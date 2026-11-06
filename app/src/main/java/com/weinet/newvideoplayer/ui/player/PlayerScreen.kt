@@ -1,10 +1,22 @@
 package com.weinet.newvideoplayer.ui.player
 
+import android.Manifest
 import android.app.Activity
+import android.app.PendingIntent
+import android.app.PictureInPictureParams
+import android.app.RemoteAction
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.graphics.drawable.Icon
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,6 +32,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -30,12 +44,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -45,15 +64,21 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.TrackSelectionDialogBuilder
-import com.weinet.newvideoplayer.data.PlaybackPositionStore
 import com.weinet.newvideoplayer.data.PlayerSettings
 import com.weinet.newvideoplayer.data.formatDuration
+import com.weinet.newvideoplayer.playback.PipState
+import com.weinet.newvideoplayer.playback.PlaybackService
+import com.weinet.newvideoplayer.playback.PlayerHolder
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 private enum class DragMode { None, Seek, Brightness, Volume }
 
 private val SPEEDS = listOf(0.25f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 3f, 4f, 6f, 8f)
+
+private const val ACTION_PIP_TOGGLE = "com.weinet.newvideoplayer.PIP_TOGGLE"
+private const val ACTION_PIP_NEXT = "com.weinet.newvideoplayer.PIP_NEXT"
+private const val ACTION_PIP_PREV = "com.weinet.newvideoplayer.PIP_PREV"
 
 @OptIn(UnstableApi::class)
 private enum class Aspect(val label: String, val mode: Int) {
@@ -76,76 +101,104 @@ private fun subtitleMime(name: String): String = when (name.substringAfterLast('
     else -> MimeTypes.APPLICATION_SUBRIP
 }
 
+private fun pipParams(context: Context, player: ExoPlayer, playing: Boolean, autoEnter: Boolean): PictureInPictureParams {
+    val size = player.videoSize
+    val ratio = if (size.width > 0 && size.height > 0) {
+        val r = size.width.toFloat() / size.height
+        when {
+            r > 2.39f -> Rational(239, 100)
+            r < 1 / 2.39f -> Rational(100, 239)
+            else -> Rational(size.width, size.height)
+        }
+    } else Rational(16, 9)
+
+    fun action(icon: Int, title: String, act: String, code: Int) = RemoteAction(
+        Icon.createWithResource(context, icon), title, title,
+        PendingIntent.getBroadcast(context, code, Intent(act).setPackage(context.packageName), PendingIntent.FLAG_IMMUTABLE),
+    )
+    val actions = buildList {
+        if (player.hasPreviousMediaItem()) add(action(android.R.drawable.ic_media_previous, "上一部", ACTION_PIP_PREV, 3))
+        add(if (playing) action(android.R.drawable.ic_media_pause, "暫停", ACTION_PIP_TOGGLE, 1)
+            else action(android.R.drawable.ic_media_play, "播放", ACTION_PIP_TOGGLE, 1))
+        if (player.hasNextMediaItem()) add(action(android.R.drawable.ic_media_next, "下一部", ACTION_PIP_NEXT, 2))
+    }
+    val b = PictureInPictureParams.Builder().setAspectRatio(ratio).setActions(actions)
+    if (Build.VERSION.SDK_INT >= 31) b.setAutoEnterEnabled(autoEnter).setSeamlessResizeEnabled(true)
+    return b.build()
+}
+
 @OptIn(UnstableApi::class)
 @Composable
-fun PlayerScreen(videoId: Long, uri: Uri, title: String, onBack: () -> Unit) {
+fun PlayerScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val activity = context as Activity
-    val positions = remember { PlaybackPositionStore(context) }
+    val playerOrNull by PlayerHolder.player.collectAsStateWithLifecycle()
+    val player = playerOrNull
+    if (player == null) {
+        LaunchedEffect(Unit) { onBack() }
+        return
+    }
     val settings = remember { PlayerSettings(context) }
     val audio = remember { context.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     val maxVolume = remember { audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC) }
+    val inPip by PipState.inPip
 
     var softwareDecoder by remember { mutableStateOf(settings.preferSoftwareDecoder) }
-    var subtitleUri by remember { mutableStateOf<Uri?>(null) }
-    var subtitleName by remember { mutableStateOf("") }
+    var backgroundPlay by remember { mutableStateOf(settings.backgroundPlay) }
+    var autoPip by remember { mutableStateOf(settings.autoPip) }
 
-    fun mediaItem(): MediaItem {
-        val b = MediaItem.Builder().setUri(uri)
-        subtitleUri?.let {
-            b.setSubtitleConfigurations(listOf(
-                MediaItem.SubtitleConfiguration.Builder(it)
-                    .setMimeType(subtitleMime(subtitleName))
-                    .setLanguage("und")
-                    .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                    .build()
-            ))
-        }
-        return b.build()
-    }
-
-    // The player is rebuilt when the decoder preference changes.
-    val player = remember(softwareDecoder) {
-        buildPlayer(context, softwareDecoder).apply {
-            setMediaItem(mediaItem())
-            seekTo(positions.get(videoId))
-            setPlaybackSpeed(settings.speed)
-            prepare()
-            playWhenReady = true
-        }
-    }
-    DisposableEffect(player) {
-        onDispose {
-            positions.save(videoId, player.currentPosition, player.duration)
-            player.release()
-        }
-    }
-
-    var isPlaying by remember { mutableStateOf(true) }
+    var isPlaying by remember { mutableStateOf(player.isPlaying) }
     var position by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(0L) }
+    var title by remember { mutableStateOf("") }
+    var hasNext by remember { mutableStateOf(false) }
+    var hasPrev by remember { mutableStateOf(false) }
     var controlsVisible by remember { mutableStateOf(true) }
     var locked by remember { mutableStateOf(false) }
-    var muted by remember { mutableStateOf(false) }
+    var muted by remember { mutableStateOf(player.volume == 0f) }
     var night by remember { mutableStateOf(false) }
     var aspect by remember { mutableStateOf(Aspect.Fit) }
     var rotation by remember { mutableStateOf(Rotation.Auto) }
-    var speed by remember { mutableFloatStateOf(settings.speed) }
+    var speed by remember { mutableFloatStateOf(player.playbackParameters.speed) }
     var showSpeed by remember { mutableStateOf(false) }
     var showMore by remember { mutableStateOf(false) }
     var hint by remember { mutableStateOf<String?>(null) }
     var lastTouch by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
+    fun touch() { lastTouch = System.currentTimeMillis() }
+
+    fun exit() {
+        PlayerHolder.stop(context)
+        onBack()
+    }
+
+    fun enterPip() {
+        if (Build.VERSION.SDK_INT >= 26) activity.enterPictureInPictureMode(pipParams(context, player, isPlaying, autoPip))
+    }
+
+    fun skip(next: Boolean) {
+        PlayerHolder.saveCurrentPosition(context)
+        if (next) player.seekToNextMediaItem() else player.seekToPreviousMediaItem()
+    }
+
     val pickSubtitle = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
-        if (picked != null) {
+        val current = player.currentMediaItem
+        if (picked != null && current != null) {
+            val name = picked.lastPathSegment ?: "sub.srt"
+            val item = current.buildUpon().setSubtitleConfigurations(listOf(
+                MediaItem.SubtitleConfiguration.Builder(picked)
+                    .setMimeType(subtitleMime(name))
+                    .setLanguage("und")
+                    .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                    .build()
+            )).build()
             val pos = player.currentPosition
-            subtitleUri = picked
-            subtitleName = picked.lastPathSegment ?: "sub.srt"
-            player.setMediaItem(mediaItem(), pos)
-            player.prepare()
+            player.replaceMediaItem(player.currentMediaItemIndex, item)
+            player.seekTo(pos)
             hint = "已載入字幕"
         }
     }
+    val notifPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     DisposableEffect(player) {
         val l = object : Player.Listener {
@@ -153,6 +206,49 @@ fun PlayerScreen(videoId: Long, uri: Uri, title: String, onBack: () -> Unit) {
         }
         player.addListener(l)
         onDispose { player.removeListener(l) }
+    }
+
+    // PiP buttons.
+    DisposableEffect(player) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(c: Context, i: Intent) {
+                when (i.action) {
+                    ACTION_PIP_TOGGLE -> player.playWhenReady = !player.playWhenReady
+                    ACTION_PIP_NEXT -> skip(true)
+                    ACTION_PIP_PREV -> skip(false)
+                }
+            }
+        }
+        val filter = IntentFilter().apply { addAction(ACTION_PIP_TOGGLE); addAction(ACTION_PIP_NEXT); addAction(ACTION_PIP_PREV) }
+        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        onDispose { context.unregisterReceiver(receiver) }
+    }
+
+    // Keep PiP params (aspect ratio, play/pause icon, auto-enter) current.
+    LaunchedEffect(player, isPlaying, autoPip, hasNext, hasPrev) {
+        if (Build.VERSION.SDK_INT >= 26) activity.setPictureInPictureParams(pipParams(context, player, isPlaying, autoPip && isPlaying))
+    }
+    DisposableEffect(Unit) {
+        PipState.onUserLeave = { if (Build.VERSION.SDK_INT < 31 && autoPip && player.isPlaying && !PlayerHolder.floating) enterPip() }
+        onDispose {
+            PipState.onUserLeave = null
+            if (Build.VERSION.SDK_INT >= 31) activity.setPictureInPictureParams(
+                PictureInPictureParams.Builder().setAutoEnterEnabled(false).build()
+            )
+        }
+    }
+
+    // Leaving the screen: pause unless PiP, floating window or background play keeps it going.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, player) {
+        val obs = LifecycleEventObserver { _, e ->
+            if (e == Lifecycle.Event.ON_STOP) {
+                PlayerHolder.saveCurrentPosition(context)
+                if (!PlayerHolder.floating && !settings.backgroundPlay) player.pause()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
     }
 
     // Fullscreen, keep screen on, restore on exit.
@@ -176,23 +272,26 @@ fun PlayerScreen(videoId: Long, uri: Uri, title: String, onBack: () -> Unit) {
         while (true) {
             position = player.currentPosition
             duration = player.duration.coerceAtLeast(0)
-            if (++tick % 10 == 0) positions.save(videoId, position, player.duration)
+            title = player.currentMediaItem?.mediaMetadata?.title?.toString() ?: ""
+            hasNext = player.hasNextMediaItem()
+            hasPrev = player.hasPreviousMediaItem()
+            if (++tick % 10 == 0) PlayerHolder.saveCurrentPosition(context)
             if (controlsVisible && isPlaying && System.currentTimeMillis() - lastTouch > 4_000) controlsVisible = false
             delay(500)
         }
     }
     LaunchedEffect(hint) { if (hint != null) { delay(900); hint = null } }
     LaunchedEffect(rotation) { activity.requestedOrientation = rotation.value }
-    BackHandler(enabled = locked) { hint = "螢幕已鎖定" }
-
-    fun touch() { lastTouch = System.currentTimeMillis() }
+    BackHandler { if (locked) hint = "螢幕已鎖定" else exit() }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         AndroidView(
             factory = { PlayerView(it).apply { useController = false } },
             update = { it.player = player; it.resizeMode = aspect.mode },
+            onRelease = { it.player = null },
             modifier = Modifier.fillMaxSize(),
         )
+        if (inPip) return@Box
         if (night) Box(Modifier.fillMaxSize().background(Color(0x66201000)))
 
         // Gesture layer.
@@ -260,7 +359,6 @@ fun PlayerScreen(videoId: Long, uri: Uri, title: String, onBack: () -> Unit) {
                 modifier = Modifier.align(Alignment.Center).background(Color(0x99000000), MaterialTheme.shapes.small).padding(12.dp))
         }
 
-        // Locked: only the unlock button shows.
         if (locked) {
             AnimatedVisibility(controlsVisible, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.CenterStart)) {
                 IconButton(onClick = { touch(); locked = false }, modifier = Modifier.padding(24.dp).background(Color(0x99000000), MaterialTheme.shapes.extraLarge)) {
@@ -276,7 +374,7 @@ fun PlayerScreen(videoId: Long, uri: Uri, title: String, onBack: () -> Unit) {
                             .statusBarsPadding().padding(horizontal = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "返回", tint = Color.White) }
+                        IconButton(onClick = { exit() }) { Icon(Icons.Default.ArrowBack, "返回", tint = Color.White) }
                         Text(title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                         TextButton(onClick = { touch(); showSpeed = true }) { Text("${speed}x", color = Color.White) }
                         Ctl(Icons.Default.Subtitles, "字幕") {
@@ -287,15 +385,34 @@ fun PlayerScreen(videoId: Long, uri: Uri, title: String, onBack: () -> Unit) {
                             touch()
                             TrackSelectionDialogBuilder(context, "音軌", player, C.TRACK_TYPE_AUDIO).build().show()
                         }
+                        Ctl(Icons.Default.PictureInPictureAlt, "子母畫面") { touch(); enterPip() }
+                        Ctl(Icons.Default.OpenInNew, "浮動視窗") {
+                            touch()
+                            if (!Settings.canDrawOverlays(context)) {
+                                hint = "請允許「顯示在其他應用程式上層」"
+                                context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    Uri.parse("package:${context.packageName}")))
+                            } else {
+                                PlayerHolder.floating = true
+                                PlaybackService.showFloat(context)
+                                onBack()
+                                activity.moveTaskToBack(true)
+                            }
+                        }
                         Ctl(Icons.Default.MoreVert, "更多") { touch(); showMore = true }
                     }
-                    // Center
-                    IconButton(
-                        onClick = { touch(); player.playWhenReady = !player.playWhenReady },
-                        modifier = Modifier.align(Alignment.Center).size(72.dp).background(Color(0x66000000), MaterialTheme.shapes.extraLarge),
-                    ) {
-                        Icon(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            if (isPlaying) "暫停" else "播放", tint = Color.White, modifier = Modifier.size(48.dp))
+                    // Center: previous / play-pause / next
+                    Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+                        if (hasPrev) Ctl(Icons.Default.SkipPrevious, "上一部") { touch(); skip(false) }
+                        IconButton(
+                            onClick = { touch(); player.playWhenReady = !player.playWhenReady },
+                            modifier = Modifier.size(72.dp).background(Color(0x66000000), MaterialTheme.shapes.extraLarge),
+                        ) {
+                            Icon(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                if (isPlaying) "暫停" else "播放", tint = Color.White, modifier = Modifier.size(48.dp))
+                        }
+                        if (hasNext) Ctl(Icons.Default.SkipNext, "下一部") { touch(); skip(true) }
                     }
                     // Bottom bar
                     Column(Modifier.fillMaxWidth().align(Alignment.BottomCenter).background(Color(0x88000000))
@@ -359,13 +476,31 @@ fun PlayerScreen(videoId: Long, uri: Uri, title: String, onBack: () -> Unit) {
             confirmButton = { TextButton(onClick = { showMore = false }) { Text("關閉") } },
             title = { Text("更多") },
             text = {
-                Column {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
                     ListItem(
                         headlineContent = { Text("載入外掛字幕") },
                         supportingContent = { Text("SRT、ASS/SSA、VTT、TTML") },
                         modifier = Modifier.clickable {
                             showMore = false
-                            pickSubtitle.launch(arrayOf("application/x-subrip", "text/*", "application/octet-stream", "*/*"))
+                            pickSubtitle.launch(arrayOf("*/*"))
+                        },
+                    )
+                    ListItem(
+                        headlineContent = { Text("背景播放") },
+                        supportingContent = { Text("離開 app 後繼續播放聲音，可從通知列控制") },
+                        trailingContent = {
+                            Switch(checked = backgroundPlay, onCheckedChange = { on ->
+                                backgroundPlay = on; settings.backgroundPlay = on
+                                if (on && Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(
+                                        context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                                ) notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            })
+                        },
+                    )
+                    ListItem(
+                        headlineContent = { Text("按主畫面鍵自動子母畫面") },
+                        trailingContent = {
+                            Switch(checked = autoPip, onCheckedChange = { autoPip = it; settings.autoPip = it })
                         },
                     )
                     ListItem(
@@ -373,9 +508,9 @@ fun PlayerScreen(videoId: Long, uri: Uri, title: String, onBack: () -> Unit) {
                         supportingContent = { Text(if (softwareDecoder) "軟體解碼（相容性較高）" else "硬體加速（較省電）") },
                         trailingContent = {
                             Switch(checked = !softwareDecoder, onCheckedChange = { hw ->
-                                positions.save(videoId, player.currentPosition, player.duration)
                                 settings.preferSoftwareDecoder = !hw
                                 softwareDecoder = !hw
+                                PlayerHolder.rebuild(context)
                             })
                         },
                     )

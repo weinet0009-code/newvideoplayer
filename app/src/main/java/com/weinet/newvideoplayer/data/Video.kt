@@ -1,6 +1,8 @@
 package com.weinet.newvideoplayer.data
 
 import android.net.Uri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 
 data class Video(
     val id: Long,
@@ -11,6 +13,12 @@ data class Video(
     val sizeBytes: Long,
     val dateAdded: Long,
 )
+
+fun Video.toMediaItem(): MediaItem = MediaItem.Builder()
+    .setMediaId(id.toString())
+    .setUri(uri)
+    .setMediaMetadata(MediaMetadata.Builder().setTitle(title).setDisplayTitle(title).build())
+    .build()
 
 fun formatDuration(ms: Long): String {
     val total = ms / 1000
