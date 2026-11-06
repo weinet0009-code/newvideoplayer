@@ -30,7 +30,8 @@ object MediaActions {
 
     /** Keeps the original extension; [newName] is the name without it. */
     @Suppress("DEPRECATION")
-    fun rename(context: Context, video: Video, newName: String): Boolean = try {
+    fun rename(context: Context, video: Video, newName: String): Boolean {
+      return try {
         val ext = video.title.substringAfterLast('.', "")
         val full = if (ext.isNotEmpty() && !newName.endsWith(".$ext")) "$newName.$ext" else newName
         if (Build.VERSION.SDK_INT >= 30) {
@@ -50,5 +51,6 @@ object MediaActions {
             MediaScannerConnection.scanFile(context, arrayOf(old.absolutePath, target.absolutePath), null, null)
             true
         }
-    } catch (e: Exception) { false }
+      } catch (e: Exception) { false }
+    }
 }

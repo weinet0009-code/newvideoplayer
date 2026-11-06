@@ -142,6 +142,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                         LibraryTab.Recent ->
                             if (state.recent.isEmpty()) Empty("還沒有播放紀錄")
                             else VideoList(state.recent, onOpen, onLongPress = { sheetFor = it })
+                        LibraryTab.Private -> Unit
                         LibraryTab.Playlists -> {
                             val name = state.selectedPlaylist
                             if (name == null) {
