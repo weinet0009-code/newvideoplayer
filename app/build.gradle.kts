@@ -13,6 +13,10 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+        // OpenSubtitles consumer key (one per app). Set it as a Gradle property or an environment variable.
+        val osKey = providers.gradleProperty("OPENSUBTITLES_API_KEY").orNull
+            ?: System.getenv("OPENSUBTITLES_API_KEY") ?: ""
+        buildConfigField("String", "OPENSUBTITLES_API_KEY", "\"$osKey\"")
     }
     buildTypes {
         release { isMinifyEnabled = false }
@@ -22,7 +26,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
 }
 
 dependencies {
@@ -41,6 +45,8 @@ dependencies {
     implementation(libs.media3.session)
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
+    implementation(libs.media3.cast)
+    implementation(libs.androidx.mediarouter)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.fragment.ktx)
     testImplementation(libs.junit)

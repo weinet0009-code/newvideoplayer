@@ -173,6 +173,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
             add(VideoAction("加入播放清單", Icons.Default.PlaylistAdd) { addTarget = v })
             if (playlistName != null) add(VideoAction("移出這個清單", Icons.Default.PlaylistRemove) { LibraryStore.removeFromPlaylist(playlistName, v.id) })
             add(VideoAction("分享", Icons.Default.Share) { shareVideo(context, v) })
+            add(VideoAction("轉成音訊檔", Icons.Default.MusicNote) { vm.extractAudio(v) })
             add(VideoAction("重新命名", Icons.Default.Edit) { renameFor = v })
             add(VideoAction("詳細資訊", Icons.Default.Info) { detailsFor = v })
             add(VideoAction("移到私密資料夾", Icons.Default.Lock) { vaultFor = v })

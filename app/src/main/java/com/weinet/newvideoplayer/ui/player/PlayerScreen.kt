@@ -69,7 +69,12 @@ import com.weinet.newvideoplayer.data.formatDuration
 import com.weinet.newvideoplayer.playback.PipState
 import com.weinet.newvideoplayer.playback.PlaybackService
 import com.weinet.newvideoplayer.playback.PlayerHolder
+import com.weinet.newvideoplayer.cast.CastManager
+import com.weinet.newvideoplayer.tools.AudioExtractor
+import com.weinet.newvideoplayer.ui.library.Busy
+import com.weinet.newvideoplayer.ui.library.BusyDialog
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 private enum class DragMode { None, Seek, Brightness, Volume }
@@ -163,6 +168,14 @@ fun PlayerScreen(onBack: () -> Unit) {
     var showSpeed by remember { mutableStateOf(false) }
     var showMore by remember { mutableStateOf(false) }
     var hint by remember { mutableStateOf<String?>(null) }
+    var showCast by remember { mutableStateOf(false) }
+    var showOnlineSubs by remember { mutableStateOf(false) }
+    var showAi by remember { mutableStateOf(false) }
+    var showApi by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf<Busy?>(null) }
+    val castActive by CastManager.active.collectAsStateWithLifecycle()
+    val castError by CastManager.error.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
     var lastTouch by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
     fun touch() { lastTouch = System.currentTimeMillis() }
@@ -181,10 +194,11 @@ fun PlayerScreen(onBack: () -> Unit) {
         if (next) player.seekToNextMediaItem() else player.seekToPreviousMediaItem()
     }
 
-    val pickSubtitle = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
+    fun currentVideo() = PlayerHolder.queue.getOrNull(player.currentMediaItemIndex)
+
+    fun loadSubtitle(picked: Uri, name: String) {
         val current = player.currentMediaItem
-        if (picked != null && current != null) {
-            val name = picked.lastPathSegment ?: "sub.srt"
+        if (current != null) {
             val item = current.buildUpon().setSubtitleConfigurations(listOf(
                 MediaItem.SubtitleConfiguration.Builder(picked)
                     .setMimeType(subtitleMime(name))
@@ -198,6 +212,24 @@ fun PlayerScreen(onBack: () -> Unit) {
             hint = "已載入字幕"
         }
     }
+
+    val pickSubtitle = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
+        if (picked != null) loadSubtitle(picked, picked.lastPathSegment ?: "sub.srt")
+    }
+
+    fun extractAudio() {
+        val v = currentVideo() ?: return
+        scope.launch {
+            busy = Busy("轉成音訊…", 0f)
+            hint = try {
+                "已存到 " + AudioExtractor.toMusic(context, v) { p -> busy = Busy("轉成音訊…", p) }
+            } catch (e: AudioExtractor.Unsupported) { "此音訊格式（${e.mime}）無法直接轉出" }
+            catch (e: AudioExtractor.NoAudio) { "這部影片沒有聲音" }
+            catch (e: Exception) { "轉換失敗" }
+            busy = null
+        }
+    }
+    LaunchedEffect(castError) { castError?.let { hint = it; CastManager.error.value = null } }
     val notifPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     DisposableEffect(player) {
@@ -280,7 +312,7 @@ fun PlayerScreen(onBack: () -> Unit) {
             delay(500)
         }
     }
-    LaunchedEffect(hint) { if (hint != null) { delay(900); hint = null } }
+    LaunchedEffect(hint) { if (hint != null) { delay(if (hint!!.length > 12) 2500 else 900); hint = null } }
     LaunchedEffect(rotation) { activity.requestedOrientation = rotation.value }
     BackHandler { if (locked) hint = "螢幕已鎖定" else exit() }
 
@@ -385,6 +417,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                             touch()
                             TrackSelectionDialogBuilder(context, "音軌", player, C.TRACK_TYPE_AUDIO).build().show()
                         }
+                        Ctl(Icons.Default.Cast, "投放") { touch(); showCast = true }
                         Ctl(Icons.Default.PictureInPictureAlt, "子母畫面") { touch(); enterPip() }
                         Ctl(Icons.Default.OpenInNew, "浮動視窗") {
                             touch()
@@ -449,6 +482,18 @@ fun PlayerScreen(onBack: () -> Unit) {
         }
     }
 
+    if (castActive && !inPip) CastPanel(Modifier.fillMaxSize())
+    if (showCast) CastRouteDialog(onDismiss = { showCast = false })
+    if (showOnlineSubs) currentVideo()?.let { v ->
+        OnlineSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) }, onDismiss = { showOnlineSubs = false })
+    }
+    if (showAi) currentVideo()?.let { v ->
+        AiSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) },
+            onOpenSettings = { showApi = true }, onDismiss = { showAi = false })
+    }
+    if (showApi) ApiSettingsDialog(onDismiss = { showApi = false })
+    busy?.let { BusyDialog(it.label, it.progress) }
+
     if (showSpeed) {
         AlertDialog(
             onDismissRequest = { showSpeed = false },
@@ -484,6 +529,31 @@ fun PlayerScreen(onBack: () -> Unit) {
                             showMore = false
                             pickSubtitle.launch(arrayOf("*/*"))
                         },
+                    )
+                    ListItem(
+                        headlineContent = { Text("線上搜尋字幕") },
+                        supportingContent = { Text("OpenSubtitles") },
+                        modifier = Modifier.clickable { showMore = false; showOnlineSubs = true },
+                    )
+                    ListItem(
+                        headlineContent = { Text("AI 產生字幕") },
+                        supportingContent = { Text("辨識影片語音，自動產生字幕") },
+                        modifier = Modifier.clickable { showMore = false; showAi = true },
+                    )
+                    ListItem(
+                        headlineContent = { Text("轉成音訊檔") },
+                        supportingContent = { Text("存到 Music/NewVideoPlayer") },
+                        modifier = Modifier.clickable { showMore = false; extractAudio() },
+                    )
+                    ListItem(
+                        headlineContent = { Text("投放到電視") },
+                        supportingContent = { Text("Chromecast，需在同一個 Wi-Fi") },
+                        modifier = Modifier.clickable { showMore = false; showCast = true },
+                    )
+                    ListItem(
+                        headlineContent = { Text("字幕服務設定") },
+                        supportingContent = { Text("OpenAI 金鑰、OpenSubtitles 帳號") },
+                        modifier = Modifier.clickable { showMore = false; showApi = true },
                     )
                     ListItem(
                         headlineContent = { Text("背景播放") },

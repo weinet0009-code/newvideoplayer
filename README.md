@@ -33,3 +33,10 @@ gradle assembleDebug
 - 影片以 AES-256-CTR 加密存到 app 內部儲存（金鑰由 Android Keystore 保護），播放時即時解密、可拖動進度；縮圖與清單索引也加密
 - 可還原到 Movies/NewVideoPlayer，或永久刪除
 - 長按影片：加入播放清單、分享、重新命名、詳細資訊、移到私密資料夾、刪除（Android 11+ 會跳系統確認）
+
+## M5
+- Chromecast 投放：同 Wi-Fi 搜尋電視，手機內建小型 HTTP 伺服器（支援 Range 拖動），私密影片也能投放；投放時手機變成遙控器，停止後回到原進度
+- 線上字幕：OpenSubtitles 搜尋下載（中英/繁中/簡中/英文），可選擇登入 OpenSubtitles 帳號提高每日額度
+  - 需要 app 自己的 consumer key：在 opensubtitles.com 申請後，建置時設定 `OPENSUBTITLES_API_KEY`（Gradle property 或環境變數）
+- AI 字幕：擷取音訊後送 OpenAI whisper-1 產生 SRT 並自動載入（使用者在 app 內輸入自己的 OpenAI 金鑰，加密保存；音訊上限 25 MB）
+- 轉成音訊檔：不重新編碼直接抽出音軌（AAC→M4A、Opus/Vorbis→WebM），存到 Music/NewVideoPlayer。真正的 MP3 需等加入 FFmpeg/LAME

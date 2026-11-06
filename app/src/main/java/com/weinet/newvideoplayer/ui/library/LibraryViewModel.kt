@@ -8,6 +8,7 @@ import com.weinet.newvideoplayer.data.LibraryStore
 import com.weinet.newvideoplayer.data.MediaActions
 import com.weinet.newvideoplayer.data.Video
 import com.weinet.newvideoplayer.data.VideoRepository
+import com.weinet.newvideoplayer.tools.AudioExtractor
 import com.weinet.newvideoplayer.vault.VaultStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -126,5 +127,15 @@ class LibraryViewModel(private val app: Application) : AndroidViewModel(app) {
             if (ok) { removeEverywhere(v); message.value = "已移到私密資料夾"; refresh() }
             else { VaultStore.delete(app, entry); message.value = "已取消，原檔保留" }
         }
+    }
+
+    fun extractAudio(v: Video) = viewModelScope.launch {
+        busy.value = Busy("轉成音訊…", 0f)
+        message.value = try {
+            "已存到 " + AudioExtractor.toMusic(app, v) { p -> busy.value = Busy("轉成音訊…", p) }
+        } catch (e: AudioExtractor.Unsupported) { "此音訊格式（${e.mime}）無法直接轉出" }
+        catch (e: AudioExtractor.NoAudio) { "這部影片沒有聲音" }
+        catch (e: Exception) { "轉換失敗" }
+        busy.value = null
     }
 }
