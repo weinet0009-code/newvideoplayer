@@ -22,13 +22,14 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = nav, startDestination = "library") {
                     composable("library") {
                         LibraryScreen(onOpen = { video ->
-                            nav.navigate("player/${video.id}/${Uri.encode(video.uri.toString())}")
+                            nav.navigate("player/${video.id}/${Uri.encode(video.uri.toString())}/${Uri.encode(video.title)}")
                         })
                     }
-                    composable("player/{id}/{uri}") { entry ->
+                    composable("player/{id}/{uri}/{title}") { entry ->
                         val id = entry.arguments?.getString("id")!!.toLong()
                         val uri = Uri.parse(Uri.decode(entry.arguments?.getString("uri")!!))
-                        PlayerScreen(videoId = id, uri = uri, onBack = { nav.popBackStack() })
+                        val title = Uri.decode(entry.arguments?.getString("title") ?: "")
+                        PlayerScreen(videoId = id, uri = uri, title = title, onBack = { nav.popBackStack() })
                     }
                 }
             }
