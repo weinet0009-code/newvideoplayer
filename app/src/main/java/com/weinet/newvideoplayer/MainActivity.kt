@@ -2,7 +2,7 @@ package com.weinet.newvideoplayer
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
@@ -18,8 +18,9 @@ import com.weinet.newvideoplayer.playback.PlayerHolder
 import com.weinet.newvideoplayer.ui.library.LibraryScreen
 import com.weinet.newvideoplayer.ui.player.PlayerScreen
 import com.weinet.newvideoplayer.ui.theme.AppTheme
+import com.weinet.newvideoplayer.vault.VaultSession
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     /** Set when the floating window or the notification asks to reopen the player. */
     private val openPlayerRequest = mutableStateOf(0)
@@ -66,6 +67,11 @@ class MainActivity : ComponentActivity() {
             if (PlayerHolder.floating) PlaybackService.hideFloat(this)
             openPlayerRequest.value++
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (!isChangingConfigurations) VaultSession.lock()
     }
 
     override fun onUserLeaveHint() {

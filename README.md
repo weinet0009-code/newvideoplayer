@@ -27,3 +27,9 @@ gradle assembleDebug
 ```
 
 每次推到 main，GitHub Actions 會自動建置 debug APK，可在 Actions 頁面下載。
+
+## M4
+- 私密資料夾：PIN（PBKDF2 雜湊）＋指紋解鎖，錯誤 5 次鎖 30 秒，離開分頁或 app 自動上鎖
+- 影片以 AES-256-CTR 加密存到 app 內部儲存（金鑰由 Android Keystore 保護），播放時即時解密、可拖動進度；縮圖與清單索引也加密
+- 可還原到 Movies/NewVideoPlayer，或永久刪除
+- 長按影片：加入播放清單、分享、重新命名、詳細資訊、移到私密資料夾、刪除（Android 11+ 會跳系統確認）

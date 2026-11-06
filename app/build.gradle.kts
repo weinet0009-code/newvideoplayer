@@ -41,5 +41,7 @@ dependencies {
     implementation(libs.media3.session)
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.fragment.ktx)
     testImplementation(libs.junit)
 }

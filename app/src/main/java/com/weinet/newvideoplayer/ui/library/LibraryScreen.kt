@@ -1,7 +1,10 @@
 package com.weinet.newvideoplayer.ui.library
 
 import android.Manifest
+import android.app.Activity
 import android.os.Build
+import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,26 +34,50 @@ import coil.request.videoFrameMillis
 import com.weinet.newvideoplayer.data.LibraryStore
 import com.weinet.newvideoplayer.data.Video
 import com.weinet.newvideoplayer.data.formatDuration
+import com.weinet.newvideoplayer.ui.vault.VaultScreen
+import com.weinet.newvideoplayer.vault.VaultSession
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
-    val permission = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_VIDEO
-    else Manifest.permission.READ_EXTERNAL_STORAGE
-    var granted by remember { mutableStateOf(false) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-        granted = it
-        if (it) vm.refresh()
+    val context = LocalContext.current
+    val permissions = when {
+        Build.VERSION.SDK_INT >= 33 -> arrayOf(Manifest.permission.READ_MEDIA_VIDEO)
+        Build.VERSION.SDK_INT >= 30 -> arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        else -> arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
-    LaunchedEffect(Unit) { launcher.launch(permission) }
+    var granted by remember { mutableStateOf(false) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        granted = it[permissions[0]] == true
+        if (granted) vm.refresh()
+    }
+    LaunchedEffect(Unit) { launcher.launch(permissions) }
+
+    val consent by vm.consent.collectAsStateWithLifecycle()
+    val busy by vm.busy.collectAsStateWithLifecycle()
+    val message by vm.message.collectAsStateWithLifecycle()
+    val consentLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { r ->
+        val c = vm.consent.value
+        vm.consent.value = null
+        c?.onResult?.invoke(r.resultCode == Activity.RESULT_OK)
+    }
+    LaunchedEffect(consent) { consent?.let { consentLauncher.launch(IntentSenderRequest.Builder(it.sender).build()) } }
+    LaunchedEffect(message) { message?.let { Toast.makeText(context, it, Toast.LENGTH_SHORT).show(); vm.message.value = null } }
+    // Locks the private folder when leaving its tab.
+    LaunchedEffect(state.tab) { if (state.tab != LibraryTab.Private) VaultSession.lock() }
     BackHandler(enabled = state.query.isNotEmpty() || state.selectedFolder != null || state.selectedPlaylist != null) { vm.back() }
 
     var addTarget by remember { mutableStateOf<Video?>(null) }
+    var sheetFor by remember { mutableStateOf<Video?>(null) }
+    var renameFor by remember { mutableStateOf<Video?>(null) }
+    var deleteFor by remember { mutableStateOf<Video?>(null) }
+    var vaultFor by remember { mutableStateOf<Video?>(null) }
+    var detailsFor by remember { mutableStateOf<Video?>(null) }
     var showNewPlaylist by remember { mutableStateOf(false) }
     var deletePlaylist by remember { mutableStateOf<String?>(null) }
 
-    val title = state.selectedFolder ?: state.selectedPlaylist ?: "影片"
+    val title = if (state.tab == LibraryTab.Private) "私密資料夾" else state.selectedFolder ?: state.selectedPlaylist ?: "影片"
     val inside = state.selectedFolder != null || state.selectedPlaylist != null
 
     Scaffold(
@@ -79,6 +106,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                                 LibraryTab.Folders -> Icons.Default.Folder
                                 LibraryTab.Recent -> Icons.Default.History
                                 LibraryTab.Playlists -> Icons.Default.QueueMusic
+                                LibraryTab.Private -> Icons.Default.Lock
                             }, null)
                         },
                         label = { Text(t.label) },
@@ -89,8 +117,9 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             when {
+                state.tab == LibraryTab.Private -> VaultScreen(onOpen = onOpen)
                 !granted -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Button(onClick = { launcher.launch(permission) }) { Text("允許讀取影片") }
+                    Button(onClick = { launcher.launch(permissions) }) { Text("允許讀取影片") }
                 }
                 state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -106,13 +135,13 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                     }
                     when (state.tab) {
                         LibraryTab.Folders -> when {
-                            state.query.isNotBlank() -> VideoList(state.searchResults, onOpen, onLongPress = { addTarget = it })
-                            state.selectedFolder != null -> VideoList(state.folderVideos, onOpen, onLongPress = { addTarget = it })
+                            state.query.isNotBlank() -> VideoList(state.searchResults, onOpen, onLongPress = { sheetFor = it })
+                            state.selectedFolder != null -> VideoList(state.folderVideos, onOpen, onLongPress = { sheetFor = it })
                             else -> FolderList(state.folders, onSelect = vm::selectFolder)
                         }
                         LibraryTab.Recent ->
                             if (state.recent.isEmpty()) Empty("還沒有播放紀錄")
-                            else VideoList(state.recent, onOpen, onLongPress = { addTarget = it })
+                            else VideoList(state.recent, onOpen, onLongPress = { sheetFor = it })
                         LibraryTab.Playlists -> {
                             val name = state.selectedPlaylist
                             if (name == null) {
@@ -121,8 +150,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                             } else {
                                 val vids = state.playlistVideos(name)
                                 if (vids.isEmpty()) Empty("長按任何影片即可加入這個清單")
-                                else VideoList(vids, onOpen, onLongPress = { LibraryStore.removeFromPlaylist(name, it.id) },
-                                    longPressHint = "長按移出清單")
+                                else VideoList(vids, onOpen, onLongPress = { sheetFor = it })
                             }
                         }
                     }
@@ -138,6 +166,28 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
             onDismiss = { addTarget = null },
         )
     }
+    sheetFor?.let { v ->
+        val playlistName = state.selectedPlaylist.takeIf { state.tab == LibraryTab.Playlists }
+        VideoActionSheet(v, buildList {
+            add(VideoAction("加入播放清單", Icons.Default.PlaylistAdd) { addTarget = v })
+            if (playlistName != null) add(VideoAction("移出這個清單", Icons.Default.PlaylistRemove) { LibraryStore.removeFromPlaylist(playlistName, v.id) })
+            add(VideoAction("分享", Icons.Default.Share) { shareVideo(context, v) })
+            add(VideoAction("重新命名", Icons.Default.Edit) { renameFor = v })
+            add(VideoAction("詳細資訊", Icons.Default.Info) { detailsFor = v })
+            add(VideoAction("移到私密資料夾", Icons.Default.Lock) { vaultFor = v })
+            add(VideoAction("刪除", Icons.Default.Delete) { deleteFor = v })
+        }, onDismiss = { sheetFor = null })
+    }
+    renameFor?.let { v -> RenameDialog(v.title, onDismiss = { renameFor = null }, onRename = { vm.rename(v, it) }) }
+    deleteFor?.let { v ->
+        ConfirmDialog("刪除影片？", "「${v.title}」會從手機刪除。", "刪除", onDismiss = { deleteFor = null }, onConfirm = { vm.delete(v) })
+    }
+    vaultFor?.let { v ->
+        ConfirmDialog("移到私密資料夾？", "影片會加密存到 app 內，原檔會從相簿刪除。之後可以隨時還原。", "移動",
+            onDismiss = { vaultFor = null }, onConfirm = { vm.moveToVault(v) })
+    }
+    detailsFor?.let { v -> DetailsDialog(context, v, onDismiss = { detailsFor = null }) }
+    busy?.let { BusyDialog(it.label, it.progress) }
     if (showNewPlaylist) {
         NewPlaylistDialog(onDismiss = { showNewPlaylist = false }, onCreate = { LibraryStore.createPlaylist(it) })
     }

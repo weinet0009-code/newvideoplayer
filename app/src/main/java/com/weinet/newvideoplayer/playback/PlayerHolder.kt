@@ -10,6 +10,8 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import com.weinet.newvideoplayer.vault.AppDataSource
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
@@ -52,6 +54,7 @@ object PlayerHolder {
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
         val positions = PlaybackPositionStore(app)
         return ExoPlayer.Builder(app, renderers)
+            .setMediaSourceFactory(DefaultMediaSourceFactory(AppDataSource.Factory(app)))
             .setHandleAudioBecomingNoisy(true)
             .build().apply {
                 addListener(object : Player.Listener {
