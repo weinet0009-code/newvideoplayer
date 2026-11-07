@@ -27,6 +27,7 @@ object LocalWhisper {
         Tiny("ggml-tiny-q5_1.bin", "快速（tiny）", 30, "818710568da3ca15689e31a743197b520007872ff9576237bda97bd1b469c3d7"),
         Base("ggml-base-q5_1.bin", "推薦（base）", 56, "422f1ae452ade6f30a004d7e5c6a43195e4433bc370bf23fac9cc591f01a8898"),
         Small("ggml-small-q5_1.bin", "較準（small）", 181, "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb"),
+        Turbo("ggml-large-v3-turbo-q5_0.bin", "最準（large-v3-turbo）", 547, "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2"),
     }
 
     private const val CHUNK_SECONDS = 300

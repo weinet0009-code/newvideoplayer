@@ -149,6 +149,10 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                         }) { Text("刪除") } else Text("未下載", style = MaterialTheme.typography.bodySmall)
                     }
                 }
+                if (model == LocalWhisper.Model.Turbo) {
+                    Text("最準但最慢，約需 1 GB 記憶體，建議 8 GB 以上的手機；長影片可能要好幾個小時。",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                }
                 Text("語言", style = MaterialTheme.typography.labelLarge)
                 Row(Modifier.padding(vertical = 4.dp)) {
                     listOf("zh" to "中文", "en" to "英文", "ja" to "日文", "" to "自動").forEach { (code, label) ->
