@@ -65,6 +65,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.weinet.newvideoplayer.data.SubtitleStore
+import com.weinet.newvideoplayer.playback.Enhance
+import com.weinet.newvideoplayer.playback.SleepTimer
 import com.weinet.newvideoplayer.data.PlayerSettings
 import com.weinet.newvideoplayer.data.formatDuration
 import com.weinet.newvideoplayer.playback.PipState
@@ -100,6 +102,17 @@ private enum class Rotation(val label: String, val value: Int) {
     Auto("自動旋轉", ActivityInfo.SCREEN_ORIENTATION_SENSOR),
     Landscape("橫向", ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE),
     Portrait("直向", ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT),
+}
+
+private val REPEAT_LABELS = listOf("關閉", "單部循環", "全部循環")
+
+private fun sleepLabel(s: SleepTimer.State): String = when (s) {
+    SleepTimer.State.Off -> "關閉"
+    SleepTimer.State.EndOfVideo -> "播完這部後暫停"
+    is SleepTimer.State.At -> {
+        val min = ((s.epochMs - System.currentTimeMillis()).coerceAtLeast(0) + 59_999) / 60_000
+        "約 $min 分鐘後暫停"
+    }
 }
 
 private fun subtitleMime(name: String): String = SubtitleStore.mime(name)
@@ -172,6 +185,10 @@ fun PlayerScreen(onBack: () -> Unit) {
     var showSubPicker by remember { mutableStateOf(false) }
     var showAudioPicker by remember { mutableStateOf(false) }
     var showApi by remember { mutableStateOf(false) }
+    var showSleep by remember { mutableStateOf(false) }
+    var repeat by remember { mutableIntStateOf(player.repeatMode) }
+    var enhance by remember { mutableIntStateOf(settings.enhance) }
+    val sleep by SleepTimer.state.collectAsStateWithLifecycle()
     var busy by remember { mutableStateOf<Busy?>(null) }
     val castActive by CastManager.active.collectAsStateWithLifecycle()
     val castError by CastManager.error.collectAsStateWithLifecycle()
@@ -575,6 +592,34 @@ fun PlayerScreen(onBack: () -> Unit) {
         )
     }
 
+    if (showSleep) {
+        AlertDialog(
+            onDismissRequest = { showSleep = false },
+            confirmButton = { TextButton(onClick = { showSleep = false }) { Text("關閉") } },
+            title = { Text("定時關閉") },
+            text = {
+                Column {
+                    Row(Modifier.fillMaxWidth().clickable { SleepTimer.cancel(); showSleep = false }
+                        .padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = sleep == SleepTimer.State.Off, onClick = null)
+                        Spacer(Modifier.width(12.dp))
+                        Text("關閉")
+                    }
+                    SleepTimer.OPTIONS.forEach { m ->
+                        Row(Modifier.fillMaxWidth().clickable {
+                            SleepTimer.set(player, m); showSleep = false
+                            hint = if (m == 0) "這部播完後暫停" else "$m 分鐘後暫停"
+                        }.padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected = m == 0 && sleep == SleepTimer.State.EndOfVideo, onClick = null)
+                            Spacer(Modifier.width(12.dp))
+                            Text(if (m == 0) "播完這部" else "$m 分鐘")
+                        }
+                    }
+                }
+            },
+        )
+    }
+
     if (showMore) {
         AlertDialog(
             onDismissRequest = { showMore = false },
@@ -582,6 +627,27 @@ fun PlayerScreen(onBack: () -> Unit) {
             title = { Text("更多") },
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
+                    ListItem(
+                        headlineContent = { Text("循環播放") },
+                        supportingContent = { Text(REPEAT_LABELS[repeat]) },
+                        modifier = Modifier.clickable {
+                            repeat = (repeat + 1) % 3
+                            player.repeatMode = repeat; settings.repeatMode = repeat
+                        },
+                    )
+                    ListItem(
+                        headlineContent = { Text("定時關閉") },
+                        supportingContent = { Text(sleepLabel(sleep)) },
+                        modifier = Modifier.clickable { showMore = false; showSleep = true },
+                    )
+                    ListItem(
+                        headlineContent = { Text("畫質增強") },
+                        supportingContent = { Text(Enhance.LABELS[enhance] + "（對比、色彩、銳利度）") },
+                        modifier = Modifier.clickable {
+                            enhance = (enhance + 1) % Enhance.LABELS.size
+                            PlayerHolder.setEnhance(context, enhance)
+                        },
+                    )
                     ListItem(
                         headlineContent = { Text("載入外掛字幕") },
                         supportingContent = { Text("SRT、ASS/SSA、VTT、TTML") },

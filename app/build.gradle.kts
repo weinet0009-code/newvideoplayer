@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
     implementation(libs.media3.cast)
+    implementation(libs.media3.effect)
     implementation(libs.androidx.mediarouter)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.fragment.ktx)

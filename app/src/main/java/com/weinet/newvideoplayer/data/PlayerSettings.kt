@@ -24,4 +24,14 @@ class PlayerSettings(context: Context) {
     var autoPip: Boolean
         get() = prefs.getBoolean("auto_pip", true)
         set(v) = prefs.edit().putBoolean("auto_pip", v).apply()
+
+    /** Player.REPEAT_MODE_OFF / ONE / ALL. */
+    var repeatMode: Int
+        get() = prefs.getInt("repeat_mode", 0)
+        set(v) = prefs.edit().putInt("repeat_mode", v).apply()
+
+    /** Picture enhancement level, 0 = off (see playback.Enhance). */
+    var enhance: Int
+        get() = prefs.getInt("enhance", 0)
+        set(v) = prefs.edit().putInt("enhance", v).apply()
 }

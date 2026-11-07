@@ -70,7 +70,17 @@ object PlayerHolder {
                         }
                     }
                 })
+                val settings = PlayerSettings(app)
+                repeatMode = settings.repeatMode
+                if (settings.enhance > 0) setVideoEffects(Enhance.effects(settings.enhance))
             }
+    }
+
+    /** Applies a picture enhancement level to the current player and remembers it. */
+    @OptIn(UnstableApi::class)
+    fun setEnhance(context: Context, level: Int) {
+        PlayerSettings(context.applicationContext).enhance = level
+        _player.value?.setVideoEffects(Enhance.effects(level))
     }
 
     private fun obtain(context: Context): ExoPlayer =
@@ -122,6 +132,7 @@ object PlayerHolder {
 
     /** Stops playback and ends the background session. */
     fun stop(context: Context) {
+        SleepTimer.cancel()
         saveCurrentPosition(context)
         floating = false
         _player.value?.let { it.stop(); it.clearMediaItems() }
