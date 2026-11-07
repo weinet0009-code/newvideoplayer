@@ -75,6 +75,8 @@ import com.weinet.newvideoplayer.tools.AudioExtractor
 import com.weinet.newvideoplayer.ui.library.Busy
 import com.weinet.newvideoplayer.ui.library.BusyDialog
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -247,6 +249,21 @@ fun PlayerScreen(onBack: () -> Unit) {
                     ?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
             }.getOrNull() ?: picked.lastPathSegment ?: "sub.srt"
             loadSubtitle(picked, name)
+        }
+    }
+
+    fun exportSubtitle() {
+        val item = player.currentMediaItem ?: return
+        val title = currentVideo()?.title ?: item.mediaMetadata.title?.toString() ?: "subtitle"
+        val formatId = player.currentTracks.groups
+            .firstOrNull { it.type == C.TRACK_TYPE_TEXT && it.isSelected }?.getTrackFormat(0)?.id
+        scope.launch {
+            hint = try {
+                withContext(Dispatchers.IO) { SubtitleStore.export(context, item.mediaId, formatId, title) }
+                    ?.let { "已存到 $it" } ?: "沒有可匯出的字幕（先載入或產生字幕，內建字幕無法匯出）"
+            } catch (e: Exception) {
+                "匯出失敗：${e.message}"
+            }
         }
     }
 
@@ -582,6 +599,11 @@ fun PlayerScreen(onBack: () -> Unit) {
                         headlineContent = { Text("AI 產生字幕") },
                         supportingContent = { Text("手機離線辨識語音，免費") },
                         modifier = Modifier.clickable { showMore = false; showAi = true },
+                    )
+                    ListItem(
+                        headlineContent = { Text("匯出字幕檔") },
+                        supportingContent = { Text("目前選用的字幕，存到 Download/NewVideoPlayer") },
+                        modifier = Modifier.clickable { showMore = false; exportSubtitle() },
                     )
                     ListItem(
                         headlineContent = { Text("轉成音訊檔") },

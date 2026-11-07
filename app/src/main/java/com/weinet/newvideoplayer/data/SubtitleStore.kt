@@ -84,6 +84,38 @@ object SubtitleStore {
         return if (subs.isEmpty()) item else item.buildUpon().setSubtitleConfigurations(subs).build()
     }
 
+    /**
+     * Copies the saved subtitle behind [formatId] (the selected text track), or the only saved one,
+     * to Download/NewVideoPlayer named after [videoTitle]. Returns the saved path, or null when
+     * there is no saved subtitle to export (e.g. an embedded track is selected).
+     */
+    @Suppress("DEPRECATION")
+    fun export(context: Context, mediaId: String, formatId: String?, videoTitle: String): String? {
+        val list = entries(context, mediaId)
+        val e = idForFormat(context, mediaId, formatId)?.let { id -> list.first { it.id == id } }
+            ?: list.singleOrNull() ?: return null
+        val src = File(e.file)
+        val base = videoTitle.substringBeforeLast('.').ifBlank { "subtitle" }.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+        val suffix = if (e.label == "AI 字幕") ".ai" else ""
+        val name = "$base$suffix.${src.extension.ifBlank { "srt" }}"
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            val resolver = context.contentResolver
+            val values = android.content.ContentValues().apply {
+                put(android.provider.MediaStore.Downloads.DISPLAY_NAME, name)
+                // octet-stream keeps the .srt/.ass extension as given.
+                put(android.provider.MediaStore.Downloads.MIME_TYPE, "application/octet-stream")
+                put(android.provider.MediaStore.Downloads.RELATIVE_PATH, "${android.os.Environment.DIRECTORY_DOWNLOADS}/NewVideoPlayer")
+            }
+            val uri = resolver.insert(android.provider.MediaStore.Downloads.getContentUri(android.provider.MediaStore.VOLUME_EXTERNAL_PRIMARY), values)
+                ?: error("cannot create file")
+            resolver.openOutputStream(uri)!!.use { out -> src.inputStream().use { it.copyTo(out) } }
+        } else {
+            val dir = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "NewVideoPlayer").apply { mkdirs() }
+            src.copyTo(File(dir, name), overwrite = true)
+        }
+        return "Download/NewVideoPlayer/$name"
+    }
+
     fun forget(context: Context, mediaId: String) {
         dir(context, mediaId).deleteRecursively()
         prefs(context).edit().remove("list_$mediaId").remove("sel_$mediaId").apply()
