@@ -64,7 +64,6 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import androidx.media3.ui.TrackSelectionDialogBuilder
 import com.weinet.newvideoplayer.data.PlayerSettings
 import com.weinet.newvideoplayer.data.formatDuration
 import com.weinet.newvideoplayer.playback.PipState
@@ -173,6 +172,7 @@ fun PlayerScreen(onBack: () -> Unit) {
     var showOnlineSubs by remember { mutableStateOf(false) }
     var showAi by remember { mutableStateOf(false) }
     var showSubPicker by remember { mutableStateOf(false) }
+    var showAudioPicker by remember { mutableStateOf(false) }
     var showApi by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf<Busy?>(null) }
     val castActive by CastManager.active.collectAsStateWithLifecycle()
@@ -450,7 +450,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                         }
                         Ctl(Icons.Default.Audiotrack, "音軌") {
                             touch()
-                            TrackSelectionDialogBuilder(context, "音軌", player, C.TRACK_TYPE_AUDIO).build().show()
+                            showAudioPicker = true
                         }
                         Ctl(Icons.Default.Cast, "投放") { touch(); showCast = true }
                         Ctl(Icons.Default.PictureInPictureAlt, "子母畫面") { touch(); enterPip() }
@@ -530,6 +530,7 @@ fun PlayerScreen(onBack: () -> Unit) {
         onLoadFile = { showSubPicker = false; pickSubtitle.launch(arrayOf("*/*")) },
         onDismiss = { showSubPicker = false },
     )
+    if (showAudioPicker) AudioTrackPickerDialog(player, onDismiss = { showAudioPicker = false })
     if (showApi) ApiSettingsDialog(onDismiss = { showApi = false })
     busy?.let { BusyDialog(it.label, it.progress) }
 
