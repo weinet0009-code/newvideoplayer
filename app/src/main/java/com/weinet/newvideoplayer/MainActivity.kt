@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.PictureInPictureModeChangedInfo
+import androidx.media3.common.MediaMetadata
 import androidx.core.util.Consumer
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,13 +40,16 @@ class MainActivity : FragmentActivity() {
                 val nav = rememberNavController()
                 LaunchedEffect(openPlayerRequest.value) {
                     if (openPlayerRequest.value > 0 && PlayerHolder.player.value?.mediaItemCount ?: 0 > 0 &&
-                        nav.currentDestination?.route != "player") nav.navigate("player")
+                        nav.currentDestination?.route != "player" &&
+                        PlayerHolder.player.value?.currentMediaItem?.mediaMetadata?.mediaType != MediaMetadata.MEDIA_TYPE_MUSIC
+                    ) nav.navigate("player")
                 }
                 NavHost(navController = nav, startDestination = "library") {
                     composable("library") {
                         LibraryScreen(onOpen = { videos, index ->
                             PlayerHolder.start(this@MainActivity, videos, index)
-                            nav.navigate("player")
+                            // Songs keep playing under the library's mini player; videos open the player.
+                            if (!videos[index].isAudio) nav.navigate("player")
                         })
                     }
                     composable("player") {

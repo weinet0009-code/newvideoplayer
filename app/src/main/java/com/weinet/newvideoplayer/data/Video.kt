@@ -18,13 +18,32 @@ data class Video(
     val path: String = "",
     /** Set for videos stored in the private folder. */
     val vaultId: String? = null,
-)
+    /** True for songs from the music library (same model so playlists can mix both). */
+    val isAudio: Boolean = false,
+    val artist: String = "",
+    val album: String = "",
+    val albumId: Long = 0,
+) {
+    /** Album cover for songs (Coil loads it through MediaStore). */
+    val artUri: Uri?
+        get() = if (!isAudio || albumId == 0L) null
+        else if (android.os.Build.VERSION.SDK_INT >= 29)
+            android.content.ContentUris.withAppendedId(android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId)
+        else android.content.ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), albumId)
+}
 
 /** Private videos get a non-numeric media id so they never enter "recent" or resume history. */
 fun Video.toMediaItem(): MediaItem = MediaItem.Builder()
     .setMediaId(if (vaultId != null) "v$vaultId" else id.toString())
     .setUri(uri)
-    .setMediaMetadata(MediaMetadata.Builder().setTitle(title).setDisplayTitle(title).build())
+    .setMediaMetadata(
+        MediaMetadata.Builder().setTitle(title).setDisplayTitle(title).apply {
+            if (isAudio) {
+                setArtist(artist).setAlbumTitle(album).setArtworkUri(artUri)
+                    .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
+            }
+        }.build()
+    )
     .build()
 
 fun formatDuration(ms: Long): String {

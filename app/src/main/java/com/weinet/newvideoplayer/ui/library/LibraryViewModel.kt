@@ -15,29 +15,56 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-enum class LibraryTab(val label: String) { Folders("資料夾"), Recent("最近播放"), Playlists("播放清單"), Private("私密") }
+enum class LibraryTab(val label: String) { Videos("影片"), Music("音樂"), Playlists("播放清單") }
+enum class VideoSub(val label: String) { Folders("資料夾"), Recent("最近播放") }
+enum class MusicSub(val label: String) { Songs("歌曲"), Albums("專輯"), Artists("演出者"), Folders("資料夾") }
 
 data class LibraryState(
     val loading: Boolean = false,
     val videos: List<Video> = emptyList(),
-    val tab: LibraryTab = LibraryTab.Folders,
+    val songs: List<Video> = emptyList(),
+    val tab: LibraryTab = LibraryTab.Videos,
+    val videoSub: VideoSub = VideoSub.Folders,
+    val musicSub: MusicSub = MusicSub.Songs,
+    /** The folder, album or artist opened in the current tab. */
     val selectedFolder: String? = null,
     val selectedPlaylist: String? = null,
     val query: String = "",
     val recentIds: List<Long> = emptyList(),
     val playlists: Map<String, List<Long>> = emptyMap(),
 ) {
-    private val byId: Map<Long, Video> get() = videos.associateBy { it.id }
+    private val byId: Map<Long, Video> get() = (videos + songs).associateBy { it.id }
+    private val videoById: Map<Long, Video> get() = videos.associateBy { it.id }
     val folders: Map<String, List<Video>> get() = videos.groupBy { it.folder }.toSortedMap()
-    val recent: List<Video> get() = recentIds.mapNotNull { byId[it] }
-    fun playlistVideos(name: String): List<Video> = playlists[name].orEmpty().mapNotNull { byId[it] }
+    val recent: List<Video> get() = recentIds.mapNotNull { videoById[it] }
+    fun playlistItems(name: String): List<Video> = playlists[name].orEmpty().mapNotNull { byId[it] }
+
+    /** Songs grouped for the current music sub-tab (albums, artists or folders). */
+    val musicGroups: Map<String, List<Video>>
+        get() = when (musicSub) {
+            MusicSub.Albums -> songs.groupBy { it.album.ifBlank { "未知專輯" } }
+            MusicSub.Artists -> songs.groupBy { it.artist.ifBlank { "未知演出者" } }
+            MusicSub.Folders -> songs.groupBy { it.folder }
+            MusicSub.Songs -> emptyMap()
+        }.toList().sortedBy { it.first.lowercase() }.toMap()
 
     val searchResults: List<Video>
-        get() = videos.filter { it.title.contains(query, ignoreCase = true) }
-    val folderVideos: List<Video>
-        get() = videos.filter { it.folder == selectedFolder }
+        get() = if (tab == LibraryTab.Music) songs.filter {
+            it.title.contains(query, true) || it.artist.contains(query, true) || it.album.contains(query, true)
+        } else videos.filter { it.title.contains(query, ignoreCase = true) }
+
+    /** What is inside the opened folder / album / artist. */
+    val selectedItems: List<Video>
+        get() = when {
+            selectedFolder == null -> emptyList()
+            tab == LibraryTab.Music -> musicGroups[selectedFolder].orEmpty().let { list ->
+                if (musicSub == MusicSub.Albums) list.sortedBy { it.title.lowercase() } else list
+            }
+            else -> videos.filter { it.folder == selectedFolder }
+        }
 }
 
 /** A system consent dialog (Android 11+) the screen must launch, and what to do with the answer. */
@@ -49,7 +76,10 @@ data class Busy(val label: String, val progress: Float)
 private data class Ui(
     val loading: Boolean = false,
     val videos: List<Video> = emptyList(),
-    val tab: LibraryTab = LibraryTab.Folders,
+    val songs: List<Video> = emptyList(),
+    val tab: LibraryTab = LibraryTab.Videos,
+    val videoSub: VideoSub = VideoSub.Folders,
+    val musicSub: MusicSub = MusicSub.Songs,
     val selectedFolder: String? = null,
     val selectedPlaylist: String? = null,
     val query: String = "",
@@ -64,15 +94,19 @@ class LibraryViewModel(private val app: Application) : AndroidViewModel(app) {
     val message = MutableStateFlow<String?>(null)
 
     val state: StateFlow<LibraryState> = combine(ui, LibraryStore.recent, LibraryStore.playlists) { u, r, p ->
-        LibraryState(u.loading, u.videos, u.tab, u.selectedFolder, u.selectedPlaylist, u.query, r, p)
+        LibraryState(u.loading, u.videos, u.songs, u.tab, u.videoSub, u.musicSub, u.selectedFolder, u.selectedPlaylist, u.query, r, p)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, LibraryState())
 
     fun refresh() = viewModelScope.launch {
-        if (ui.value.videos.isEmpty()) ui.value = ui.value.copy(loading = true)
-        ui.value = ui.value.copy(loading = false, videos = repo.loadVideos())
+        if (ui.value.videos.isEmpty() && ui.value.songs.isEmpty()) ui.value = ui.value.copy(loading = true)
+        val videos = async { repo.loadVideos() }
+        val songs = async { repo.loadAudio() }
+        ui.value = ui.value.copy(loading = false, videos = videos.await(), songs = songs.await())
     }
 
-    fun selectTab(t: LibraryTab) { ui.value = ui.value.copy(tab = t, selectedFolder = null, selectedPlaylist = null) }
+    fun selectTab(t: LibraryTab) { ui.value = ui.value.copy(tab = t, selectedFolder = null, selectedPlaylist = null, query = "") }
+    fun selectVideoSub(t: VideoSub) { ui.value = ui.value.copy(videoSub = t, selectedFolder = null, query = "") }
+    fun selectMusicSub(t: MusicSub) { ui.value = ui.value.copy(musicSub = t, selectedFolder = null, query = "") }
     fun selectFolder(folder: String?) { ui.value = ui.value.copy(selectedFolder = folder) }
     fun selectPlaylist(name: String?) { ui.value = ui.value.copy(selectedPlaylist = name) }
     fun search(q: String) { ui.value = ui.value.copy(query = q) }

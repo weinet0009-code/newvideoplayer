@@ -60,4 +60,63 @@ class VideoRepository(private val context: Context) {
         }
         result
     }
+
+    /** Every song on the device (MediaStore IS_MUSIC), newest first. */
+    @Suppress("DEPRECATION")
+    suspend fun loadAudio(): List<Video> = withContext(Dispatchers.IO) {
+        val collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        val folderCol = if (Build.VERSION.SDK_INT >= 29) MediaStore.Audio.Media.BUCKET_DISPLAY_NAME else MediaStore.Audio.Media.DATA
+        val pathCol = if (Build.VERSION.SDK_INT >= 29) MediaStore.Audio.Media.RELATIVE_PATH else MediaStore.Audio.Media.DATA
+        val projection = arrayOf(
+            MediaStore.Audio.Media._ID,
+            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.DISPLAY_NAME,
+            MediaStore.Audio.Media.ARTIST,
+            MediaStore.Audio.Media.ALBUM,
+            MediaStore.Audio.Media.ALBUM_ID,
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.SIZE,
+            MediaStore.Audio.Media.DATE_ADDED,
+            MediaStore.Audio.Media.MIME_TYPE,
+            folderCol,
+            pathCol,
+        ).distinct().toTypedArray()
+        val result = mutableListOf<Video>()
+        runCatching {
+            context.contentResolver.query(
+                collection, projection, "${MediaStore.Audio.Media.IS_MUSIC} != 0", null,
+                "${MediaStore.Audio.Media.DATE_ADDED} DESC"
+            )
+        }.getOrNull()?.use { c ->
+            fun col(n: String) = c.getColumnIndexOrThrow(n)
+            val idC = col(MediaStore.Audio.Media._ID); val titleC = col(MediaStore.Audio.Media.TITLE)
+            val nameC = col(MediaStore.Audio.Media.DISPLAY_NAME); val artistC = col(MediaStore.Audio.Media.ARTIST)
+            val albumC = col(MediaStore.Audio.Media.ALBUM); val albumIdC = col(MediaStore.Audio.Media.ALBUM_ID)
+            val durC = col(MediaStore.Audio.Media.DURATION); val sizeC = col(MediaStore.Audio.Media.SIZE)
+            val dateC = col(MediaStore.Audio.Media.DATE_ADDED); val mimeC = col(MediaStore.Audio.Media.MIME_TYPE)
+            val folderC = col(folderCol); val pathC = col(pathCol)
+            while (c.moveToNext()) {
+                val id = c.getLong(idC)
+                val rawFolder = c.getString(folderC) ?: ""
+                val folder = if (Build.VERSION.SDK_INT >= 29) rawFolder else java.io.File(rawFolder).parentFile?.name ?: ""
+                val artist = c.getString(artistC)?.takeIf { it != "<unknown>" } ?: ""
+                result += Video(
+                    id = id,
+                    uri = ContentUris.withAppendedId(collection, id),
+                    title = c.getString(titleC)?.takeIf { it.isNotBlank() } ?: c.getString(nameC) ?: "",
+                    folder = folder.ifBlank { "Other" },
+                    durationMs = c.getLong(durC),
+                    sizeBytes = c.getLong(sizeC),
+                    dateAdded = c.getLong(dateC),
+                    mimeType = c.getString(mimeC) ?: "audio/*",
+                    path = c.getString(pathC) ?: "",
+                    isAudio = true,
+                    artist = artist,
+                    album = c.getString(albumC) ?: "",
+                    albumId = c.getLong(albumIdC),
+                )
+            }
+        }
+        result
+    }
 }

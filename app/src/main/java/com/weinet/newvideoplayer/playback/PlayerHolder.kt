@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -63,6 +64,8 @@ object PlayerHolder {
                     override fun onMediaItemTransition(item: MediaItem?, reason: Int) {
                         val id = item?.mediaId?.toLongOrNull() ?: return
                         LibraryStore.addRecent(id)
+                        // Songs always start from the top.
+                        if (item?.mediaMetadata?.mediaType == MediaMetadata.MEDIA_TYPE_MUSIC) return
                         if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO ||
                             reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) {
                             val resume = positions.get(id)
@@ -92,7 +95,7 @@ object PlayerHolder {
         saveCurrentPosition(app)
         val p = obtain(app)
         queue = videos
-        p.setMediaItems(videos.map { SubtitleStore.attach(app, it.toMediaItem()) }, index, PlaybackPositionStore(app).get(videos[index].id))
+        p.setMediaItems(videos.map { SubtitleStore.attach(app, it.toMediaItem()) }, index, if (videos[index].isAudio) 0L else PlaybackPositionStore(app).get(videos[index].id))
         p.setPlaybackSpeed(PlayerSettings(app).speed)
         // A subtitle choice (or "off") belongs to the previous video; let this one's saved
         // subtitle, marked default, be picked again.
@@ -126,7 +129,9 @@ object PlayerHolder {
 
     fun saveCurrentPosition(context: Context) {
         val p = _player.value ?: return
-        val id = p.currentMediaItem?.mediaId?.toLongOrNull() ?: return
+        val item = p.currentMediaItem ?: return
+        if (item.mediaMetadata.mediaType == MediaMetadata.MEDIA_TYPE_MUSIC) return
+        val id = item.mediaId.toLongOrNull() ?: return
         PlaybackPositionStore(context.applicationContext).save(id, p.currentPosition, p.duration)
     }
 
