@@ -48,12 +48,12 @@ object AudioExtractor {
         override fun close() = reader.close()
     }
 
-    private fun openExtractor(context: Context, video: Video): MediaExtractor = MediaExtractor().apply {
+    internal fun openExtractor(context: Context, video: Video): MediaExtractor = MediaExtractor().apply {
         val id = video.vaultId
         if (id != null) setDataSource(VaultSource(context, id)) else setDataSource(context, video.uri, null)
     }
 
-    private fun audioTrack(ex: MediaExtractor): Pair<Int, MediaFormat> {
+    internal fun audioTrack(ex: MediaExtractor): Pair<Int, MediaFormat> {
         for (i in 0 until ex.trackCount) {
             val f = ex.getTrackFormat(i)
             if (f.getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true) return i to f

@@ -488,8 +488,7 @@ fun PlayerScreen(onBack: () -> Unit) {
         OnlineSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) }, onDismiss = { showOnlineSubs = false })
     }
     if (showAi) currentVideo()?.let { v ->
-        AiSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) },
-            onOpenSettings = { showApi = true }, onDismiss = { showAi = false })
+        AiSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) }, onDismiss = { showAi = false })
     }
     if (showApi) ApiSettingsDialog(onDismiss = { showApi = false })
     busy?.let { BusyDialog(it.label, it.progress) }
@@ -537,7 +536,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                     )
                     ListItem(
                         headlineContent = { Text("AI 產生字幕") },
-                        supportingContent = { Text("辨識影片語音，自動產生字幕") },
+                        supportingContent = { Text("手機離線辨識語音，免費") },
                         modifier = Modifier.clickable { showMore = false; showAi = true },
                     )
                     ListItem(
@@ -551,8 +550,8 @@ fun PlayerScreen(onBack: () -> Unit) {
                         modifier = Modifier.clickable { showMore = false; showCast = true },
                     )
                     ListItem(
-                        headlineContent = { Text("字幕服務設定") },
-                        supportingContent = { Text("OpenAI 金鑰、OpenSubtitles 帳號") },
+                        headlineContent = { Text("OpenSubtitles 帳號") },
+                        supportingContent = { Text("選填，登入可提高每日下載數") },
                         modifier = Modifier.clickable { showMore = false; showApi = true },
                     )
                     ListItem(

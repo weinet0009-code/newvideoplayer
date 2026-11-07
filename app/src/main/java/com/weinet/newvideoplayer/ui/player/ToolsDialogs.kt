@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -19,11 +20,12 @@ import com.weinet.newvideoplayer.data.SecretStore
 import com.weinet.newvideoplayer.data.Video
 import com.weinet.newvideoplayer.tools.AudioExtractor
 import com.weinet.newvideoplayer.tools.OpenSubtitles
-import com.weinet.newvideoplayer.tools.Whisper
+import com.weinet.newvideoplayer.tools.LocalWhisper
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
 
-const val KEY_OPENAI = "openai_key"
 const val KEY_OS_TOKEN = "opensubtitles_token"
 const val KEY_OS_USER = "opensubtitles_user"
 
@@ -98,28 +100,52 @@ fun OnlineSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onOpenSettings: () -> Unit, onDismiss: () -> Unit) {
+fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val key = remember { SecretStore.get(context, KEY_OPENAI) }
-    var lang by remember { mutableStateOf("") }
+    var model by remember { mutableStateOf(LocalWhisper.Model.Base) }
+    var downloaded by remember { mutableStateOf(LocalWhisper.Model.entries.filter { LocalWhisper.isDownloaded(context, it) }.toSet()) }
+    var lang by remember { mutableStateOf("zh") }
     var status by remember { mutableStateOf<String?>(null) }
     var progress by remember { mutableStateOf<Float?>(null) }
-    var working by remember { mutableStateOf(false) }
+    var job by remember { mutableStateOf<Job?>(null) }
+    val working = job != null
+
+    fun launchTask(block: suspend () -> Unit) {
+        job = scope.launch {
+            try { block() }
+            catch (e: CancellationException) { status = "已取消" }
+            catch (e: AudioExtractor.Unsupported) { status = "這部影片的音訊格式（${e.mime}）目前無法處理" }
+            catch (e: AudioExtractor.NoAudio) { status = "這部影片沒有聲音" }
+            catch (e: Exception) { status = "失敗：${e.message}" }
+            progress = null
+            job = null
+        }
+    }
 
     AlertDialog(
         onDismissRequest = { if (!working) onDismiss() },
-        title = { Text("AI 產生字幕") },
+        title = { Text("AI 產生字幕（離線）") },
         text = {
-            Column {
-                if (key == null) {
-                    Text("需要 OpenAI API 金鑰。金鑰只存在這支手機，並加密保存。")
-                    return@Column
-                }
-                Text("會把影片的聲音上傳到 OpenAI 辨識（whisper-1），完成後自動載入字幕。音訊需小於 25 MB（約 25–40 分鐘）。",
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text("在手機上辨識語音，不用網路、不用帳號，完全免費。第一次要下載辨識模型。長影片會花比較久，建議接上電源。",
                     style = MaterialTheme.typography.bodySmall)
-                Row(Modifier.padding(vertical = 8.dp)) {
-                    listOf("" to "自動", "zh" to "中文", "en" to "英文", "ja" to "日文").forEach { (code, label) ->
+                Spacer(Modifier.height(8.dp))
+                Text("模型", style = MaterialTheme.typography.labelLarge)
+                LocalWhisper.Model.entries.forEach { m ->
+                    Row(Modifier.fillMaxWidth().clickable(enabled = !working) { model = m }.padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = model == m, onClick = null, enabled = !working)
+                        Spacer(Modifier.width(8.dp))
+                        Text("${m.label}  ${m.sizeMb} MB", modifier = Modifier.weight(1f))
+                        if (m in downloaded) TextButton(enabled = !working, onClick = {
+                            LocalWhisper.delete(context, m); downloaded = downloaded - m
+                        }) { Text("刪除") } else Text("未下載", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                Text("語言", style = MaterialTheme.typography.labelLarge)
+                Row(Modifier.padding(vertical = 4.dp)) {
+                    listOf("zh" to "中文", "en" to "英文", "ja" to "日文", "" to "自動").forEach { (code, label) ->
                         FilterChip(selected = lang == code, enabled = !working, onClick = { lang = code }, label = { Text(label) },
                             modifier = Modifier.padding(end = 4.dp))
                     }
@@ -130,33 +156,26 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onOpenSettings: () 
             }
         },
         confirmButton = {
-            if (key == null) TextButton(onClick = { onDismiss(); onOpenSettings() }) { Text("設定金鑰") }
-            else TextButton(enabled = !working, onClick = {
-                working = true
-                scope.launch {
-                    try {
-                        status = "擷取音訊…"
-                        val audio = AudioExtractor.toCache(context, video) { progress = it }
-                        progress = null
-                        if (audio.length() > Whisper.MAX_BYTES) error("音訊超過 25 MB，影片太長")
-                        status = "上傳並辨識中，可能要幾分鐘…"
-                        val srt = Whisper.transcribe(context, key, audio, lang.ifBlank { null })
-                        audio.delete()
-                        onLoaded(srt)
-                        onDismiss()
-                    } catch (e: AudioExtractor.Unsupported) {
-                        status = "這部影片的音訊格式（${e.mime}）目前無法處理"
-                    } catch (e: AudioExtractor.NoAudio) {
-                        status = "這部影片沒有聲音"
-                    } catch (e: Exception) {
-                        status = "失敗：${e.message}"
-                    }
-                    progress = null
-                    working = false
+            if (working) TextButton(onClick = { LocalWhisper.cancel(); job?.cancel() }) { Text("停止") }
+            else if (model !in downloaded) TextButton(onClick = {
+                launchTask {
+                    status = "下載模型中…"
+                    LocalWhisper.download(context, model) { progress = it }
+                    downloaded = downloaded + model
+                    status = "模型已下載，可以開始"
+                }
+            }) { Text("下載 ${model.sizeMb} MB") }
+            else TextButton(onClick = {
+                launchTask {
+                    status = "辨識中…（進度依影片長度）"
+                    progress = 0f
+                    val srt = LocalWhisper.transcribe(context, video, model, lang.ifBlank { null }) { progress = it }
+                    onLoaded(srt)
+                    onDismiss()
                 }
             }) { Text("開始") }
         },
-        dismissButton = { TextButton(enabled = !working, onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(enabled = !working, onClick = onDismiss) { Text("關閉") } },
     )
 }
 
@@ -164,7 +183,6 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onOpenSettings: () 
 fun ApiSettingsDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var openAi by remember { mutableStateOf(SecretStore.get(context, KEY_OPENAI) ?: "") }
     var osUser by remember { mutableStateOf(SecretStore.get(context, KEY_OS_USER) ?: "") }
     var osPass by remember { mutableStateOf("") }
     var osSignedIn by remember { mutableStateOf(SecretStore.get(context, KEY_OS_TOKEN) != null) }
@@ -173,15 +191,10 @@ fun ApiSettingsDialog(onDismiss: () -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("字幕服務設定") },
+        title = { Text("OpenSubtitles 帳號") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                Text("OpenAI API 金鑰（AI 字幕）", style = MaterialTheme.typography.labelLarge)
-                OutlinedTextField(value = openAi, onValueChange = { openAi = it.trim() }, singleLine = true,
-                    placeholder = { Text("sk-…") }, visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(16.dp))
-                Text("OpenSubtitles 帳號（選填，提高每日下載數）", style = MaterialTheme.typography.labelLarge)
+                Text("選填。未登入每天可下載 5 個，登入後用帳號的額度。", style = MaterialTheme.typography.bodySmall)
                 if (osSignedIn) {
                     Row {
                         Text("已登入：$osUser", modifier = Modifier.weight(1f).padding(top = 12.dp))
@@ -211,9 +224,6 @@ fun ApiSettingsDialog(onDismiss: () -> Unit) {
                 status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             }
         },
-        confirmButton = {
-            TextButton(onClick = { SecretStore.set(context, KEY_OPENAI, openAi); onDismiss() }) { Text("儲存") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("完成") } },
     )
 }

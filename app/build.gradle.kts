@@ -17,6 +17,7 @@ android {
         val osKey = providers.gradleProperty("OPENSUBTITLES_API_KEY").orNull
             ?: System.getenv("OPENSUBTITLES_API_KEY") ?: ""
         buildConfigField("String", "OPENSUBTITLES_API_KEY", "\"$osKey\"")
+        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
     }
     buildTypes {
         release { isMinifyEnabled = false }
@@ -26,6 +27,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
+    // whisper.cpp (offline AI subtitles), fetched and built from source by CMake.
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
     buildFeatures { compose = true; buildConfig = true }
 }
 
