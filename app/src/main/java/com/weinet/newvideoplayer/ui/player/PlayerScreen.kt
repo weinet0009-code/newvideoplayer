@@ -64,6 +64,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import com.weinet.newvideoplayer.data.SubtitleStore
 import com.weinet.newvideoplayer.data.PlayerSettings
 import com.weinet.newvideoplayer.data.formatDuration
 import com.weinet.newvideoplayer.playback.PipState
@@ -99,12 +100,7 @@ private enum class Rotation(val label: String, val value: Int) {
     Portrait("直向", ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT),
 }
 
-private fun subtitleMime(name: String): String = when (name.substringAfterLast('.').lowercase()) {
-    "vtt" -> MimeTypes.TEXT_VTT
-    "ass", "ssa" -> MimeTypes.TEXT_SSA
-    "ttml", "xml", "dfxp" -> MimeTypes.APPLICATION_TTML
-    else -> MimeTypes.APPLICATION_SUBRIP
-}
+private fun subtitleMime(name: String): String = SubtitleStore.mime(name)
 
 private fun pipParams(context: Context, player: ExoPlayer, playing: Boolean, autoEnter: Boolean): PictureInPictureParams {
     val size = player.videoSize
@@ -204,11 +200,13 @@ fun PlayerScreen(onBack: () -> Unit) {
      */
     fun loadSubtitle(picked: Uri, name: String, label: String = name) {
         val current = player.currentMediaItem ?: return
-        val existing = current.localConfiguration?.subtitleConfigurations.orEmpty()
-            .filter { it.uri != picked }
-            .map { it.buildUpon().setSelectionFlags(0).build() }
         val id = "ext${System.currentTimeMillis()}"
-        val config = MediaItem.SubtitleConfiguration.Builder(picked)
+        // Save a copy so the subtitle comes back next time this video is opened.
+        val uri = runCatching { SubtitleStore.add(context, current.mediaId, picked, name, label, id) }.getOrDefault(picked)
+        val existing = current.localConfiguration?.subtitleConfigurations.orEmpty()
+            .filter { it.uri != picked && it.uri != uri && it.label != label }
+            .map { it.buildUpon().setSelectionFlags(0).build() }
+        val config = MediaItem.SubtitleConfiguration.Builder(uri)
             .setMimeType(subtitleMime(name))
             .setLanguage("und")
             .setLabel(label)
@@ -528,6 +526,11 @@ fun PlayerScreen(onBack: () -> Unit) {
     if (showSubPicker) SubtitlePickerDialog(
         player,
         onLoadFile = { showSubPicker = false; pickSubtitle.launch(arrayOf("*/*")) },
+        onSelected = { formatId ->
+            player.currentMediaItem?.mediaId?.let { m ->
+                SubtitleStore.setSelected(context, m, SubtitleStore.idForFormat(context, m, formatId))
+            }
+        },
         onDismiss = { showSubPicker = false },
     )
     if (showAudioPicker) AudioTrackPickerDialog(player, onDismiss = { showAudioPicker = false })

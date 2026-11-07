@@ -52,7 +52,7 @@ private fun trackLabel(f: Format, index: Int, fallback: String): String {
 }
 
 @Composable
-fun SubtitlePickerDialog(player: Player, onLoadFile: () -> Unit, onDismiss: () -> Unit) {
+fun SubtitlePickerDialog(player: Player, onLoadFile: () -> Unit, onSelected: (formatId: String?) -> Unit = {}, onDismiss: () -> Unit) {
     val groups = remember {
         player.currentTracks.groups.filter { it.type == C.TRACK_TYPE_TEXT && it.length > 0 && it.isSupported }
     }
@@ -77,9 +77,9 @@ fun SubtitlePickerDialog(player: Player, onLoadFile: () -> Unit, onDismiss: () -
         title = { Text("字幕") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                Option("關閉字幕", off) { selectTextTrack(player, null) }
+                Option("關閉字幕", off) { selectTextTrack(player, null); onSelected(null) }
                 groups.forEachIndexed { i, g ->
-                    Option(trackLabel(g.getTrackFormat(0), i, "字幕"), !off && g.isSelected) { selectTextTrack(player, g) }
+                    Option(trackLabel(g.getTrackFormat(0), i, "字幕"), !off && g.isSelected) { selectTextTrack(player, g); onSelected(g.getTrackFormat(0).id) }
                 }
                 if (groups.isEmpty()) {
                     Text("這部影片沒有字幕。可以載入字幕檔，或從「更多」線上搜尋、AI 產生。",

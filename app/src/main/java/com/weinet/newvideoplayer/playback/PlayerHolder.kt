@@ -3,6 +3,7 @@ package com.weinet.newvideoplayer.playback
 import android.content.ComponentName
 import android.content.Context
 import androidx.annotation.OptIn
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -15,6 +16,7 @@ import com.weinet.newvideoplayer.vault.AppDataSource
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
+import com.weinet.newvideoplayer.data.SubtitleStore
 import com.weinet.newvideoplayer.data.LibraryStore
 import com.weinet.newvideoplayer.data.PlaybackPositionStore
 import com.weinet.newvideoplayer.data.PlayerSettings
@@ -80,8 +82,14 @@ object PlayerHolder {
         saveCurrentPosition(app)
         val p = obtain(app)
         queue = videos
-        p.setMediaItems(videos.map { it.toMediaItem() }, index, PlaybackPositionStore(app).get(videos[index].id))
+        p.setMediaItems(videos.map { SubtitleStore.attach(app, it.toMediaItem()) }, index, PlaybackPositionStore(app).get(videos[index].id))
         p.setPlaybackSpeed(PlayerSettings(app).speed)
+        // A subtitle choice (or "off") belongs to the previous video; let this one's saved
+        // subtitle, marked default, be picked again.
+        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+            .build()
         p.prepare()
         p.playWhenReady = true
         LibraryStore.addRecent(videos[index].id)
