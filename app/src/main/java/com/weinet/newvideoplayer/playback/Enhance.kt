@@ -13,7 +13,7 @@ import androidx.media3.effect.Contrast
 import androidx.media3.effect.GlEffect
 import androidx.media3.effect.GlShaderProgram
 import androidx.media3.effect.HslAdjustment
-import androidx.media3.effect.SingleFrameGlShaderProgram
+import androidx.media3.effect.BaseGlShaderProgram
 
 /** Picture enhancement levels: off, light, strong. Runs on the GPU through Media3 effects. */
 object Enhance {
@@ -33,7 +33,7 @@ class Sharpen(private val amount: Float) : GlEffect {
     override fun toGlShaderProgram(context: Context, useHdr: Boolean): GlShaderProgram = Program(amount, useHdr)
 
     private class Program(private val amount: Float, useHdr: Boolean) :
-        SingleFrameGlShaderProgram(/* useHighPrecisionColorComponents= */ useHdr) {
+        BaseGlShaderProgram(/* useHighPrecisionColorComponents= */ useHdr, /* texturePoolCapacity= */ 1) {
         private val program = GlProgram(VERTEX, FRAGMENT).apply {
             setBufferAttribute("aFramePosition", GlUtil.getNormalizedCoordinateBounds(), GlUtil.HOMOGENEOUS_COORDINATE_VECTOR_SIZE)
         }
