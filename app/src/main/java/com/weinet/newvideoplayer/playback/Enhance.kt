@@ -33,7 +33,7 @@ class Sharpen(private val amount: Float) : GlEffect {
     override fun toGlShaderProgram(context: Context, useHdr: Boolean): GlShaderProgram = Program(amount, useHdr)
 
     private class Program(private val amount: Float, useHdr: Boolean) :
-        SingleFrameGlShaderProgram(/* useHighPrecisionColorComponents= */ useHdr, /* texturePoolCapacity= */ 1) {
+        SingleFrameGlShaderProgram(/* useHighPrecisionColorComponents= */ useHdr) {
         private val program = GlProgram(VERTEX, FRAGMENT).apply {
             setBufferAttribute("aFramePosition", GlUtil.getNormalizedCoordinateBounds(), GlUtil.HOMOGENEOUS_COORDINATE_VECTOR_SIZE)
         }
