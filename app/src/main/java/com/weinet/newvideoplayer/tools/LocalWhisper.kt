@@ -2,7 +2,11 @@ package com.weinet.newvideoplayer.tools
 
 import android.content.Context
 import com.weinet.newvideoplayer.data.Video
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -27,10 +31,29 @@ object LocalWhisper {
 
     private const val CHUNK_SECONDS = 300
 
+    /** Silero voice-activity model (~0.9 MB): lets Whisper skip silence and music-only parts. */
+    private const val VAD_FILE = "ggml-silero-v6.2.0.bin"
+    private const val VAD_SHA256 = "2aa269b785eeb53a82983a20501ddf7c1d9c48e33ab63a41391ac6c9f7fb6987"
+    private const val VAD_URL = "https://huggingface.co/ggml-org/whisper-vad/resolve/main/$VAD_FILE"
+
     @JvmStatic private external fun nativeInit(path: String): Long
     @JvmStatic private external fun nativeFree(ptr: Long)
     @JvmStatic private external fun nativeAbort(flag: Boolean)
-    @JvmStatic private external fun nativeTranscribe(ptr: Long, pcm: FloatArray, lang: String?, prompt: String?, threads: Int): ByteArray?
+    @JvmStatic private external fun nativeTranscribe(ptr: Long, pcm: FloatArray, lang: String?, prompt: String?, threads: Int, vadModel: String?): ByteArray?
+    @JvmStatic private external fun nativeLoadBackends(dir: String)
+    @JvmStatic private external fun nativeSystemInfo(): String
+    @JvmStatic private external fun nativeProgress(): Int
+
+    private fun ensureBackends(context: Context) = nativeLoadBackends(context.applicationInfo.nativeLibraryDir)
+
+    /** True when the phone's CPU got the fast build (ARMv8.2+ dotprod or fp16 instructions). */
+    fun isAccelerated(context: Context): Boolean {
+        ensureBackends(context)
+        val info = nativeSystemInfo()
+        return "DOTPROD = 1" in info || "FP16_VA = 1" in info
+    }
+
+    fun vadFile(context: Context) = File(File(context.filesDir, "whisper").apply { mkdirs() }, VAD_FILE)
 
     fun modelFile(context: Context, m: Model) = File(File(context.filesDir, "whisper").apply { mkdirs() }, m.file)
     fun isDownloaded(context: Context, m: Model) = modelFile(context, m).exists()
@@ -40,10 +63,22 @@ object LocalWhisper {
     fun cancel() = nativeAbort(true)
 
     suspend fun download(context: Context, m: Model, onProgress: (Float) -> Unit): File = withContext(Dispatchers.IO) {
+        val file = fetch("https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${m.file}", modelFile(context, m), m.sha256, onProgress)
+        ensureVad(context)
+        file
+    }
+
+    /** Downloads the small VAD model if it is missing. Returns null when it can't be fetched. */
+    suspend fun ensureVad(context: Context): File? = withContext(Dispatchers.IO) {
+        val f = vadFile(context)
+        if (f.exists()) return@withContext f
+        try { fetch(VAD_URL, f, VAD_SHA256) {} } catch (e: CancellationException) { throw e } catch (e: Exception) { null }
+    }
+
+    private suspend fun fetch(url: String, target: File, sha256: String, onProgress: (Float) -> Unit): File = withContext(Dispatchers.IO) {
         val job = coroutineContext[Job]
-        val target = modelFile(context, m)
         val part = File(target.path + ".part")
-        val conn = URL("https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${m.file}").openConnection() as HttpURLConnection
+        val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 20_000
         conn.readTimeout = 60_000
         conn.setRequestProperty("User-Agent", "NewVideoPlayer")
@@ -66,7 +101,7 @@ object LocalWhisper {
             }
         }
         val hex = digest.digest().joinToString("") { "%02x".format(it) }
-        if (hex != m.sha256) { part.delete(); throw IOException("模型檔驗證失敗") }
+        if (hex != sha256) { part.delete(); throw IOException("模型檔驗證失敗") }
         if (!part.renameTo(target)) throw IOException("無法儲存模型")
         target
     }
@@ -75,9 +110,11 @@ object LocalWhisper {
      * Transcribes [video] and writes an SRT file to the cache. [language] is a Whisper code
      * ("zh", "en", "ja") or null for auto-detect.
      */
-    suspend fun transcribe(context: Context, video: Video, m: Model, language: String?, onProgress: (Float) -> Unit): File =
+    suspend fun transcribe(context: Context, video: Video, m: Model, language: String?, skipSilence: Boolean, onProgress: (Float) -> Unit): File =
         withContext(Dispatchers.Default) {
             val job = coroutineContext[Job]
+            ensureBackends(context)
+            val vad = if (skipSilence) ensureVad(context)?.path else null
             nativeAbort(false)
             val ctx = nativeInit(modelFile(context, m).path)
             if (ctx == 0L) throw IOException("模型載入失敗，請重新下載")
@@ -85,17 +122,29 @@ object LocalWhisper {
             // Nudges Whisper towards Traditional Chinese characters instead of Simplified.
             val prompt = if (language == "zh") "以下是繁體中文的字幕。" else null
             val segments = mutableListOf<Segment>()
+            var done = 0f
+            var chunkEnd = 0f
+            // whisper.cpp reports percent within the current chunk; turn it into overall progress.
+            val ticker = launch {
+                while (isActive) {
+                    delay(1000)
+                    onProgress(done + (chunkEnd - done) * nativeProgress().coerceIn(0, 100) / 100f)
+                }
+            }
             try {
                 PcmDecoder.decode(context, video, CHUNK_SECONDS) { pcm, offsetMs, progress ->
                     job?.ensureActive()
-                    val bytes = nativeTranscribe(ctx, pcm, language, prompt, threads)
+                    chunkEnd = progress
+                    val bytes = nativeTranscribe(ctx, pcm, language, prompt, threads, vad)
                     job?.ensureActive()
                     if (bytes == null) throw IOException("辨識失敗")
                     segments += Srt.parseNative(bytes, offsetMs)
+                    done = progress
                     onProgress(progress)
                     true
                 }
             } finally {
+                ticker.cancel()
                 nativeFree(ctx)
             }
             val out = File(File(context.cacheDir, "subs").apply { mkdirs() }, "ai-${System.currentTimeMillis()}.srt")

@@ -22,8 +22,10 @@ import com.weinet.newvideoplayer.tools.AudioExtractor
 import com.weinet.newvideoplayer.tools.OpenSubtitles
 import com.weinet.newvideoplayer.tools.LocalWhisper
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 const val KEY_OS_TOKEN = "opensubtitles_token"
@@ -106,6 +108,10 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
     var model by remember { mutableStateOf(LocalWhisper.Model.Base) }
     var downloaded by remember { mutableStateOf(LocalWhisper.Model.entries.filter { LocalWhisper.isDownloaded(context, it) }.toSet()) }
     var lang by remember { mutableStateOf("zh") }
+    var skipSilence by remember { mutableStateOf(true) }
+    var accelerated by remember { mutableStateOf<Boolean?>(null) }
+    LaunchedEffect(Unit) { accelerated = withContext(Dispatchers.Default) { LocalWhisper.isAccelerated(context) } }
+    var startedAt by remember { mutableStateOf(0L) }
     var status by remember { mutableStateOf<String?>(null) }
     var progress by remember { mutableStateOf<Float?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
@@ -150,7 +156,27 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                             modifier = Modifier.padding(end = 4.dp))
                     }
                 }
+                Row(Modifier.fillMaxWidth().clickable(enabled = !working) { skipSilence = !skipSilence }.padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("跳過靜音（較快）")
+                        Text("只辨識有人說話的段落，也比較不會亂出字", style = MaterialTheme.typography.bodySmall)
+                    }
+                    Switch(checked = skipSilence, onCheckedChange = null, enabled = !working)
+                }
+                accelerated?.let {
+                    Text(if (it) "此手機支援加速指令，已啟用快速版" else "此手機不支援加速指令，使用通用版（較慢）",
+                        style = MaterialTheme.typography.bodySmall)
+                }
+                Spacer(Modifier.height(4.dp))
                 progress?.let { LinearProgressIndicator(progress = { it.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
+                val p = progress
+                if (working && startedAt > 0 && p != null) {
+                    val elapsed = System.currentTimeMillis() - startedAt
+                    val pct = (p * 100).toInt().coerceIn(0, 100)
+                    Text(if (p < 0.02f || elapsed < 15_000) "$pct%・估算剩餘時間中…" else "$pct%・剩下約 ${formatEta(((elapsed / p) * (1 - p)).toLong())}",
+                        style = MaterialTheme.typography.bodySmall)
+                }
                 if (working && progress == null) LinearProgressIndicator(Modifier.fillMaxWidth())
                 status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             }
@@ -167,9 +193,12 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
             }) { Text("下載 ${model.sizeMb} MB") }
             else TextButton(onClick = {
                 launchTask {
-                    status = "辨識中…（進度依影片長度）"
+                    status = "辨識中…可以先做別的事，但請不要關掉這個視窗"
                     progress = 0f
-                    val srt = LocalWhisper.transcribe(context, video, model, lang.ifBlank { null }) { progress = it }
+                    startedAt = System.currentTimeMillis()
+                    val srt = try {
+                        LocalWhisper.transcribe(context, video, model, lang.ifBlank { null }, skipSilence) { progress = it }
+                    } finally { startedAt = 0L }
                     val lines = srt.readText().split("-->").size - 1
                     if (lines == 0) {
                         status = "沒有辨識到任何語音，可以換個模型或語言再試"
@@ -182,6 +211,11 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
         },
         dismissButton = { TextButton(enabled = !working, onClick = onDismiss) { Text("關閉") } },
     )
+}
+
+private fun formatEta(ms: Long): String {
+    val min = (ms / 60_000).coerceAtLeast(1)
+    return if (min < 60) "$min 分鐘" else "${min / 60} 小時 ${min % 60} 分"
 }
 
 @Composable

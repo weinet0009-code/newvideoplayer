@@ -34,6 +34,9 @@ android {
             version = "3.22.1"
         }
     }
+    // ggml loads its CPU variant (libggml-cpu-*.so) with dlopen from nativeLibraryDir,
+    // so native libs must be extracted to disk instead of mapped from the APK.
+    packaging { jniLibs { useLegacyPackaging = true } }
     buildFeatures { compose = true; buildConfig = true }
 }
 

@@ -6,12 +6,45 @@
 #include <stdlib.h>
 #include <string.h>
 #include "whisper.h"
+#include "ggml-backend.h"
 
 static atomic_int g_abort = 0;
+
+static atomic_int g_progress = 0;
+static atomic_int g_backends_loaded = 0;
 
 static bool abort_cb(void *user_data) {
     (void) user_data;
     return atomic_load(&g_abort) != 0;
+}
+
+static void progress_cb(struct whisper_context *ctx, struct whisper_state *state, int progress, void *user_data) {
+    (void) ctx; (void) state; (void) user_data;
+    atomic_store(&g_progress, progress);
+}
+
+/* Loads the best libggml-cpu-*.so for this CPU from the app's native library folder (arm64 only). */
+JNIEXPORT void JNICALL
+Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeLoadBackends(JNIEnv *env, jclass clazz, jstring dir) {
+#ifdef GGML_BACKEND_DL
+    if (atomic_exchange(&g_backends_loaded, 1)) return;
+    const char *d = (*env)->GetStringUTFChars(env, dir, NULL);
+    ggml_backend_load_all_from_path(d);
+    (*env)->ReleaseStringUTFChars(env, dir, d);
+#else
+    (void) env; (void) dir;
+#endif
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeSystemInfo(JNIEnv *env, jclass clazz) {
+    return (*env)->NewStringUTF(env, whisper_print_system_info());
+}
+
+/* Percent (0..100) of the chunk currently being transcribed. */
+JNIEXPORT jint JNICALL
+Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeProgress(JNIEnv *env, jclass clazz) {
+    return atomic_load(&g_progress);
 }
 
 JNIEXPORT jlong JNICALL
@@ -40,7 +73,7 @@ Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeAbort(JNIEnv *env, jclas
  */
 JNIEXPORT jbyteArray JNICALL
 Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeTranscribe(
-        JNIEnv *env, jclass clazz, jlong ptr, jfloatArray pcm, jstring lang, jstring prompt, jint threads) {
+        JNIEnv *env, jclass clazz, jlong ptr, jfloatArray pcm, jstring lang, jstring prompt, jint threads, jstring vadModel) {
     struct whisper_context *ctx = (struct whisper_context *) (intptr_t) ptr;
     if (!ctx) return NULL;
 
@@ -48,6 +81,7 @@ Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeTranscribe(
     jfloat *data = (*env)->GetFloatArrayElements(env, pcm, NULL);
     const char *l = lang ? (*env)->GetStringUTFChars(env, lang, NULL) : NULL;
     const char *pr = prompt ? (*env)->GetStringUTFChars(env, prompt, NULL) : NULL;
+    const char *vm = vadModel ? (*env)->GetStringUTFChars(env, vadModel, NULL) : NULL;
 
     struct whisper_full_params wp = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
     wp.print_realtime = false;
@@ -62,12 +96,20 @@ Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeTranscribe(
     wp.initial_prompt = pr;
     wp.abort_callback = abort_cb;
     wp.abort_callback_user_data = NULL;
+    wp.progress_callback = progress_cb;
+    wp.progress_callback_user_data = NULL;
+    /* Silero VAD: only speech is sent to Whisper (faster, fewer made-up lines in silence).
+     * Segment times are mapped back to the original timeline by whisper.cpp. */
+    wp.vad = vm != NULL;
+    wp.vad_model_path = vm;
+    atomic_store(&g_progress, 0);
 
     int rc = whisper_full(ctx, wp, data, n);
 
     (*env)->ReleaseFloatArrayElements(env, pcm, data, JNI_ABORT);
     if (l) (*env)->ReleaseStringUTFChars(env, lang, l);
     if (pr) (*env)->ReleaseStringUTFChars(env, prompt, pr);
+    if (vm) (*env)->ReleaseStringUTFChars(env, vadModel, vm);
     if (rc != 0 || atomic_load(&g_abort)) return NULL;
 
     size_t cap = 4096, len = 0;
