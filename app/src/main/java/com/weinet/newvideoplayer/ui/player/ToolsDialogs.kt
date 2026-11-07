@@ -170,8 +170,13 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                     status = "辨識中…（進度依影片長度）"
                     progress = 0f
                     val srt = LocalWhisper.transcribe(context, video, model, lang.ifBlank { null }) { progress = it }
-                    onLoaded(srt)
-                    onDismiss()
+                    val lines = srt.readText().split("-->").size - 1
+                    if (lines == 0) {
+                        status = "沒有辨識到任何語音，可以換個模型或語言再試"
+                    } else {
+                        onLoaded(srt)
+                        onDismiss()
+                    }
                 }
             }) { Text("開始") }
         },

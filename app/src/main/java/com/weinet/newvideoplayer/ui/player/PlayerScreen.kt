@@ -206,9 +206,16 @@ fun PlayerScreen(onBack: () -> Unit) {
                     .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
                     .build()
             )).build()
+            // replaceMediaItem() keeps the old media source when only subtitles change (Media3
+            // treats it as a metadata update), so the new track never appears. Reset the playlist
+            // instead so the source is rebuilt with the subtitle merged in.
+            val index = player.currentMediaItemIndex
             val pos = player.currentPosition
-            player.replaceMediaItem(player.currentMediaItemIndex, item)
-            player.seekTo(pos)
+            val play = player.playWhenReady
+            val items = List(player.mediaItemCount) { if (it == index) item else player.getMediaItemAt(it) }
+            player.setMediaItems(items, index, pos)
+            player.prepare()
+            player.playWhenReady = play
             hint = "已載入字幕"
         }
     }
