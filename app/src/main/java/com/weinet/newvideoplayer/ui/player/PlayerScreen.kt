@@ -243,7 +243,13 @@ fun PlayerScreen(onBack: () -> Unit) {
     }
 
     val pickSubtitle = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
-        if (picked != null) loadSubtitle(picked, picked.lastPathSegment ?: "sub.srt")
+        if (picked != null) {
+            val name = runCatching {
+                context.contentResolver.query(picked, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)
+                    ?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+            }.getOrNull() ?: picked.lastPathSegment ?: "sub.srt"
+            loadSubtitle(picked, name)
+        }
     }
 
     fun extractAudio() {
