@@ -9,6 +9,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
+import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
@@ -51,10 +52,16 @@ object PlayerHolder {
             val all = MediaCodecUtil.getDecoderInfos(mime, secure, tunneling)
             if (preferSoftware) all.sortedBy { !it.softwareOnly } else all.sortedBy { it.softwareOnly }
         }
-        val renderers = DefaultRenderersFactory(app)
+        // FFmpeg decoders (NextLib): AC3/E-AC3/DTS/TrueHD audio and software H.264/HEVC/VP8/VP9 video.
+        // Normally used only when the phone's own decoders can't play a track; first choice when
+        // the user prefers software decoding.
+        val renderers = NextRenderersFactory(app)
             .setMediaCodecSelector(selector)
             .setEnableDecoderFallback(true)
-            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+            .setExtensionRendererMode(
+                if (preferSoftware) DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER
+                else DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON
+            )
         val positions = PlaybackPositionStore(app)
         return ExoPlayer.Builder(app, renderers)
             .setMediaSourceFactory(DefaultMediaSourceFactory(AppDataSource.Factory(app)))

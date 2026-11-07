@@ -23,7 +23,7 @@ import java.nio.ByteBuffer
 
 /**
  * Copies a video's audio track into an audio file without re-encoding (fast, no quality loss).
- * AAC becomes .m4a, Opus/Vorbis becomes .webm. Other codecs (AC3, DTS, MP3-in-MKV…) need FFmpeg.
+ * AAC becomes .m4a, Opus/Vorbis becomes .webm. For any codec the phone can decode, use MP3 ([Mp3Encoder]).
  */
 object AudioExtractor {
     class Unsupported(val mime: String) : Exception("unsupported audio: $mime")
@@ -105,11 +105,18 @@ object AudioExtractor {
         }
     }
 
-    /** Saves the audio to Music/NewVideoPlayer; returns the file name. */
+    /**
+     * Saves the audio to Music/NewVideoPlayer; returns the file name.
+     * [mp3] re-encodes to MP3 with LAME; otherwise the original track is copied (m4a/webm).
+     */
     @Suppress("DEPRECATION")
-    suspend fun toMusic(context: Context, video: Video, onProgress: (Float) -> Unit): String = withContext(Dispatchers.IO) {
-        val out = probe(context, video)
+    suspend fun toMusic(context: Context, video: Video, mp3: Boolean = false, onProgress: (Float) -> Unit): String = withContext(Dispatchers.IO) {
+        val out = if (mp3) Out("mp3", -1, "audio/mpeg") else probe(context, video)
         val name = "${baseName(video)}.${out.ext}"
+        fun write(fd: FileDescriptor) {
+            if (mp3) java.io.FileOutputStream(fd).buffered(1 shl 16).let { s -> Mp3Encoder.encode(context, video, s, onProgress); s.flush() }
+            else extract(context, video, fd, onProgress)
+        }
         if (Build.VERSION.SDK_INT >= 29) {
             val resolver = context.contentResolver
             val values = ContentValues().apply {
@@ -121,7 +128,7 @@ object AudioExtractor {
             val uri = resolver.insert(MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY), values)
                 ?: error("cannot create file")
             try {
-                resolver.openFileDescriptor(uri, "rw")!!.use { extract(context, video, it.fileDescriptor, onProgress) }
+                resolver.openFileDescriptor(uri, if (mp3) "w" else "rw")!!.use { write(it.fileDescriptor) }
                 resolver.update(uri, ContentValues().apply { put(MediaStore.Audio.Media.IS_PENDING, 0) }, null, null)
             } catch (e: Exception) {
                 resolver.delete(uri, null, null)
@@ -130,7 +137,7 @@ object AudioExtractor {
         } else {
             val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "NewVideoPlayer").apply { mkdirs() }
             val file = File(dir, name)
-            RandomAccessFile(file, "rw").use { extract(context, video, it.fd, onProgress) }
+            RandomAccessFile(file, "rw").use { it.setLength(0); write(it.fd) }
             MediaScannerConnection.scanFile(context, arrayOf(file.absolutePath), arrayOf(out.mime), null)
         }
         "Music/NewVideoPlayer/$name"

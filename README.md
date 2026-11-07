@@ -57,3 +57,9 @@ gradle assembleDebug
 - 播放歌曲時底部出現迷你播放條，點開有封面、進度、上一首／下一首、隨機、循環、定時關閉、停止；背景與鎖屏控制沿用播放服務
 - 播放清單可同時放影片和歌曲
 - 私密資料夾暫時隱藏（程式保留）
+
+## FFmpeg 與 MP3
+- 播放器使用 NextLib（FFmpeg）解碼：手機本身解不了的音軌（AC3、E-AC3、DTS、TrueHD 等）與影片（H.264、HEVC、VP8、VP9）自動改用 FFmpeg；設定選「軟體解碼」時優先用 FFmpeg
+- 轉成音訊檔可選 MP3（LAME 3.100，192 kbps，重新編碼）或原始音軌（M4A／WebM，直接複製）
+- 授權：NextLib 為 GPL-3.0，LAME 為 LGPL；發佈 APK 時本專案需以 GPL-3.0 相容方式公開原始碼
+- RMVB、WMV 等容器仍不支援（需要 VLC 引擎）

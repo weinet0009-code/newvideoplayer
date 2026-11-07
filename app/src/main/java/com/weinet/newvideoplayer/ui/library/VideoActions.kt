@@ -113,3 +113,34 @@ fun BusyDialog(label: String, progress: Float) {
         },
     )
 }
+
+/** Asks how to save a video's sound: real MP3 (re-encoded) or the original track copied as is. */
+@Composable
+fun AudioFormatDialog(onDismiss: () -> Unit, onPick: (mp3: Boolean) -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("轉成音訊檔") },
+        text = {
+            Column {
+                ListItem(
+                    headlineContent = { Text("MP3（192 kbps）") },
+                    supportingContent = { Text("重新編碼，每台裝置都能播，比較慢") },
+                    modifier = Modifier.clickable { onDismiss(); onPick(true) },
+                )
+                ListItem(
+                    headlineContent = { Text("原始音訊（M4A／WebM）") },
+                    supportingContent = { Text("直接複製音軌，很快、不失真，部分格式不支援") },
+                    modifier = Modifier.clickable { onDismiss(); onPick(false) },
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+    )
+}
+
+fun audioErrorText(e: Exception): String = when (e) {
+    is com.weinet.newvideoplayer.tools.AudioExtractor.Unsupported -> "此音訊格式（${e.mime}）無法轉出，可改選 MP3 試試"
+    is com.weinet.newvideoplayer.tools.AudioExtractor.NoAudio -> "這部影片沒有聲音"
+    else -> "轉換失敗"
+}

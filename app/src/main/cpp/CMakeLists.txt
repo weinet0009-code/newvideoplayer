@@ -33,3 +33,11 @@ FetchContent_MakeAvailable(whisper)
 add_library(nvpwhisper SHARED whisper_jni.c)
 target_compile_options(nvpwhisper PRIVATE -O3)
 target_link_libraries(nvpwhisper whisper ggml log)
+
+# LAME 3.100 (LGPL, vendored in lame/) for real MP3 output.
+file(GLOB LAME_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/lame/*.c)
+add_library(nvplame SHARED lame_jni.c ${LAME_SOURCES})
+target_include_directories(nvplame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lame ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(nvplame PRIVATE HAVE_CONFIG_H)
+target_compile_options(nvplame PRIVATE -O2 -w)
+target_link_libraries(nvplame m)

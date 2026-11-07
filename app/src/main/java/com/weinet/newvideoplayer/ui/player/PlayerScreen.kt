@@ -76,6 +76,8 @@ import com.weinet.newvideoplayer.cast.CastManager
 import com.weinet.newvideoplayer.tools.AudioExtractor
 import com.weinet.newvideoplayer.ui.library.Busy
 import com.weinet.newvideoplayer.ui.library.BusyDialog
+import com.weinet.newvideoplayer.ui.library.AudioFormatDialog
+import com.weinet.newvideoplayer.ui.library.audioErrorText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -186,6 +188,7 @@ fun PlayerScreen(onBack: () -> Unit) {
     var showAudioPicker by remember { mutableStateOf(false) }
     var showApi by remember { mutableStateOf(false) }
     var showSleep by remember { mutableStateOf(false) }
+    var showAudioFormat by remember { mutableStateOf(false) }
     var repeat by remember { mutableIntStateOf(player.repeatMode) }
     var enhance by remember { mutableIntStateOf(settings.enhance) }
     val sleep by SleepTimer.state.collectAsStateWithLifecycle()
@@ -284,15 +287,14 @@ fun PlayerScreen(onBack: () -> Unit) {
         }
     }
 
-    fun extractAudio() {
+    fun extractAudio(mp3: Boolean) {
         val v = currentVideo() ?: return
         scope.launch {
-            busy = Busy("轉成音訊…", 0f)
+            val label = if (mp3) "轉成 MP3…" else "轉成音訊…"
+            busy = Busy(label, 0f)
             hint = try {
-                "已存到 " + AudioExtractor.toMusic(context, v) { p -> busy = Busy("轉成音訊…", p) }
-            } catch (e: AudioExtractor.Unsupported) { "此音訊格式（${e.mime}）無法直接轉出" }
-            catch (e: AudioExtractor.NoAudio) { "這部影片沒有聲音" }
-            catch (e: Exception) { "轉換失敗" }
+                "已存到 " + AudioExtractor.toMusic(context, v, mp3) { p -> busy = Busy(label, p) }
+            } catch (e: Exception) { audioErrorText(e) }
             busy = null
         }
     }
@@ -570,6 +572,7 @@ fun PlayerScreen(onBack: () -> Unit) {
     if (showAudioPicker) AudioTrackPickerDialog(player, onDismiss = { showAudioPicker = false })
     if (showApi) ApiSettingsDialog(onDismiss = { showApi = false })
     busy?.let { BusyDialog(it.label, it.progress) }
+    if (showAudioFormat) AudioFormatDialog(onDismiss = { showAudioFormat = false }, onPick = { extractAudio(it) })
 
     if (showSpeed) {
         AlertDialog(
@@ -674,7 +677,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                     ListItem(
                         headlineContent = { Text("轉成音訊檔") },
                         supportingContent = { Text("存到 Music/NewVideoPlayer") },
-                        modifier = Modifier.clickable { showMore = false; extractAudio() },
+                        modifier = Modifier.clickable { showMore = false; showAudioFormat = true },
                     )
                     ListItem(
                         headlineContent = { Text("投放到電視") },

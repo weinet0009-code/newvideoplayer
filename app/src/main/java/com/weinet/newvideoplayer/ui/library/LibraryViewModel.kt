@@ -163,13 +163,12 @@ class LibraryViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun extractAudio(v: Video) = viewModelScope.launch {
-        busy.value = Busy("轉成音訊…", 0f)
+    fun extractAudio(v: Video, mp3: Boolean) = viewModelScope.launch {
+        val label = if (mp3) "轉成 MP3…" else "轉成音訊…"
+        busy.value = Busy(label, 0f)
         message.value = try {
-            "已存到 " + AudioExtractor.toMusic(app, v) { p -> busy.value = Busy("轉成音訊…", p) }
-        } catch (e: AudioExtractor.Unsupported) { "此音訊格式（${e.mime}）無法直接轉出" }
-        catch (e: AudioExtractor.NoAudio) { "這部影片沒有聲音" }
-        catch (e: Exception) { "轉換失敗" }
+            "已存到 " + AudioExtractor.toMusic(app, v, mp3) { p -> busy.value = Busy(label, p) }
+        } catch (e: Exception) { audioErrorText(e) }
         busy.value = null
     }
 }

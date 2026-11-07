@@ -72,6 +72,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     var showNewPlaylist by remember { mutableStateOf(false) }
     var deletePlaylist by remember { mutableStateOf<String?>(null) }
     var showNowPlaying by remember { mutableStateOf(false) }
+    var audioFor by remember { mutableStateOf<Video?>(null) }
 
     val title = state.selectedFolder ?: state.selectedPlaylist ?: state.tab.label
     val inside = state.selectedFolder != null || state.selectedPlaylist != null
@@ -194,12 +195,13 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
             add(VideoAction("加入播放清單", Icons.Default.PlaylistAdd) { addTarget = v })
             if (playlistName != null) add(VideoAction("移出這個清單", Icons.Default.PlaylistRemove) { LibraryStore.removeFromPlaylist(playlistName, v.id) })
             add(VideoAction("分享", Icons.Default.Share) { shareVideo(context, v) })
-            if (!v.isAudio) add(VideoAction("轉成音訊檔", Icons.Default.MusicNote) { vm.extractAudio(v) })
+            if (!v.isAudio) add(VideoAction("轉成音訊檔", Icons.Default.MusicNote) { audioFor = v })
             add(VideoAction("重新命名", Icons.Default.Edit) { renameFor = v })
             add(VideoAction("詳細資訊", Icons.Default.Info) { detailsFor = v })
             add(VideoAction("刪除", Icons.Default.Delete) { deleteFor = v })
         }, onDismiss = { sheetFor = null })
     }
+    audioFor?.let { v -> AudioFormatDialog(onDismiss = { audioFor = null }, onPick = { mp3 -> vm.extractAudio(v, mp3) }) }
     renameFor?.let { v -> RenameDialog(v.title, onDismiss = { renameFor = null }, onRename = { vm.rename(v, it) }) }
     deleteFor?.let { v ->
         ConfirmDialog(if (v.isAudio) "刪除歌曲？" else "刪除影片？", "「${v.title}」會從手機刪除。", "刪除", onDismiss = { deleteFor = null }, onConfirm = { vm.delete(v) })

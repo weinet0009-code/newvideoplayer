@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.media3.exoplayer)
+    implementation(libs.nextlib.media3ext)
     implementation(libs.media3.ui)
     implementation(libs.media3.session)
     implementation(libs.coil.compose)
