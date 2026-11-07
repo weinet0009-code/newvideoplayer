@@ -59,6 +59,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -171,6 +172,7 @@ fun PlayerScreen(onBack: () -> Unit) {
     var showCast by remember { mutableStateOf(false) }
     var showOnlineSubs by remember { mutableStateOf(false) }
     var showAi by remember { mutableStateOf(false) }
+    var showSubPicker by remember { mutableStateOf(false) }
     var showApi by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf<Busy?>(null) }
     val castActive by CastManager.active.collectAsStateWithLifecycle()
@@ -196,28 +198,48 @@ fun PlayerScreen(onBack: () -> Unit) {
 
     fun currentVideo() = PlayerHolder.queue.getOrNull(player.currentMediaItemIndex)
 
-    fun loadSubtitle(picked: Uri, name: String) {
-        val current = player.currentMediaItem
-        if (current != null) {
-            val item = current.buildUpon().setSubtitleConfigurations(listOf(
-                MediaItem.SubtitleConfiguration.Builder(picked)
-                    .setMimeType(subtitleMime(name))
-                    .setLanguage("und")
-                    .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                    .build()
-            )).build()
-            // replaceMediaItem() keeps the old media source when only subtitles change (Media3
-            // treats it as a metadata update), so the new track never appears. Reset the playlist
-            // instead so the source is rebuilt with the subtitle merged in.
-            val index = player.currentMediaItemIndex
-            val pos = player.currentPosition
-            val play = player.playWhenReady
-            val items = List(player.mediaItemCount) { if (it == index) item else player.getMediaItemAt(it) }
-            player.setMediaItems(items, index, pos)
-            player.prepare()
-            player.playWhenReady = play
-            hint = "已載入字幕"
-        }
+    /**
+     * Adds an external subtitle to the current video (keeping ones loaded earlier) and switches
+     * to it. The user can pick any of them, or turn subtitles off, from the subtitle button.
+     */
+    fun loadSubtitle(picked: Uri, name: String, label: String = name) {
+        val current = player.currentMediaItem ?: return
+        val existing = current.localConfiguration?.subtitleConfigurations.orEmpty()
+            .filter { it.uri != picked }
+            .map { it.buildUpon().setSelectionFlags(0).build() }
+        val id = "ext${System.currentTimeMillis()}"
+        val config = MediaItem.SubtitleConfiguration.Builder(picked)
+            .setMimeType(subtitleMime(name))
+            .setLanguage("und")
+            .setLabel(label)
+            .setId(id)
+            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+            .build()
+        val item = current.buildUpon().setSubtitleConfigurations(existing + config).build()
+        // replaceMediaItem() keeps the old media source when only subtitles change (Media3
+        // treats it as a metadata update), so the new track never appears. Reset the playlist
+        // instead so the source is rebuilt with the subtitles merged in.
+        val index = player.currentMediaItemIndex
+        val pos = player.currentPosition
+        val play = player.playWhenReady
+        val items = List(player.mediaItemCount) { if (it == index) item else player.getMediaItemAt(it) }
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+            .build()
+        player.addListener(object : Player.Listener {
+            override fun onTracksChanged(tracks: Tracks) {
+                val group = tracks.groups.firstOrNull {
+                    it.type == C.TRACK_TYPE_TEXT && it.length > 0 && it.getTrackFormat(0).id?.contains(id) == true
+                } ?: return
+                selectTextTrack(player, group)
+                player.removeListener(this)
+            }
+        })
+        player.setMediaItems(items, index, pos)
+        player.prepare()
+        player.playWhenReady = play
+        hint = "已載入字幕：$label"
     }
 
     val pickSubtitle = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
@@ -418,7 +440,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                         TextButton(onClick = { touch(); showSpeed = true }) { Text("${speed}x", color = Color.White) }
                         Ctl(Icons.Default.Subtitles, "字幕") {
                             touch()
-                            TrackSelectionDialogBuilder(context, "字幕", player, C.TRACK_TYPE_TEXT).build().show()
+                            showSubPicker = true
                         }
                         Ctl(Icons.Default.Audiotrack, "音軌") {
                             touch()
@@ -495,8 +517,13 @@ fun PlayerScreen(onBack: () -> Unit) {
         OnlineSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) }, onDismiss = { showOnlineSubs = false })
     }
     if (showAi) currentVideo()?.let { v ->
-        AiSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) }, onDismiss = { showAi = false })
+        AiSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name, "AI 字幕") }, onDismiss = { showAi = false })
     }
+    if (showSubPicker) SubtitlePickerDialog(
+        player,
+        onLoadFile = { showSubPicker = false; pickSubtitle.launch(arrayOf("*/*")) },
+        onDismiss = { showSubPicker = false },
+    )
     if (showApi) ApiSettingsDialog(onDismiss = { showApi = false })
     busy?.let { BusyDialog(it.label, it.progress) }
 

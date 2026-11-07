@@ -40,3 +40,6 @@ gradle assembleDebug
   - 需要 app 自己的 consumer key：在 opensubtitles.com 申請後，建置時設定 `OPENSUBTITLES_API_KEY`（Gradle property 或環境變數）
 - AI 字幕（離線、免費）：whisper.cpp v1.9.5 在手機上辨識，解碼成 16 kHz 單聲道、每 5 分鐘一段處理，輸出 SRT 並自動載入。模型首次下載（tiny 30 MB / base 56 MB / small 181 MB，q5_1，SHA-256 驗證），中文會提示輸出繁體。原生程式在 app/src/main/cpp，建置時由 CMake 下載 whisper.cpp 原始碼
 - 轉成音訊檔：不重新編碼直接抽出音軌（AAC→M4A、Opus/Vorbis→WebM），存到 Music/NewVideoPlayer。真正的 MP3 需等加入 FFmpeg/LAME
+
+## 字幕選擇
+- 上方「字幕」按鈕列出內建字幕和所有已載入的外掛字幕（手動、線上、AI 可同時保留），可切換或關閉字幕；新載入的字幕會自動選用
