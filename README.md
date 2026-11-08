@@ -61,7 +61,7 @@ gradle assembleDebug
 ## FFmpeg 與 MP3
 - 自己的 FFmpeg 解碼器（不用 NextLib）：`ffmpeg/build.sh` 編出只含解碼器的 FFmpeg 7.1.5（LGPL 2.1+，未開 GPL/nonfree）與 dav1d 1.5.4（BSD），靜態連進 `libnvpffmpeg.so`
 - 音訊：`ffmpeg/Ffmpeg*Audio*`（改自 Media3 1.8.0 decoder_ffmpeg，Apache 2.0）— AC3、E-AC3、DTS、TrueHD、MP3、AAC、FLAC、ALAC、Opus、Vorbis、AMR
-- 影片：`FfmpegVideoDecoder`／`FfmpegVideoRenderer`（自寫）— H.264、HEVC、VP8、VP9、AV1、MPEG-4、MPEG-2、H.263，YV12 直接畫到 Surface
+- 影片：`FfmpegVideoDecoder`／`FfmpegVideoRenderer`（自寫，自有解碼執行緒，片尾會把 FFmpeg 扣住的畫面全部吐出）— H.264、HEVC、VP8、VP9、AV1、MPEG-4、MPEG-2、H.263，YV12 直接畫到 Surface
 - 手機解不了才用 FFmpeg；設定選「軟體解碼」時影片優先用 FFmpeg。軟體解碼時不套用畫質增強
 - 本機建置：先 `NDK=/path/to/ndk bash ffmpeg/build.sh`（需 meson、ninja、pkg-config），否則 APK 不含 FFmpeg
 - 轉成音訊檔可選 MP3（LAME 3.100，LGPL，192 kbps）或原始音軌（M4A／WebM）

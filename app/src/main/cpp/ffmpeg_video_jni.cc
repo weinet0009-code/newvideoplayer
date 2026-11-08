@@ -25,7 +25,7 @@ extern "C" {
 namespace {
 
 constexpr int kYV12 = 0x32315659;
-constexpr size_t kMaxPending = 32;
+constexpr size_t kMaxPending = 64;
 
 struct Ctx {
   AVCodecContext *codec = nullptr;
@@ -108,7 +108,8 @@ JNIEXPORT jlong JNICALL FN(nativeInit)(JNIEnv *env, jclass, jstring jname, jbyte
   return reinterpret_cast<jlong>(c);
 }
 
-// Returns 0, or a negative AVERROR on a fatal error. Broken packets are skipped.
+// Returns the number of decoded frames waiting, or a negative AVERROR on a fatal error.
+// Broken packets are skipped.
 JNIEXPORT jint JNICALL FN(nativeDecode)(JNIEnv *env, jclass, jlong h, jobject data, jint size,
                                          jlong timeUs) {
   auto *c = reinterpret_cast<Ctx *>(h);
@@ -132,7 +133,19 @@ JNIEXPORT jint JNICALL FN(nativeDecode)(JNIEnv *env, jclass, jlong h, jobject da
   }
   int d = drain(c);
   if (d < 0 && d != AVERROR_INVALIDDATA) return d;
-  return 0;
+  std::lock_guard<std::mutex> lock(c->mu);
+  return static_cast<jint>(c->pending.size());
+}
+
+// End of stream: makes FFmpeg return every frame it still holds. Returns the pending count.
+JNIEXPORT jint JNICALL FN(nativeSendEos)(JNIEnv *, jclass, jlong h) {
+  auto *c = reinterpret_cast<Ctx *>(h);
+  int r = avcodec_send_packet(c->codec, nullptr);
+  if (r < 0 && r != AVERROR_EOF) return r;
+  int d = drain(c);
+  if (d < 0 && d != AVERROR_INVALIDDATA) return d;
+  std::lock_guard<std::mutex> lock(c->mu);
+  return static_cast<jint>(c->pending.size());
 }
 
 JNIEXPORT void JNICALL FN(nativeFlush)(JNIEnv *, jclass, jlong h) {
