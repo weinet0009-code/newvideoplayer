@@ -21,8 +21,8 @@ class FfmpegVideoDecoder(
     initialInputBufferSize: Int,
     threads: Int,
 ) : SimpleDecoder<DecoderInputBuffer, VideoDecoderOutputBuffer, FfmpegDecoderException>(
-    arrayOfNulls<DecoderInputBuffer>(numInputBuffers),
-    arrayOfNulls<VideoDecoderOutputBuffer>(numOutputBuffers),
+    @Suppress("UNCHECKED_CAST") (arrayOfNulls<DecoderInputBuffer>(numInputBuffers) as Array<DecoderInputBuffer>),
+    @Suppress("UNCHECKED_CAST") (arrayOfNulls<VideoDecoderOutputBuffer>(numOutputBuffers) as Array<VideoDecoderOutputBuffer>),
 ) {
     private val codecName: String
     private val context: Long
@@ -55,10 +55,10 @@ class FfmpegVideoDecoder(
     override fun createOutputBuffer() = VideoDecoderOutputBuffer { releaseOutputBuffer(it) }
 
     override fun releaseOutputBuffer(outputBuffer: VideoDecoderOutputBuffer) {
-        val id = outputBuffer.decoderPrivate
+        val id = outputBuffer.decoderPrivate.toInt()
         if (id != 0 && !closed) {
             nativeReleaseFrame(context, id)
-            outputBuffer.decoderPrivate = 0
+            outputBuffer.decoderPrivate = 0L
         }
         super.releaseOutputBuffer(outputBuffer)
     }
@@ -88,14 +88,14 @@ class FfmpegVideoDecoder(
         }
         outputBuffer.init(timeUs, outputMode, null)
         outputBuffer.initForPrivateFrame(info[1].toInt(), info[2].toInt())
-        outputBuffer.decoderPrivate = id
+        outputBuffer.decoderPrivate = id.toLong()
         outputBuffer.format = inputBuffer.format
         return null
     }
 
     /** Draws [outputBuffer] into [surface] (VIDEO_OUTPUT_MODE_SURFACE_YUV). */
     fun renderToSurface(outputBuffer: VideoDecoderOutputBuffer, surface: Surface) {
-        if (closed || nativeRender(context, surface, outputBuffer.decoderPrivate) != 0) {
+        if (closed || nativeRender(context, surface, outputBuffer.decoderPrivate.toInt()) != 0) {
             throw FfmpegDecoderException("Failed to render frame")
         }
     }
