@@ -108,7 +108,7 @@ fun OnlineSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun AiSubtitleDialog(video: Video, onLoaded: (File, String) -> Unit, onDismiss: () -> Unit) {
+fun AiSubtitleDialog(video: Video, onLoaded: (File, String, String?) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val models = remember { LocalWhisper.models(context) }
@@ -146,10 +146,11 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File, String) -> Unit, onDismiss: 
         if (r.file.readText().split("-->").size - 1 == 0) {
             status = "沒有辨識到任何語音，可以換個模型或語言再試"; return
         }
-        val saved = SidecarSubs.save(context, video, r.file, SidecarSubs.fileName(video, r.language, tag))
+        val sideName = SidecarSubs.fileName(video, r.language, tag)
+        val saved = SidecarSubs.save(context, video, r.file, sideName)
         android.widget.Toast.makeText(context, saved?.let { "字幕已存到 $it" } ?: "字幕已載入（未存到影片資料夾）",
             android.widget.Toast.LENGTH_LONG).show()
-        onLoaded(r.file, "$label ${r.language}")
+        onLoaded(r.file, "$label ${r.language}", sideName.takeIf { saved != null })
         onDismiss()
     }
 
@@ -358,7 +359,7 @@ fun ApiSettingsDialog(onDismiss: () -> Unit) {
 /** Translates the chosen subtitle with Groq (online, needs the free key) or ML Kit (offline). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TranslateSubtitleDialog(video: Video, source: File?, onLoaded: (File, String) -> Unit, onDismiss: () -> Unit) {
+fun TranslateSubtitleDialog(video: Video, source: File?, onLoaded: (File, String, String?) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var groqKey by remember { mutableStateOf(SecretStore.get(context, GroqWhisper.KEY_NAME) ?: "") }
@@ -386,10 +387,11 @@ fun TranslateSubtitleDialog(video: Video, source: File?, onLoaded: (File, String
                 else SubtitleTranslator.translateWithMlKit(context, src, target,
                     onProgress = { progress = it }, onStatus = { status = it ?: "離線翻譯中…" })
                 val tag = if (useGroq) "Groq翻譯" else "MLKit翻譯"
-                val saved = SidecarSubs.save(context, video, out, SidecarSubs.fileName(video, target.code, tag))
+                val sideName = SidecarSubs.fileName(video, target.code, tag)
+                val saved = SidecarSubs.save(context, video, out, sideName)
                 android.widget.Toast.makeText(context, saved?.let { "翻譯已存到 $it" } ?: "翻譯已載入（未存到影片資料夾）",
                     android.widget.Toast.LENGTH_LONG).show()
-                onLoaded(out, "${target.label}（${if (useGroq) "Groq" else "離線"}翻譯）")
+                onLoaded(out, "${target.label}（${if (useGroq) "Groq" else "離線"}翻譯）", sideName.takeIf { saved != null })
                 onDismiss()
             } catch (e: CancellationException) { status = "已取消" }
             catch (e: GroqWhisper.InvalidKey) { status = "金鑰無效，請確認後重新貼上" }

@@ -65,6 +65,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.weinet.newvideoplayer.data.SubtitleStore
+import com.weinet.newvideoplayer.data.SidecarSubs
 import com.weinet.newvideoplayer.playback.Enhance
 import com.weinet.newvideoplayer.playback.SleepTimer
 import com.weinet.newvideoplayer.data.PlayerSettings
@@ -221,11 +222,11 @@ fun PlayerScreen(onBack: () -> Unit) {
      * Adds an external subtitle to the current video (keeping ones loaded earlier) and switches
      * to it. The user can pick any of them, or turn subtitles off, from the subtitle button.
      */
-    fun loadSubtitle(picked: Uri, name: String, label: String = name) {
+    fun loadSubtitle(picked: Uri, name: String, label: String = name, sidecar: String? = null) {
         val current = player.currentMediaItem ?: return
         val id = "ext${System.currentTimeMillis()}"
         // Save a copy so the subtitle comes back next time this video is opened.
-        val uri = runCatching { SubtitleStore.add(context, current.mediaId, picked, name, label, id) }.getOrDefault(picked)
+        val uri = runCatching { SubtitleStore.add(context, current.mediaId, picked, name, label, id, sidecar) }.getOrDefault(picked)
         val existing = current.localConfiguration?.subtitleConfigurations.orEmpty()
             .filter { it.uri != picked && it.uri != uri && it.label != label }
             .map { it.buildUpon().setSelectionFlags(0).build() }
@@ -261,6 +262,24 @@ fun PlayerScreen(onBack: () -> Unit) {
         player.prepare()
         player.playWhenReady = play
         hint = "已載入字幕：$label"
+    }
+
+    /** Removes a saved subtitle (and the copy beside the video, if Hark wrote one) and drops its track. */
+    fun deleteSubtitle(formatId: String?) {
+        val current = player.currentMediaItem ?: return
+        val removed = SubtitleStore.remove(context, current.mediaId, formatId) ?: return
+        val (id, sidecar) = removed
+        val sideOk = sidecar == null || currentVideo()?.let { SidecarSubs.delete(context, it, sidecar) } == true
+        val keep = current.localConfiguration?.subtitleConfigurations.orEmpty().filter { it.id?.contains(id) != true }
+        val item = current.buildUpon().setSubtitleConfigurations(keep).build()
+        val index = player.currentMediaItemIndex
+        val pos = player.currentPosition
+        val play = player.playWhenReady
+        val items = List(player.mediaItemCount) { if (it == index) item else player.getMediaItemAt(it) }
+        player.setMediaItems(items, index, pos)
+        player.prepare()
+        player.playWhenReady = play
+        hint = if (sideOk) "已刪除字幕" else "已從播放器移除，但影片資料夾裡的檔案刪不掉（資料夾未授權）"
     }
 
     val pickSubtitle = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
@@ -558,7 +577,7 @@ fun PlayerScreen(onBack: () -> Unit) {
         OnlineSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) }, onDismiss = { showOnlineSubs = false })
     }
     if (showAi) currentVideo()?.let { v ->
-        AiSubtitleDialog(v, onLoaded = { f, label -> loadSubtitle(Uri.fromFile(f), f.name, label) }, onDismiss = { showAi = false })
+        AiSubtitleDialog(v, onLoaded = { f, label, side -> loadSubtitle(Uri.fromFile(f), f.name, label, side) }, onDismiss = { showAi = false })
     }
     if (showTranslate) currentVideo()?.let { v ->
         val src = remember {
@@ -567,7 +586,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                 .firstOrNull { it.type == C.TRACK_TYPE_TEXT && it.isSelected }?.getTrackFormat(0)?.id
             item?.let { SubtitleStore.selectedFile(context, it.mediaId, formatId) }
         }
-        TranslateSubtitleDialog(v, src, onLoaded = { f, label -> loadSubtitle(Uri.fromFile(f), f.name, label) },
+        TranslateSubtitleDialog(v, src, onLoaded = { f, label, side -> loadSubtitle(Uri.fromFile(f), f.name, label, side) },
             onDismiss = { showTranslate = false })
     }
     if (showSubPicker) SubtitlePickerDialog(
@@ -578,6 +597,8 @@ fun PlayerScreen(onBack: () -> Unit) {
                 SubtitleStore.setSelected(context, m, SubtitleStore.idForFormat(context, m, formatId))
             }
         },
+        deletable = { formatId -> player.currentMediaItem?.mediaId?.let { SubtitleStore.info(context, it, formatId) } },
+        onDelete = { deleteSubtitle(it) },
         onDismiss = { showSubPicker = false },
     )
     if (showAudioPicker) AudioTrackPickerDialog(player, onDismiss = { showAudioPicker = false })

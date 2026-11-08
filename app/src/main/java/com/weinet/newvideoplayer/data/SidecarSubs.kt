@@ -92,4 +92,21 @@ object SidecarSubs {
             "$folder/$name"
         }.getOrNull()
     }
+
+    /** Deletes [name] from the video's folder. True when it was deleted or wasn't there. */
+    fun delete(context: Context, video: Video, name: String): Boolean {
+        val folder = folderOf(video) ?: return false
+        val tree = treeFor(context, folder) ?: return false
+        val resolver = context.contentResolver
+        return runCatching {
+            val children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, docIdOf(folder))
+            var target: Uri? = null
+            resolver.query(children, arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME), null, null, null)?.use { c ->
+                while (c.moveToNext()) {
+                    if (c.getString(1) == name) { target = DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0)); break }
+                }
+            }
+            target?.let { DocumentsContract.deleteDocument(resolver, it) } ?: true
+        }.getOrDefault(false)
+    }
 }

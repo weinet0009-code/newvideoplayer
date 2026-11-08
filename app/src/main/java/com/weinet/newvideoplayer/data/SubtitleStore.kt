@@ -15,7 +15,7 @@ import java.io.File
  * chosen subtitle are kept per media id.
  */
 object SubtitleStore {
-    private data class Entry(val id: String, val file: String, val label: String)
+    private data class Entry(val id: String, val file: String, val label: String, val sidecar: String? = null)
 
     private fun prefs(context: Context) =
         context.applicationContext.getSharedPreferences("subtitles", Context.MODE_PRIVATE)
@@ -25,13 +25,13 @@ object SubtitleStore {
 
     private fun entries(context: Context, mediaId: String): List<Entry> {
         val a = JSONArray(prefs(context).getString("list_$mediaId", "[]"))
-        return List(a.length()) { a.getJSONObject(it).let { o -> Entry(o.getString("id"), o.getString("file"), o.getString("label")) } }
+        return List(a.length()) { a.getJSONObject(it).let { o -> Entry(o.getString("id"), o.getString("file"), o.getString("label"), o.optString("sidecar").ifBlank { null }) } }
             .filter { File(it.file).exists() }
     }
 
     private fun write(context: Context, mediaId: String, list: List<Entry>) {
         val a = JSONArray()
-        list.forEach { a.put(JSONObject().put("id", it.id).put("file", it.file).put("label", it.label)) }
+        list.forEach { a.put(JSONObject().put("id", it.id).put("file", it.file).put("label", it.label).put("sidecar", it.sidecar ?: "")) }
         prefs(context).edit().putString("list_$mediaId", a.toString()).apply()
     }
 
@@ -46,13 +46,13 @@ object SubtitleStore {
      * Copies [source] into app storage for [mediaId], replacing an earlier subtitle with the same
      * label, and marks it as the chosen one. Returns the saved file's uri.
      */
-    fun add(context: Context, mediaId: String, source: Uri, name: String, label: String, id: String): Uri {
+    fun add(context: Context, mediaId: String, source: Uri, name: String, label: String, id: String, sidecar: String? = null): Uri {
         val ext = name.substringAfterLast('.', "srt").lowercase().take(5)
         val out = File(dir(context, mediaId), "$id.$ext")
         context.contentResolver.openInputStream(source)!!.use { input -> out.outputStream().use { input.copyTo(it) } }
         val old = entries(context, mediaId)
         old.filter { it.label == label }.forEach { File(it.file).delete() }
-        write(context, mediaId, old.filter { it.label != label } + Entry(id, out.path, label))
+        write(context, mediaId, old.filter { it.label != label } + Entry(id, out.path, label, sidecar))
         setSelected(context, mediaId, id)
         return Uri.fromFile(out)
     }
@@ -121,6 +121,22 @@ object SubtitleStore {
         val list = entries(context, mediaId)
         val e = idForFormat(context, mediaId, formatId)?.let { id -> list.firstOrNull { it.id == id } } ?: list.singleOrNull()
         return e?.let { File(it.file) }
+    }
+
+    /** Label and the beside-the-video file name of the saved subtitle behind [formatId], or null if it isn't one of ours. */
+    fun info(context: Context, mediaId: String, formatId: String?): Pair<String, String?>? =
+        idForFormat(context, mediaId, formatId)?.let { id -> entries(context, mediaId).firstOrNull { it.id == id } }
+            ?.let { it.label to it.sidecar }
+
+    /** Removes the saved subtitle behind [formatId]; returns its saved id and beside-the-video file name. */
+    fun remove(context: Context, mediaId: String, formatId: String?): Pair<String, String?>? {
+        val id = idForFormat(context, mediaId, formatId) ?: return null
+        val list = entries(context, mediaId)
+        val e = list.firstOrNull { it.id == id } ?: return null
+        File(e.file).delete()
+        write(context, mediaId, list.filter { it.id != id })
+        if (prefs(context).getString("sel_$mediaId", "") == id) setSelected(context, mediaId, null)
+        return id to e.sidecar
     }
 
     fun forget(context: Context, mediaId: String) {
