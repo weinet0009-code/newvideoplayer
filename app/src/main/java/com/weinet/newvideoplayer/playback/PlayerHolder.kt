@@ -45,9 +45,9 @@ object PlayerHolder {
     private var controller: ListenableFuture<MediaController>? = null
 
     @OptIn(UnstableApi::class)
-    private fun build(context: Context): ExoPlayer {
+    private fun build(context: Context, preferSoftware: Boolean): ExoPlayer {
         val app = context.applicationContext
-        val preferSoftware = PlayerSettings(app).preferSoftwareDecoder
+        builtSoftware = preferSoftware
         val selector = MediaCodecSelector { mime, secure, tunneling ->
             val all = MediaCodecUtil.getDecoderInfos(mime, secure, tunneling)
             if (preferSoftware) all.sortedBy { !it.softwareOnly } else all.sortedBy { it.softwareOnly }
@@ -69,6 +69,11 @@ object PlayerHolder {
             .build().apply {
                 addListener(object : Player.Listener {
                     override fun onMediaItemTransition(item: MediaItem?, reason: Int) {
+                        // The next video needs the other decoder order (an AVI after an MP4 or back).
+                        if (item != null && wantsSoftware(app, item) != builtSoftware) {
+                            android.os.Handler(android.os.Looper.getMainLooper()).post { rebuild(app) }
+                            return
+                        }
                         val id = item?.mediaId?.toLongOrNull() ?: return
                         LibraryStore.addRecent(id)
                         // Songs always start from the top.
@@ -93,15 +98,41 @@ object PlayerHolder {
         _player.value?.setVideoEffects(Enhance.effects(level))
     }
 
-    private fun obtain(context: Context): ExoPlayer =
-        _player.value ?: build(context).also { _player.value = it }
+    /** Decoder order the current player was built with (true = own FFmpeg video decoder first). */
+    private var builtSoftware = false
+
+    /**
+     * FFmpeg decodes video first when the user asks for software decoding, and always for AVI:
+     * those are mostly old Xvid/DivX files, often slightly damaged, and phone decoders show the
+     * damage as flashing gray or green blocks, while FFmpeg hides it.
+     */
+    private fun wantsSoftware(context: Context, item: MediaItem): Boolean {
+        if (PlayerSettings(context).preferSoftwareDecoder) return true
+        if (item.mediaMetadata.mediaType == MediaMetadata.MEDIA_TYPE_MUSIC) return false
+        val v = queue.firstOrNull { it.toMediaItem().mediaId == item.mediaId }
+        return isAvi(v, item)
+    }
+
+    private fun isAvi(v: Video?, item: MediaItem): Boolean {
+        val mime = v?.mimeType?.lowercase() ?: ""
+        if ("avi" in mime || "msvideo" in mime) return true
+        val names = listOfNotNull(v?.path, v?.title, item.localConfiguration?.uri?.lastPathSegment)
+        return names.any { it.lowercase().endsWith(".avi") }
+    }
+
+    private fun obtain(context: Context, preferSoftware: Boolean): ExoPlayer {
+        val current = _player.value
+        if (current != null && builtSoftware == preferSoftware) return current
+        current?.release()
+        return build(context, preferSoftware).also { _player.value = it }
+    }
 
     /** Starts playing [videos] at [index], resuming where that video was left off. */
     fun start(context: Context, videos: List<Video>, index: Int) {
         val app = context.applicationContext
         saveCurrentPosition(app)
-        val p = obtain(app)
         queue = videos
+        val p = obtain(app, wantsSoftware(app, videos[index].toMediaItem()))
         p.setMediaItems(videos.map { SubtitleStore.attach(app, it.toMediaItem()) }, index, if (videos[index].isAudio) 0L else PlaybackPositionStore(app).get(videos[index].id))
         p.setPlaybackSpeed(PlayerSettings(app).speed)
         // A subtitle choice (or "off") belongs to the previous video; let this one's saved
@@ -125,8 +156,10 @@ object PlayerHolder {
         val pos = old.currentPosition
         val play = old.playWhenReady
         val speed = old.playbackParameters.speed
+        val software = old.currentMediaItem?.let { wantsSoftware(app, it) }
+            ?: PlayerSettings(app).preferSoftwareDecoder
         old.release()
-        val p = build(app)
+        val p = build(app, software)
         p.setMediaItems(items, index, pos)
         p.setPlaybackSpeed(speed)
         p.prepare()

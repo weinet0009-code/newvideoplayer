@@ -30,6 +30,18 @@ object LocalWhisper {
         Turbo("ggml-large-v3-turbo-q5_0.bin", "最準（large-v3-turbo）", 547, "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2"),
     }
 
+    /**
+     * Models offered on this phone. Turbo needs about 1 GB while running, so it's shown only on
+     * phones with 8 GB of RAM or more (Android reports a bit less than the label, about 7.2-7.7 GB
+     * on an 8 GB phone, hence the 7 GB line). A Turbo already downloaded stays listed so it can be deleted.
+     */
+    fun models(context: Context): List<Model> {
+        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+        val info = android.app.ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }
+        val bigEnough = info.totalMem >= 7_000_000_000L
+        return Model.entries.filter { it != Model.Turbo || bigEnough || isDownloaded(context, it) }
+    }
+
     private const val CHUNK_SECONDS = 300
 
     /** Silero voice-activity model (~0.9 MB): lets Whisper skip silence and music-only parts. */

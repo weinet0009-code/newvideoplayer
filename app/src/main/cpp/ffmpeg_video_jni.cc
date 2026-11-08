@@ -26,6 +26,7 @@ namespace {
 
 constexpr int kYV12 = 0x32315659;
 constexpr size_t kMaxPending = 64;
+constexpr int kMaxCorruptInARow = 30;
 
 struct Ctx {
   AVCodecContext *codec = nullptr;
@@ -34,6 +35,7 @@ struct Ctx {
   std::deque<AVFrame *> pending;                 // decoded, not handed to Java yet
   std::unordered_map<int, AVFrame *> handedOut;  // id -> frame owned by an output buffer
   int nextId = 1;
+  int droppedInARow = 0;  // corrupt frames skipped since the last good one
   // Rendering state (playback thread).
   ANativeWindow *window = nullptr;
   jobject surface = nullptr;  // global ref
@@ -56,6 +58,19 @@ int drain(Ctx *c) {
       av_frame_free(&f);
       return (r == AVERROR(EAGAIN) || r == AVERROR_EOF) ? 0 : r;
     }
+    // Damaged files (often old AVIs) make the decoder output frames with gray or smeared blocks;
+    // shown between good frames they flash. Skip them and keep the last good picture, but never
+    // more than ~1 s in a row so a file that is broken everywhere still plays.
+    // Frames the decoder only patched up (concealment) usually look fine and are kept.
+    bool corrupt = (f->flags & AV_FRAME_FLAG_CORRUPT) ||
+                   (f->decode_error_flags &
+                    (FF_DECODE_ERROR_INVALID_BITSTREAM | FF_DECODE_ERROR_MISSING_REFERENCE));
+    if (corrupt && c->droppedInARow < kMaxCorruptInARow) {
+      c->droppedInARow++;
+      av_frame_free(&f);
+      continue;
+    }
+    c->droppedInARow = 0;
     std::lock_guard<std::mutex> lock(c->mu);
     if (c->pending.size() >= kMaxPending) {
       AVFrame *old = c->pending.front();
@@ -91,6 +106,8 @@ JNIEXPORT jlong JNICALL FN(nativeInit)(JNIEnv *env, jclass, jstring jname, jbyte
   c->codec->pkt_timebase = AVRational{1, 1000000};
   c->codec->thread_count = threads;
   c->codec->thread_type = FF_THREAD_FRAME | FF_THREAD_SLICE;
+  // Hide damage: guess missing motion vectors and smooth broken block edges.
+  c->codec->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK | FF_EC_FAVOR_INTER;
   if (extra) {
     jsize n = env->GetArrayLength(extra);
     if (n > 0) {
@@ -151,6 +168,7 @@ JNIEXPORT jint JNICALL FN(nativeSendEos)(JNIEnv *, jclass, jlong h) {
 JNIEXPORT void JNICALL FN(nativeFlush)(JNIEnv *, jclass, jlong h) {
   auto *c = reinterpret_cast<Ctx *>(h);
   avcodec_flush_buffers(c->codec);
+  c->droppedInARow = 0;
   std::lock_guard<std::mutex> lock(c->mu);
   freePending(c);
 }

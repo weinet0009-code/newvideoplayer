@@ -46,6 +46,7 @@ class FfmpegVideoDecoder(
     private var framesReady = 0
     private var draining = false
     private var lastFormat: Format? = null
+    private var lastOutputUs = C.TIME_UNSET
 
     @Volatile var outputMode: Int = C.VIDEO_OUTPUT_MODE_NONE
     @Volatile private var closed = false
@@ -173,6 +174,7 @@ class FfmpegVideoDecoder(
                 nativeFlush(context)
                 framesReady = 0
                 draining = false
+                lastOutputUs = C.TIME_UNSET
                 return true
             }
             output = availableOutputs.removeLast()
@@ -185,12 +187,15 @@ class FfmpegVideoDecoder(
                 framesReady--
                 if (id == 0) { recycleOutput(output); return true }
                 val timeUs = info[0]
-                if (!startReached(timeUs)) {
+                // A damaged index can hand out a frame older than the one just shown; showing it
+                // makes the picture jump back and forth, so it is skipped.
+                if (!startReached(timeUs) || (lastOutputUs != C.TIME_UNSET && timeUs < lastOutputUs)) {
                     nativeReleaseFrame(context, id)
                     synchronized(lock) { skippedOutputs++ }
                     recycleOutput(output)
                     return true
                 }
+                lastOutputUs = timeUs
                 output.init(timeUs, outputMode, null)
                 output.initForPrivateFrame(info[1].toInt(), info[2].toInt())
                 output.decoderPrivate = id.toLong()

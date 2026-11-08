@@ -105,6 +105,7 @@ fun OnlineSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -
 fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val models = remember { LocalWhisper.models(context) }
     var model by remember { mutableStateOf(LocalWhisper.Model.Base) }
     var downloaded by remember { mutableStateOf(LocalWhisper.Model.entries.filter { LocalWhisper.isDownloaded(context, it) }.toSet()) }
     var lang by remember { mutableStateOf("zh") }
@@ -138,7 +139,7 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                     style = MaterialTheme.typography.bodySmall)
                 Spacer(Modifier.height(8.dp))
                 Text("模型", style = MaterialTheme.typography.labelLarge)
-                LocalWhisper.Model.entries.forEach { m ->
+                models.forEach { m ->
                     Row(Modifier.fillMaxWidth().clickable(enabled = !working) { model = m }.padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(selected = model == m, onClick = null, enabled = !working)
@@ -150,7 +151,7 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                     }
                 }
                 if (model == LocalWhisper.Model.Turbo) {
-                    Text("最準但最慢，約需 1 GB 記憶體，建議 8 GB 以上的手機；長影片可能要好幾個小時。",
+                    Text("最準但最慢，約需 1 GB 記憶體；長影片可能要好幾個小時。",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 }
                 Text("語言", style = MaterialTheme.typography.labelLarge)
