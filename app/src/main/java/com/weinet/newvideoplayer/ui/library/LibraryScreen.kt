@@ -73,11 +73,13 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     var deletePlaylist by remember { mutableStateOf<String?>(null) }
     var showNowPlaying by remember { mutableStateOf(false) }
     var audioFor by remember { mutableStateOf<Video?>(null) }
+    var showTheme by remember { mutableStateOf(false) }
 
     val title = state.selectedFolder ?: state.selectedPlaylist ?: state.tab.label
     val inside = state.selectedFolder != null || state.selectedPlaylist != null
     val longPress: (Video) -> Unit = { sheetFor = it }
 
+    if (showTheme) com.weinet.newvideoplayer.ui.theme.ThemeDialog(onDismiss = { showTheme = false })
     Scaffold(
         topBar = {
             TopAppBar(
@@ -90,6 +92,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                         TextButton(onClick = { LibraryStore.clearRecent() }) { Text("清除") }
                     if (state.tab == LibraryTab.Playlists && state.selectedPlaylist == null)
                         IconButton(onClick = { showNewPlaylist = true }) { Icon(Icons.Default.Add, "新增播放清單") }
+                    if (!inside) IconButton(onClick = { showTheme = true }) { Icon(Icons.Default.Palette, "佈景主題") }
                 },
             )
         },
