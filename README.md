@@ -59,7 +59,10 @@ gradle assembleDebug
 - 私密資料夾暫時隱藏（程式保留）
 
 ## FFmpeg 與 MP3
-- 播放器使用 NextLib（FFmpeg）解碼：手機本身解不了的音軌（AC3、E-AC3、DTS、TrueHD 等）與影片（H.264、HEVC、VP8、VP9）自動改用 FFmpeg；設定選「軟體解碼」時優先用 FFmpeg
-- 轉成音訊檔可選 MP3（LAME 3.100，192 kbps，重新編碼）或原始音軌（M4A／WebM，直接複製）
-- 授權：NextLib 為 GPL-3.0，LAME 為 LGPL；發佈 APK 時本專案需以 GPL-3.0 相容方式公開原始碼
+- 自己的 FFmpeg 解碼器（不用 NextLib）：`ffmpeg/build.sh` 編出只含解碼器的 FFmpeg 7.1.5（LGPL 2.1+，未開 GPL/nonfree）與 dav1d 1.5.4（BSD），靜態連進 `libnvpffmpeg.so`
+- 音訊：`ffmpeg/Ffmpeg*Audio*`（改自 Media3 1.8.0 decoder_ffmpeg，Apache 2.0）— AC3、E-AC3、DTS、TrueHD、MP3、AAC、FLAC、ALAC、Opus、Vorbis、AMR
+- 影片：`FfmpegVideoDecoder`／`FfmpegVideoRenderer`（自寫）— H.264、HEVC、VP8、VP9、AV1、MPEG-4、MPEG-2、H.263，YV12 直接畫到 Surface
+- 手機解不了才用 FFmpeg；設定選「軟體解碼」時影片優先用 FFmpeg。軟體解碼時不套用畫質增強
+- 本機建置：先 `NDK=/path/to/ndk bash ffmpeg/build.sh`（需 meson、ninja、pkg-config），否則 APK 不含 FFmpeg
+- 轉成音訊檔可選 MP3（LAME 3.100，LGPL，192 kbps）或原始音軌（M4A／WebM）
 - RMVB、WMV 等容器仍不支援（需要 VLC 引擎）

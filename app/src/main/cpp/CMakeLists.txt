@@ -41,3 +41,21 @@ target_include_directories(nvplame PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lame ${CM
 target_compile_definitions(nvplame PRIVATE HAVE_CONFIG_H)
 target_compile_options(nvplame PRIVATE -O2 -w)
 target_link_libraries(nvplame m)
+
+# Own FFmpeg decoders (LGPL FFmpeg + dav1d, built by ffmpeg/build.sh into app/ffmpeg/<abi>).
+set(FFMPEG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg/${ANDROID_ABI})
+if (EXISTS ${FFMPEG_DIR}/lib/libavcodec.a)
+    add_library(nvpffmpeg SHARED ffmpeg_audio_jni.cc ffmpeg_video_jni.cc)
+    target_include_directories(nvpffmpeg PRIVATE ${FFMPEG_DIR}/include)
+    target_compile_options(nvpffmpeg PRIVATE -O2)
+    target_link_options(nvpffmpeg PRIVATE -Wl,-Bsymbolic -Wl,--exclude-libs,ALL)
+    target_link_libraries(nvpffmpeg
+        ${FFMPEG_DIR}/lib/libavcodec.a
+        ${FFMPEG_DIR}/lib/libswscale.a
+        ${FFMPEG_DIR}/lib/libswresample.a
+        ${FFMPEG_DIR}/lib/libavutil.a
+        ${FFMPEG_DIR}/lib/libdav1d.a
+        android log m z)
+else()
+    message(WARNING "FFmpeg not found in ${FFMPEG_DIR}; run ffmpeg/build.sh. Building without FFmpeg decoders.")
+endif()
