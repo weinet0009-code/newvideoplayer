@@ -20,4 +20,18 @@ object LangCodes {
         names[s]?.let { return it }
         return if (s.length in 2..3 && s.all { it.isLetter() }) s else "und"
     }
+
+    /** Prompt nudging Whisper towards Traditional characters for Chinese. */
+    fun prompt(lang: String?): String? = when (lang) {
+        "zh" -> "以下是繁體中文的字幕。"
+        "yue" -> "以下是粵語的繁體中文字幕。"
+        else -> null
+    }
+
+    /** Whisper still writes some Simplified characters; convert Chinese output to Traditional (Android 10+). */
+    fun toTraditional(lang: String?, segs: List<Segment>): List<Segment> {
+        if ((lang != "zh" && lang != "yue") || android.os.Build.VERSION.SDK_INT < 29) return segs
+        val tr = runCatching { android.icu.text.Transliterator.getInstance("Simplified-Traditional") }.getOrNull() ?: return segs
+        return segs.map { it.copy(text = tr.transliterate(it.text)) }
+    }
 }

@@ -133,8 +133,6 @@ object LocalWhisper {
             val ctx = nativeInit(modelFile(context, m).path)
             if (ctx == 0L) throw IOException("模型載入失敗，請重新下載")
             val threads = Runtime.getRuntime().availableProcessors().coerceIn(2, 4)
-            // Nudges Whisper towards Traditional Chinese characters instead of Simplified.
-            val prompt = if (language == "zh") "以下是繁體中文的字幕。" else null
             val segments = mutableListOf<Segment>()
             var detected: String? = language
             var done = 0f
@@ -150,11 +148,13 @@ object LocalWhisper {
                 PcmDecoder.decode(context, video, CHUNK_SECONDS) { pcm, offsetMs, progress ->
                     job?.ensureActive()
                     chunkEnd = progress
-                    val bytes = nativeTranscribe(ctx, pcm, language, prompt, threads, vad)
+                    // The first chunk's detected language is kept for the rest, so it can't flip midway.
+                    val lang = detected
+                    val bytes = nativeTranscribe(ctx, pcm, lang, LangCodes.prompt(lang), threads, vad)
                     job?.ensureActive()
                     if (bytes == null) throw IOException("辨識失敗")
                     segments += Srt.parseNative(bytes, offsetMs)
-                    if (detected == null) detected = nativeLastLang(ctx)
+                    if (detected == null) detected = LangCodes.normalize(nativeLastLang(ctx)).takeIf { it != "und" }
                     done = progress
                     onProgress(progress)
                     true
@@ -164,7 +164,7 @@ object LocalWhisper {
                 nativeFree(ctx)
             }
             val out = File(File(context.cacheDir, "subs").apply { mkdirs() }, "ai-${System.currentTimeMillis()}.srt")
-            out.writeText(Srt.format(segments))
+            out.writeText(Srt.format(LangCodes.toTraditional(detected, segments)))
             AiResult(out, LangCodes.normalize(detected))
         }
 }

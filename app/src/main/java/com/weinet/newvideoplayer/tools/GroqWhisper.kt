@@ -41,7 +41,6 @@ object GroqWhisper {
         onProgress: (Float) -> Unit, onStatus: (String?) -> Unit,
     ): AiResult = withContext(Dispatchers.IO) {
         val job = coroutineContext[Job]
-        val prompt = if (language == "zh") "以下是繁體中文的字幕。" else null
         val segments = mutableListOf<Segment>()
         var detected: String? = language
         PcmDecoder.decode(context, video, CHUNK_SECONDS) { pcm, offsetMs, progress ->
@@ -50,11 +49,13 @@ object GroqWhisper {
             var attempt = 0
             while (true) {
                 job?.ensureActive()
-                val r = post(apiKey, wav, language, prompt)
+                // The first chunk's detected language is kept for the rest, so it can't flip midway.
+                val r = post(apiKey, wav, detected, LangCodes.prompt(detected))
                 when {
                     r.code == 200 -> {
                         segments += parse(r.body, offsetMs)
-                        if (detected == null) detected = runCatching { JSONObject(r.body).optString("language") }.getOrNull()?.ifBlank { null }
+                        if (detected == null) detected = LangCodes.normalize(runCatching { JSONObject(r.body).optString("language") }.getOrNull())
+                            .takeIf { it != "und" }
                         break
                     }
                     r.code == 401 -> throw InvalidKey()
@@ -74,7 +75,7 @@ object GroqWhisper {
             true
         }
         val out = File(File(context.cacheDir, "subs").apply { mkdirs() }, "ai-${System.currentTimeMillis()}.srt")
-        out.writeText(Srt.format(segments))
+        out.writeText(Srt.format(LangCodes.toTraditional(detected, segments)))
         AiResult(out, LangCodes.normalize(detected))
     }
 

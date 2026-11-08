@@ -676,7 +676,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                         modifier = Modifier.clickable { showMore = false; showOnlineSubs = true },
                     )
                     ListItem(
-                        headlineContent = { Text("AI 產生字幕") },
+                        headlineContent = { Text("AI 產生字幕（Beta）") },
                         supportingContent = { Text("手機離線或 Groq 雲端辨識，免費") },
                         modifier = Modifier.clickable { showMore = false; showAi = true },
                     )

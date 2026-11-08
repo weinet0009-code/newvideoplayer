@@ -106,7 +106,7 @@ fun OnlineSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AiSubtitleDialog(video: Video, onLoaded: (File, String) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
@@ -116,7 +116,8 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File, String) -> Unit, onDismiss: 
     var cloud by remember { mutableStateOf(groqKey.isNotBlank()) }
     var model by remember { mutableStateOf(LocalWhisper.Model.Base) }
     var downloaded by remember { mutableStateOf(LocalWhisper.Model.entries.filter { LocalWhisper.isDownloaded(context, it) }.toSet()) }
-    var lang by remember { mutableStateOf("zh") }
+    var lang by remember { mutableStateOf("") }
+    var pickLang by remember { mutableStateOf(false) }
     var skipSilence by remember { mutableStateOf(true) }
     var accelerated by remember { mutableStateOf<Boolean?>(null) }
     LaunchedEffect(Unit) { accelerated = withContext(Dispatchers.Default) { LocalWhisper.isAccelerated(context) } }
@@ -166,7 +167,7 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File, String) -> Unit, onDismiss: 
 
     AlertDialog(
         onDismissRequest = { if (!working) onDismiss() },
-        title = { Text(if (cloud) "AI 產生字幕（雲端）" else "AI 產生字幕（離線）") },
+        title = { Text(if (cloud) "AI 產生字幕（雲端・Beta）" else "AI 產生字幕（離線・Beta）") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 Row(Modifier.padding(bottom = 4.dp)) {
@@ -212,13 +213,22 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File, String) -> Unit, onDismiss: 
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 }
                 }
-                Text("語言", style = MaterialTheme.typography.labelLarge)
-                Row(Modifier.padding(vertical = 4.dp)) {
-                    listOf("zh" to "中文", "en" to "英文", "ja" to "日文", "" to "自動").forEach { (code, label) ->
-                        FilterChip(selected = lang == code, enabled = !working, onClick = { lang = code }, label = { Text(label) },
-                            modifier = Modifier.padding(end = 4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("語言：${AI_LANGS.firstOrNull { it.first == lang }?.second ?: "自動"}", style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.weight(1f))
+                    TextButton(enabled = !working, onClick = { pickLang = !pickLang }) { Text(if (pickLang) "收起" else "指定語言") }
+                }
+                if (pickLang) {
+                    Text("自動辨識認錯時才需要指定", style = MaterialTheme.typography.bodySmall)
+                    FlowRow(Modifier.padding(vertical = 4.dp)) {
+                        AI_LANGS.forEach { (code, label) ->
+                            FilterChip(selected = lang == code, enabled = !working, onClick = { lang = code }, label = { Text(label) },
+                                modifier = Modifier.padding(end = 4.dp))
+                        }
                     }
                 }
+                Text("Beta：AI 字幕難免有錯字或時間偏差。", style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (!cloud) Row(Modifier.fillMaxWidth().clickable(enabled = !working) { skipSilence = !skipSilence }.padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
@@ -439,3 +449,9 @@ fun TranslateSubtitleDialog(video: Video, source: File?, onLoaded: (File, String
         dismissButton = { TextButton(enabled = !working, onClick = onDismiss) { Text("關閉") } },
     )
 }
+
+
+private val AI_LANGS = listOf(
+    "" to "自動", "zh" to "中文", "yue" to "粵語", "en" to "英文", "ja" to "日文",
+    "ko" to "韓文", "th" to "泰文", "vi" to "越南文", "es" to "西班牙文",
+)
