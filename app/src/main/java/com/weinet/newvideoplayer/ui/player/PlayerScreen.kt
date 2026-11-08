@@ -184,6 +184,7 @@ fun PlayerScreen(onBack: () -> Unit) {
     var showCast by remember { mutableStateOf(false) }
     var showOnlineSubs by remember { mutableStateOf(false) }
     var showAi by remember { mutableStateOf(false) }
+    var showTranslate by remember { mutableStateOf(false) }
     var showSubPicker by remember { mutableStateOf(false) }
     var showAudioPicker by remember { mutableStateOf(false) }
     var showApi by remember { mutableStateOf(false) }
@@ -557,7 +558,17 @@ fun PlayerScreen(onBack: () -> Unit) {
         OnlineSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name) }, onDismiss = { showOnlineSubs = false })
     }
     if (showAi) currentVideo()?.let { v ->
-        AiSubtitleDialog(v, onLoaded = { loadSubtitle(Uri.fromFile(it), it.name, "AI 字幕") }, onDismiss = { showAi = false })
+        AiSubtitleDialog(v, onLoaded = { f, label -> loadSubtitle(Uri.fromFile(f), f.name, label) }, onDismiss = { showAi = false })
+    }
+    if (showTranslate) currentVideo()?.let { v ->
+        val src = remember {
+            val item = player.currentMediaItem
+            val formatId = player.currentTracks.groups
+                .firstOrNull { it.type == C.TRACK_TYPE_TEXT && it.isSelected }?.getTrackFormat(0)?.id
+            item?.let { SubtitleStore.selectedFile(context, it.mediaId, formatId) }
+        }
+        TranslateSubtitleDialog(v, src, onLoaded = { f, label -> loadSubtitle(Uri.fromFile(f), f.name, label) },
+            onDismiss = { showTranslate = false })
     }
     if (showSubPicker) SubtitlePickerDialog(
         player,
@@ -666,8 +677,13 @@ fun PlayerScreen(onBack: () -> Unit) {
                     )
                     ListItem(
                         headlineContent = { Text("AI 產生字幕") },
-                        supportingContent = { Text("手機離線辨識語音，免費") },
+                        supportingContent = { Text("手機離線或 Groq 雲端辨識，免費") },
                         modifier = Modifier.clickable { showMore = false; showAi = true },
+                    )
+                    ListItem(
+                        headlineContent = { Text("翻譯字幕") },
+                        supportingContent = { Text("Groq 或離線 ML Kit，免費") },
+                        modifier = Modifier.clickable { showMore = false; showTranslate = true },
                     )
                     ListItem(
                         headlineContent = { Text("匯出字幕檔") },

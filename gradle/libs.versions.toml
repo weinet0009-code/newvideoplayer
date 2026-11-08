@@ -1,4 +1,6 @@
 [versions]
+mlkitTranslate = "17.0.3"
+mlkitLanguageId = "17.0.6"
 agp = "8.7.2"
 kotlin = "2.1.21"
 coreKtx = "1.15.0"
@@ -13,6 +15,8 @@ fragment = "1.8.5"
 mediarouter = "1.7.0"
 
 [libraries]
+mlkit-translate = { group = "com.google.mlkit", name = "translate", version.ref = "mlkitTranslate" }
+mlkit-language-id = { group = "com.google.mlkit", name = "language-id", version.ref = "mlkitLanguageId" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }

@@ -71,3 +71,7 @@ gradle assembleDebug
 - AI 產生字幕可切換「雲端（Groq）」：使用 Groq 託管的 whisper-large-v3-turbo，使用者自備免費金鑰（https://console.groq.com/keys）。
 - 免費方案：每天 28,800 秒（8 小時）、每小時 7,200 秒音訊、每分鐘 20 次。超過時依 retry-after 自動等待。
 - 音訊以 16 kHz 單聲道 WAV、每段 10 分鐘（約 19 MB）上傳。聲音會傳到 Groq。
+
+### 字幕存檔與翻譯
+- AI／Groq 產生的字幕會存在影片旁：`影片.<語言>.AI.srt`、`影片.<語言>.Groq.srt`（第一次需授權該資料夾，Android 系統資料夾選擇器）。「自動」語言使用辨識出的語言代碼。
+- 更多 → 翻譯字幕：Groq（openai/gpt-oss-120b，每批 40 行，用同一把免費金鑰）或 ML Kit 離線翻譯（每種語言約 30 MB 模型；中文輸出經 ICU 轉為繁體，Android 10+）。輸出 `影片.<語言>.Groq翻譯.srt`／`影片.<語言>.MLKit翻譯.srt`。只支援 SRT／VTT 來源。

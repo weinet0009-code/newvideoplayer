@@ -96,7 +96,7 @@ object SubtitleStore {
             ?: list.singleOrNull() ?: return null
         val src = File(e.file)
         val base = videoTitle.substringBeforeLast('.').ifBlank { "subtitle" }.replace(Regex("[\\\\/:*?\"<>|]"), "_")
-        val suffix = if (e.label == "AI 字幕") ".ai" else ""
+        val suffix = if (e.label.startsWith("AI 字幕")) ".ai" else if (e.label.startsWith("Groq 字幕")) ".groq" else ""
         val name = "$base$suffix.${src.extension.ifBlank { "srt" }}"
         if (android.os.Build.VERSION.SDK_INT >= 29) {
             val resolver = context.contentResolver
@@ -114,6 +114,13 @@ object SubtitleStore {
             src.copyTo(File(dir, name), overwrite = true)
         }
         return "Download/NewVideoPlayer/$name"
+    }
+
+    /** The saved subtitle file behind [formatId] (the selected text track), or the only saved one. */
+    fun selectedFile(context: Context, mediaId: String, formatId: String?): File? {
+        val list = entries(context, mediaId)
+        val e = idForFormat(context, mediaId, formatId)?.let { id -> list.firstOrNull { it.id == id } } ?: list.singleOrNull()
+        return e?.let { File(it.file) }
     }
 
     fun forget(context: Context, mediaId: String) {

@@ -39,10 +39,11 @@ object GroqWhisper {
     suspend fun transcribe(
         context: Context, video: Video, apiKey: String, language: String?,
         onProgress: (Float) -> Unit, onStatus: (String?) -> Unit,
-    ): File = withContext(Dispatchers.IO) {
+    ): AiResult = withContext(Dispatchers.IO) {
         val job = coroutineContext[Job]
         val prompt = if (language == "zh") "以下是繁體中文的字幕。" else null
         val segments = mutableListOf<Segment>()
+        var detected: String? = language
         PcmDecoder.decode(context, video, CHUNK_SECONDS) { pcm, offsetMs, progress ->
             job?.ensureActive()
             val wav = toWav(pcm)
@@ -51,7 +52,11 @@ object GroqWhisper {
                 job?.ensureActive()
                 val r = post(apiKey, wav, language, prompt)
                 when {
-                    r.code == 200 -> { segments += parse(r.body, offsetMs); break }
+                    r.code == 200 -> {
+                        segments += parse(r.body, offsetMs)
+                        if (detected == null) detected = runCatching { JSONObject(r.body).optString("language") }.getOrNull()?.ifBlank { null }
+                        break
+                    }
                     r.code == 401 -> throw InvalidKey()
                     (r.code == 429 || r.code >= 500) && attempt < 30 -> {
                         // Free-plan limit (or a hiccup): wait as long as Groq asks, then retry.
@@ -70,7 +75,7 @@ object GroqWhisper {
         }
         val out = File(File(context.cacheDir, "subs").apply { mkdirs() }, "ai-${System.currentTimeMillis()}.srt")
         out.writeText(Srt.format(segments))
-        out
+        AiResult(out, LangCodes.normalize(detected))
     }
 
     private class Response(val code: Int, val body: String, val retryAfter: Long?)

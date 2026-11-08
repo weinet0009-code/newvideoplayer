@@ -22,6 +22,11 @@ import com.weinet.newvideoplayer.tools.AudioExtractor
 import com.weinet.newvideoplayer.tools.OpenSubtitles
 import com.weinet.newvideoplayer.tools.LocalWhisper
 import com.weinet.newvideoplayer.tools.GroqWhisper
+import com.weinet.newvideoplayer.tools.AiResult
+import com.weinet.newvideoplayer.tools.SubtitleTranslator
+import com.weinet.newvideoplayer.data.SidecarSubs
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -103,7 +108,7 @@ fun OnlineSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Unit) {
+fun AiSubtitleDialog(video: Video, onLoaded: (File, String) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val models = remember { LocalWhisper.models(context) }
@@ -120,6 +125,32 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
     var progress by remember { mutableStateOf<Float?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
     val working = job != null
+    var pendingStart by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { tree ->
+        tree?.let { SidecarSubs.rememberGrant(context, it) }
+        pendingStart?.invoke(); pendingStart = null
+    }
+
+    /** Asks once for the video's folder (to save the .srt beside it), then runs [start]. */
+    fun withFolder(start: () -> Unit) {
+        if (SidecarSubs.needsGrant(context, video)) {
+            pendingStart = start
+            status = "請選擇影片所在的資料夾並允許存取，字幕會存在影片旁邊"
+            runCatching { folderPicker.launch(SidecarSubs.initialUri(video)) }.onFailure { pendingStart = null; start() }
+        } else start()
+    }
+
+    /** Saves the result beside the video, loads it into the player and closes. */
+    fun finish(r: AiResult, tag: String, label: String) {
+        if (r.file.readText().split("-->").size - 1 == 0) {
+            status = "沒有辨識到任何語音，可以換個模型或語言再試"; return
+        }
+        val saved = SidecarSubs.save(context, video, r.file, SidecarSubs.fileName(video, r.language, tag))
+        android.widget.Toast.makeText(context, saved?.let { "字幕已存到 $it" } ?: "字幕已載入（未存到影片資料夾）",
+            android.widget.Toast.LENGTH_LONG).show()
+        onLoaded(r.file, "$label ${r.language}")
+        onDismiss()
+    }
 
     fun launchTask(block: suspend () -> Unit) {
         job = scope.launch {
@@ -217,20 +248,19 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
             if (working) TextButton(onClick = { LocalWhisper.cancel(); job?.cancel() }) { Text("停止") }
             else if (cloud) TextButton(enabled = groqKey.isNotBlank(), onClick = {
                 SecretStore.set(context, GroqWhisper.KEY_NAME, groqKey)
-                launchTask {
-                    status = "上傳並辨識中…請不要關掉這個視窗"
-                    progress = 0f
-                    startedAt = System.currentTimeMillis()
-                    val srt = try {
-                        GroqWhisper.transcribe(context, video, groqKey, lang.ifBlank { null },
-                            onProgress = { progress = it },
-                            onStatus = { status = it ?: "上傳並辨識中…請不要關掉這個視窗" })
-                    } catch (e: GroqWhisper.InvalidKey) {
-                        status = "金鑰無效，請確認後重新貼上"; null
-                    } finally { startedAt = 0L }
-                    if (srt != null) {
-                        if (srt.readText().split("-->").size - 1 == 0) status = "沒有辨識到任何語音，可以換個語言再試"
-                        else { onLoaded(srt); onDismiss() }
+                withFolder {
+                    launchTask {
+                        status = "上傳並辨識中…請不要關掉這個視窗"
+                        progress = 0f
+                        startedAt = System.currentTimeMillis()
+                        val r = try {
+                            GroqWhisper.transcribe(context, video, groqKey, lang.ifBlank { null },
+                                onProgress = { progress = it },
+                                onStatus = { status = it ?: "上傳並辨識中…請不要關掉這個視窗" })
+                        } catch (e: GroqWhisper.InvalidKey) {
+                            status = "金鑰無效，請確認後重新貼上"; null
+                        } finally { startedAt = 0L }
+                        if (r != null) finish(r, "Groq", "Groq 字幕")
                     }
                 }
             }) { Text("開始") }
@@ -243,19 +273,15 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                 }
             }) { Text("下載 ${model.sizeMb} MB") }
             else TextButton(onClick = {
-                launchTask {
-                    status = "辨識中…可以先做別的事，但請不要關掉這個視窗"
-                    progress = 0f
-                    startedAt = System.currentTimeMillis()
-                    val srt = try {
-                        LocalWhisper.transcribe(context, video, model, lang.ifBlank { null }, skipSilence) { progress = it }
-                    } finally { startedAt = 0L }
-                    val lines = srt.readText().split("-->").size - 1
-                    if (lines == 0) {
-                        status = "沒有辨識到任何語音，可以換個模型或語言再試"
-                    } else {
-                        onLoaded(srt)
-                        onDismiss()
+                withFolder {
+                    launchTask {
+                        status = "辨識中…可以先做別的事，但請不要關掉這個視窗"
+                        progress = 0f
+                        startedAt = System.currentTimeMillis()
+                        val r = try {
+                            LocalWhisper.transcribe(context, video, model, lang.ifBlank { null }, skipSilence) { progress = it }
+                        } finally { startedAt = 0L }
+                        finish(r, "AI", "AI 字幕")
                     }
                 }
             }) { Text("開始") }
@@ -315,5 +341,101 @@ fun ApiSettingsDialog(onDismiss: () -> Unit) {
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text("完成") } },
+    )
+}
+
+
+/** Translates the chosen subtitle with Groq (online, needs the free key) or ML Kit (offline). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TranslateSubtitleDialog(video: Video, source: File?, onLoaded: (File, String) -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var groqKey by remember { mutableStateOf(SecretStore.get(context, GroqWhisper.KEY_NAME) ?: "") }
+    var useGroq by remember { mutableStateOf(groqKey.isNotBlank()) }
+    var target by remember { mutableStateOf(SubtitleTranslator.Target.ZhTw) }
+    var status by remember { mutableStateOf<String?>(if (source == null) "先在字幕選單選好要翻譯的字幕（外掛、線上或 AI 產生的；內建字幕無法翻譯）" else null) }
+    var progress by remember { mutableStateOf<Float?>(null) }
+    var job by remember { mutableStateOf<Job?>(null) }
+    val working = job != null
+    var pendingStart by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { tree ->
+        tree?.let { SidecarSubs.rememberGrant(context, it) }
+        pendingStart?.invoke(); pendingStart = null
+    }
+
+    fun start() {
+        val src = source ?: return
+        if (useGroq) SecretStore.set(context, GroqWhisper.KEY_NAME, groqKey)
+        job = scope.launch {
+            try {
+                status = if (useGroq) "翻譯中…" else "離線翻譯中…"
+                progress = 0f
+                val out = if (useGroq) SubtitleTranslator.translateWithGroq(context, src, target, groqKey,
+                    onProgress = { progress = it }, onStatus = { status = it ?: "翻譯中…" })
+                else SubtitleTranslator.translateWithMlKit(context, src, target,
+                    onProgress = { progress = it }, onStatus = { status = it ?: "離線翻譯中…" })
+                val tag = if (useGroq) "Groq翻譯" else "MLKit翻譯"
+                val saved = SidecarSubs.save(context, video, out, SidecarSubs.fileName(video, target.code, tag))
+                android.widget.Toast.makeText(context, saved?.let { "翻譯已存到 $it" } ?: "翻譯已載入（未存到影片資料夾）",
+                    android.widget.Toast.LENGTH_LONG).show()
+                onLoaded(out, "${target.label}（${if (useGroq) "Groq" else "離線"}翻譯）")
+                onDismiss()
+            } catch (e: CancellationException) { status = "已取消" }
+            catch (e: GroqWhisper.InvalidKey) { status = "金鑰無效，請確認後重新貼上" }
+            catch (e: Exception) { status = "失敗：${e.message}" }
+            progress = null
+            job = null
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = { if (!working) onDismiss() },
+        title = { Text("翻譯字幕") },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Row(Modifier.padding(bottom = 4.dp)) {
+                    FilterChip(selected = useGroq, enabled = !working, onClick = { useGroq = true }, label = { Text("Groq（較自然）") },
+                        modifier = Modifier.padding(end = 4.dp))
+                    FilterChip(selected = !useGroq, enabled = !working, onClick = { useGroq = false }, label = { Text("離線（ML Kit）") })
+                }
+                if (useGroq) {
+                    Text("用 Groq 的語言模型翻譯，免費額度每天大約夠翻幾部電影。字幕文字會傳到 Groq。",
+                        style = MaterialTheme.typography.bodySmall)
+                    OutlinedTextField(value = groqKey, onValueChange = { groqKey = it.trim() }, singleLine = true, enabled = !working,
+                        label = { Text("Groq API 金鑰") }, visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth())
+                    TextButton(enabled = !working, onClick = {
+                        runCatching {
+                            context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(GroqWhisper.KEYS_URL)).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                        }
+                    }) { Text("申請免費金鑰") }
+                } else {
+                    Text("在手機上翻譯，免費、不用金鑰。第一次每種語言要下載約 30 MB 模型。品質較生硬，非英文之間會經過英文轉譯。",
+                        style = MaterialTheme.typography.bodySmall)
+                }
+                Text("翻成", style = MaterialTheme.typography.labelLarge)
+                Row(Modifier.padding(vertical = 4.dp)) {
+                    SubtitleTranslator.Target.entries.forEach { t ->
+                        FilterChip(selected = target == t, enabled = !working, onClick = { target = t }, label = { Text(t.label) },
+                            modifier = Modifier.padding(end = 4.dp))
+                    }
+                }
+                progress?.let { LinearProgressIndicator(progress = { it.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
+                status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+            }
+        },
+        confirmButton = {
+            if (working) TextButton(onClick = { job?.cancel() }) { Text("停止") }
+            else TextButton(enabled = source != null && (!useGroq || groqKey.isNotBlank()), onClick = {
+                if (SidecarSubs.needsGrant(context, video)) {
+                    pendingStart = { start() }
+                    status = "請選擇影片所在的資料夾並允許存取，翻譯會存在影片旁邊"
+                    runCatching { folderPicker.launch(SidecarSubs.initialUri(video)) }.onFailure { pendingStart = null; start() }
+                } else start()
+            }) { Text("開始") }
+        },
+        dismissButton = { TextButton(enabled = !working, onClick = onDismiss) { Text("關閉") } },
     )
 }

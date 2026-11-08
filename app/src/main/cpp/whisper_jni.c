@@ -139,3 +139,15 @@ Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeTranscribe(
     free(buf);
     return out;
 }
+
+/* Language of the last transcription ("zh", "en"), useful when it was auto-detected. */
+JNIEXPORT jstring JNICALL
+Java_com_weinet_newvideoplayer_tools_LocalWhisper_nativeLastLang(JNIEnv *env, jclass clazz, jlong ptr) {
+    (void) clazz;
+    struct whisper_context *ctx = (struct whisper_context *) (intptr_t) ptr;
+    if (!ctx) return NULL;
+    int id = whisper_full_lang_id(ctx);
+    if (id < 0) return NULL;
+    const char *s = whisper_lang_str(id);
+    return s ? (*env)->NewStringUTF(env, s) : NULL;
+}

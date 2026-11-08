@@ -56,6 +56,7 @@ object LocalWhisper {
     @JvmStatic private external fun nativeLoadBackends(dir: String)
     @JvmStatic private external fun nativeSystemInfo(): String
     @JvmStatic private external fun nativeProgress(): Int
+    @JvmStatic private external fun nativeLastLang(ptr: Long): String?
 
     private fun ensureBackends(context: Context) = nativeLoadBackends(context.applicationInfo.nativeLibraryDir)
 
@@ -123,7 +124,7 @@ object LocalWhisper {
      * Transcribes [video] and writes an SRT file to the cache. [language] is a Whisper code
      * ("zh", "en", "ja") or null for auto-detect.
      */
-    suspend fun transcribe(context: Context, video: Video, m: Model, language: String?, skipSilence: Boolean, onProgress: (Float) -> Unit): File =
+    suspend fun transcribe(context: Context, video: Video, m: Model, language: String?, skipSilence: Boolean, onProgress: (Float) -> Unit): AiResult =
         withContext(Dispatchers.Default) {
             val job = coroutineContext[Job]
             ensureBackends(context)
@@ -135,6 +136,7 @@ object LocalWhisper {
             // Nudges Whisper towards Traditional Chinese characters instead of Simplified.
             val prompt = if (language == "zh") "以下是繁體中文的字幕。" else null
             val segments = mutableListOf<Segment>()
+            var detected: String? = language
             var done = 0f
             var chunkEnd = 0f
             // whisper.cpp reports percent within the current chunk; turn it into overall progress.
@@ -152,6 +154,7 @@ object LocalWhisper {
                     job?.ensureActive()
                     if (bytes == null) throw IOException("辨識失敗")
                     segments += Srt.parseNative(bytes, offsetMs)
+                    if (detected == null) detected = nativeLastLang(ctx)
                     done = progress
                     onProgress(progress)
                     true
@@ -162,6 +165,6 @@ object LocalWhisper {
             }
             val out = File(File(context.cacheDir, "subs").apply { mkdirs() }, "ai-${System.currentTimeMillis()}.srt")
             out.writeText(Srt.format(segments))
-            out
+            AiResult(out, LangCodes.normalize(detected))
         }
 }
