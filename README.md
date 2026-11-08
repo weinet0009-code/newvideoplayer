@@ -66,3 +66,8 @@ gradle assembleDebug
 - 本機建置：先 `NDK=/path/to/ndk bash ffmpeg/build.sh`（需 meson、ninja、pkg-config），否則 APK 不含 FFmpeg
 - 轉成音訊檔可選 MP3（LAME 3.100，LGPL，192 kbps）或原始音軌（M4A／WebM）
 - RMVB、WMV 等容器仍不支援（需要 VLC 引擎）
+
+### 雲端 AI 字幕（Groq）
+- AI 產生字幕可切換「雲端（Groq）」：使用 Groq 託管的 whisper-large-v3-turbo，使用者自備免費金鑰（https://console.groq.com/keys）。
+- 免費方案：每天 28,800 秒（8 小時）、每小時 7,200 秒音訊、每分鐘 20 次。超過時依 retry-after 自動等待。
+- 音訊以 16 kHz 單聲道 WAV、每段 10 分鐘（約 19 MB）上傳。聲音會傳到 Groq。

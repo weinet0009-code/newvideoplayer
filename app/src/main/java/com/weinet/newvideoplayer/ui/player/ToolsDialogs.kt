@@ -21,6 +21,7 @@ import com.weinet.newvideoplayer.data.Video
 import com.weinet.newvideoplayer.tools.AudioExtractor
 import com.weinet.newvideoplayer.tools.OpenSubtitles
 import com.weinet.newvideoplayer.tools.LocalWhisper
+import com.weinet.newvideoplayer.tools.GroqWhisper
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -106,6 +107,8 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val models = remember { LocalWhisper.models(context) }
+    var groqKey by remember { mutableStateOf(SecretStore.get(context, GroqWhisper.KEY_NAME) ?: "") }
+    var cloud by remember { mutableStateOf(groqKey.isNotBlank()) }
     var model by remember { mutableStateOf(LocalWhisper.Model.Base) }
     var downloaded by remember { mutableStateOf(LocalWhisper.Model.entries.filter { LocalWhisper.isDownloaded(context, it) }.toSet()) }
     var lang by remember { mutableStateOf("zh") }
@@ -132,9 +135,32 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
 
     AlertDialog(
         onDismissRequest = { if (!working) onDismiss() },
-        title = { Text("AI 產生字幕（離線）") },
+        title = { Text(if (cloud) "AI 產生字幕（雲端）" else "AI 產生字幕（離線）") },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
+                Row(Modifier.padding(bottom = 4.dp)) {
+                    FilterChip(selected = !cloud, enabled = !working, onClick = { cloud = false }, label = { Text("本機") },
+                        modifier = Modifier.padding(end = 4.dp))
+                    FilterChip(selected = cloud, enabled = !working, onClick = { cloud = true }, label = { Text("雲端（Groq）") })
+                }
+                if (cloud) {
+                    Text("用 Groq 的 Whisper（large-v3-turbo）在雲端辨識，一小時的影片通常幾分鐘就好。需要你自己的免費金鑰，免費額度每天 8 小時音訊。聲音會上傳到 Groq。",
+                        style = MaterialTheme.typography.bodySmall)
+                    OutlinedTextField(value = groqKey, onValueChange = { groqKey = it.trim() }, singleLine = true, enabled = !working,
+                        label = { Text("Groq API 金鑰") }, visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth())
+                    Row {
+                        TextButton(enabled = !working, onClick = {
+                            try {
+                                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse(GroqWhisper.KEYS_URL)).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                            } catch (_: Exception) { status = "請用瀏覽器開啟 ${GroqWhisper.KEYS_URL}" }
+                        }) { Text("申請免費金鑰") }
+                        if (groqKey.isNotBlank()) TextButton(enabled = !working, onClick = {
+                            groqKey = ""; SecretStore.set(context, GroqWhisper.KEY_NAME, null)
+                        }) { Text("清除金鑰") }
+                    }
+                } else {
                 Text("在手機上辨識語音，不用網路、不用帳號，完全免費。第一次要下載辨識模型。長影片會花比較久，建議接上電源。",
                     style = MaterialTheme.typography.bodySmall)
                 Spacer(Modifier.height(8.dp))
@@ -154,6 +180,7 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                     Text("最準但最慢，約需 1 GB 記憶體；長影片可能要好幾個小時。",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 }
+                }
                 Text("語言", style = MaterialTheme.typography.labelLarge)
                 Row(Modifier.padding(vertical = 4.dp)) {
                     listOf("zh" to "中文", "en" to "英文", "ja" to "日文", "" to "自動").forEach { (code, label) ->
@@ -161,7 +188,7 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                             modifier = Modifier.padding(end = 4.dp))
                     }
                 }
-                Row(Modifier.fillMaxWidth().clickable(enabled = !working) { skipSilence = !skipSilence }.padding(vertical = 4.dp),
+                if (!cloud) Row(Modifier.fillMaxWidth().clickable(enabled = !working) { skipSilence = !skipSilence }.padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text("跳過靜音（較快）")
@@ -169,7 +196,7 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
                     }
                     Switch(checked = skipSilence, onCheckedChange = null, enabled = !working)
                 }
-                accelerated?.let {
+                if (!cloud) accelerated?.let {
                     Text(if (it) "此手機支援加速指令，已啟用快速版" else "此手機不支援加速指令，使用通用版（較慢）",
                         style = MaterialTheme.typography.bodySmall)
                 }
@@ -188,6 +215,25 @@ fun AiSubtitleDialog(video: Video, onLoaded: (File) -> Unit, onDismiss: () -> Un
         },
         confirmButton = {
             if (working) TextButton(onClick = { LocalWhisper.cancel(); job?.cancel() }) { Text("停止") }
+            else if (cloud) TextButton(enabled = groqKey.isNotBlank(), onClick = {
+                SecretStore.set(context, GroqWhisper.KEY_NAME, groqKey)
+                launchTask {
+                    status = "上傳並辨識中…請不要關掉這個視窗"
+                    progress = 0f
+                    startedAt = System.currentTimeMillis()
+                    val srt = try {
+                        GroqWhisper.transcribe(context, video, groqKey, lang.ifBlank { null },
+                            onProgress = { progress = it },
+                            onStatus = { status = it ?: "上傳並辨識中…請不要關掉這個視窗" })
+                    } catch (e: GroqWhisper.InvalidKey) {
+                        status = "金鑰無效，請確認後重新貼上"; null
+                    } finally { startedAt = 0L }
+                    if (srt != null) {
+                        if (srt.readText().split("-->").size - 1 == 0) status = "沒有辨識到任何語音，可以換個語言再試"
+                        else { onLoaded(srt); onDismiss() }
+                    }
+                }
+            }) { Text("開始") }
             else if (model !in downloaded) TextButton(onClick = {
                 launchTask {
                     status = "下載模型中…"
