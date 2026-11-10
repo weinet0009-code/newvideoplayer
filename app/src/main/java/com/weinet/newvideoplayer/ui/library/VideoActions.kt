@@ -21,9 +21,13 @@ data class VideoAction(val label: String, val icon: ImageVector, val run: () -> 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VideoActionSheet(video: Video, actions: List<VideoAction>, onDismiss: () -> Unit) {
+fun VideoActionSheet(video: Video, actions: List<VideoAction>, onDismiss: () -> Unit) = ActionSheet(video.title, actions, onDismiss)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ActionSheet(title: String, actions: List<VideoAction>, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Text(video.title, maxLines = 2, overflow = TextOverflow.Ellipsis,
+        Text(title, maxLines = 2, overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
         actions.forEach { a ->
             ListItem(

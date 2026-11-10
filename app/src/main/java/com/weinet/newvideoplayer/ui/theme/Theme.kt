@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
@@ -39,7 +40,7 @@ enum class Palette(val label: String, val dark: Boolean, val bg: Long, val surfa
     Mist("霧藍", false, 0xFFEEF3F8, 0xFFF6F9FC, 0xFF3A6EA5, 0xFFFFFFFF),
 }
 
-enum class ThemeMode(val label: String) { Fixed("配色"), Auto("自動（跟隨系統）"), Image("自選圖片") }
+enum class ThemeMode(val label: String) { Auto("自動"), Fixed("配色"), Custom("自由配色"), Image("自選圖片") }
 
 data class ThemeConfig(
     val mode: ThemeMode = ThemeMode.Auto,
@@ -52,6 +53,9 @@ data class ThemeConfig(
     val imageDarkText: Boolean = false,
     /** Overlay strength 0..0.85 so text stays readable. */
     val imageScrim: Float = 0.45f,
+    /** Free colours (only for [ThemeMode.Custom]), ARGB. */
+    val customBg: Long = 0xFF14181F,
+    val customText: Long = 0xFFF2F2F2,
 )
 
 /** Saved theme choice; changes apply right away. */
@@ -75,6 +79,8 @@ object ThemeStore {
             imagePath = p.getString("image", null)?.takeIf { File(it).exists() },
             imageDarkText = !p.getBoolean("imageWhiteText", true),
             imageScrim = p.getFloat("imageScrim", 0.45f),
+            customBg = p.getLong("customBg", 0xFF14181F),
+            customText = p.getLong("customText", 0xFFF2F2F2),
         )
     }
 
@@ -84,7 +90,8 @@ object ThemeStore {
             .putString("mode", c.mode.name).putString("palette", c.palette.name)
             .putString("autoDark", c.autoDark.name).putString("autoLight", c.autoLight.name)
             .putString("image", c.imagePath).putBoolean("imageWhiteText", !c.imageDarkText)
-            .putFloat("imageScrim", c.imageScrim).apply()
+            .putFloat("imageScrim", c.imageScrim)
+            .putLong("customBg", c.customBg).putLong("customText", c.customText).apply()
     }
 
     /** Copies the picked picture into app storage (so it survives the gallery permission) and returns its path. */
@@ -97,26 +104,38 @@ object ThemeStore {
     }.getOrNull()
 }
 
-private fun scheme(p: Palette): ColorScheme {
-    val bg = Color(p.bg); val surface = Color(p.surface); val accent = Color(p.accent)
-    val toward = if (p.dark) Color.White else Color.Black
+private fun scheme(p: Palette): ColorScheme =
+    schemeOf(p.dark, Color(p.bg), Color(p.surface), Color(p.accent), Color(p.onAccent), if (p.dark) Color.White else Color.Black)
+
+/** Free colours: dark or light follows the background's brightness; the accent stays a readable blue. */
+fun isDarkColor(c: Long) = Color(c).luminance() < 0.4f
+
+private fun customScheme(bgL: Long, textL: Long): ColorScheme {
+    val bg = Color(bgL); val text = Color(textL); val dark = isDarkColor(bgL)
+    val accent = if (dark) Color(0xFF8AB4F8) else Color(0xFF2F6BE0)
+    return schemeOf(dark, bg, lerp(bg, text, 0.04f), accent, if (dark) Color(0xFF00224D) else Color.White, text)
+}
+
+private fun schemeOf(dark: Boolean, bg: Color, surface: Color, accent: Color, onAccent: Color, text: Color): ColorScheme {
+    val toward = if (dark) Color.White else Color.Black
     fun s(f: Float) = lerp(surface, toward, f)
-    return if (p.dark) darkColorScheme(
-        primary = accent, onPrimary = Color(p.onAccent),
-        primaryContainer = lerp(surface, accent, 0.30f), onPrimaryContainer = Color.White,
-        secondaryContainer = lerp(surface, accent, 0.22f), onSecondaryContainer = Color.White,
-        background = bg, onBackground = Color.White, surface = surface, onSurface = Color.White,
-        surfaceVariant = s(0.10f), onSurfaceVariant = Color(0xFFC8C8C8),
+    val muted = lerp(text, bg, 0.25f)
+    return if (dark) darkColorScheme(
+        primary = accent, onPrimary = onAccent,
+        primaryContainer = lerp(surface, accent, 0.30f), onPrimaryContainer = text,
+        secondaryContainer = lerp(surface, accent, 0.22f), onSecondaryContainer = text,
+        background = bg, onBackground = text, surface = surface, onSurface = text,
+        surfaceVariant = s(0.10f), onSurfaceVariant = muted,
         surfaceContainerLowest = bg, surfaceContainerLow = s(0.03f), surfaceContainer = s(0.06f),
         surfaceContainerHigh = s(0.09f), surfaceContainerHighest = s(0.13f),
         outline = s(0.35f), outlineVariant = s(0.18f),
     ) else lightColorScheme(
-        primary = accent, onPrimary = Color(p.onAccent),
-        primaryContainer = lerp(surface, accent, 0.18f), onPrimaryContainer = Color.Black,
-        secondaryContainer = lerp(surface, accent, 0.14f), onSecondaryContainer = Color.Black,
-        background = bg, onBackground = Color.Black, surface = surface, onSurface = Color.Black,
-        surfaceVariant = s(0.06f), onSurfaceVariant = Color(0xFF444444),
-        surfaceContainerLowest = Color.White, surfaceContainerLow = s(0.02f), surfaceContainer = s(0.04f),
+        primary = accent, onPrimary = onAccent,
+        primaryContainer = lerp(surface, accent, 0.18f), onPrimaryContainer = text,
+        secondaryContainer = lerp(surface, accent, 0.14f), onSecondaryContainer = text,
+        background = bg, onBackground = text, surface = surface, onSurface = text,
+        surfaceVariant = s(0.06f), onSurfaceVariant = muted,
+        surfaceContainerLowest = lerp(bg, Color.White, 0.5f), surfaceContainerLow = s(0.02f), surfaceContainer = s(0.04f),
         surfaceContainerHigh = s(0.06f), surfaceContainerHighest = s(0.09f),
         outline = s(0.40f), outlineVariant = s(0.15f),
     )
@@ -141,6 +160,7 @@ fun AppTheme(content: @Composable () -> Unit) {
     val (colors, dark) = when (cfg.mode) {
         ThemeMode.Fixed -> scheme(cfg.palette) to cfg.palette.dark
         ThemeMode.Auto -> (if (systemDark) cfg.autoDark else cfg.autoLight).let { scheme(it) to it.dark }
+        ThemeMode.Custom -> customScheme(cfg.customBg, cfg.customText) to isDarkColor(cfg.customBg)
         ThemeMode.Image -> if (cfg.imagePath != null) imageScheme(cfg.imageDarkText) to !cfg.imageDarkText
         else scheme(cfg.autoDark) to true
     }

@@ -159,7 +159,7 @@ private fun VaultList(vm: VaultViewModel, onOpen: (List<Video>, Int) -> Unit, on
         when {
             loadError -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("無法讀取私密資料夾") }
             entries.isEmpty() -> Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                Text("在任何影片上長按，選「移到私密資料夾」。影片會加密存放在 app 內，相簿和其他 app 都看不到。",
+                Text("在影片或資料夾上長按，選「移到私密資料夾」。影片會加密存放在 app 內，相簿和其他 app 都看不到。",
                     textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
             }
             else -> LazyColumn {

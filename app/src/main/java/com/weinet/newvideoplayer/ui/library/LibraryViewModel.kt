@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-enum class LibraryTab(val label: String) { Videos("影片"), Music("音樂"), Playlists("播放清單") }
+enum class LibraryTab(val label: String) { Videos("影片"), Music("音樂"), Playlists("播放清單"), Settings("設定") }
 enum class VideoSub(val label: String) { Folders("資料夾"), Recent("最近播放") }
 enum class MusicSub(val label: String) { Songs("歌曲"), Albums("專輯"), Artists("演出者"), Folders("資料夾") }
 
@@ -160,6 +160,38 @@ class LibraryViewModel(private val app: Application) : AndroidViewModel(app) {
         deleteOriginal(v) { ok ->
             if (ok) { removeEverywhere(v); message.value = "已移到私密資料夾"; refresh() }
             else { VaultStore.delete(app, entry); message.value = "已取消，原檔保留" }
+        }
+    }
+
+    /** Encrypts every video of a folder into the vault, then deletes the originals (one system prompt on Android 11+). */
+    fun moveFolderToVault(videos: List<Video>) = viewModelScope.launch {
+        val list = videos.filter { !it.isAudio && it.vaultId == null }
+        if (list.isEmpty()) return@launch
+        val done = mutableListOf<Pair<Video, com.weinet.newvideoplayer.vault.VaultEntry>>()
+        list.forEachIndexed { i, v ->
+            val label = "加密中 ${i + 1}/${list.size}…"
+            busy.value = Busy(label, 0f)
+            runCatching { VaultStore.import(app, v) { p -> busy.value = Busy(label, p) } }.getOrNull()?.let { done += v to it }
+        }
+        busy.value = null
+        if (done.isEmpty()) { message.value = "加密失敗"; return@launch }
+        val failed = list.size - done.size
+        fun report(moved: Int) {
+            message.value = "已將 $moved 部影片移到私密資料夾" + if (failed > 0) "，$failed 部失敗" else ""
+            refresh()
+        }
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            val sender = android.provider.MediaStore.createDeleteRequest(app.contentResolver, done.map { it.first.uri }).intentSender
+            consent.value = Consent(sender) { ok ->
+                if (ok) { done.forEach { removeEverywhere(it.first) }; report(done.size) }
+                else { done.forEach { VaultStore.delete(app, it.second) }; message.value = "已取消，原檔保留" }
+            }
+        } else {
+            var moved = 0
+            done.forEach { (v, e) ->
+                if (MediaActions.deleteDirect(app, v.uri)) { removeEverywhere(v); moved++ } else VaultStore.delete(app, e)
+            }
+            report(moved)
         }
     }
 

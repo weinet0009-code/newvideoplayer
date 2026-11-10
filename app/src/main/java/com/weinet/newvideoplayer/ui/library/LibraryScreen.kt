@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +35,9 @@ import coil.request.videoFrameMillis
 import com.weinet.newvideoplayer.data.LibraryStore
 import com.weinet.newvideoplayer.data.Video
 import com.weinet.newvideoplayer.data.formatDuration
+import com.weinet.newvideoplayer.ui.settings.*
+import com.weinet.newvideoplayer.ui.vault.VaultScreen
+import com.weinet.newvideoplayer.vault.VaultSession
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +66,12 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     }
     LaunchedEffect(consent) { consent?.let { consentLauncher.launch(IntentSenderRequest.Builder(it.sender).build()) } }
     LaunchedEffect(message) { message?.let { Toast.makeText(context, it, Toast.LENGTH_SHORT).show(); vm.message.value = null } }
+    // Saveable so coming back from the player (e.g. a vault video) returns to the same page.
+    var settingsPage by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
+    LaunchedEffect(state.tab) { if (state.tab != LibraryTab.Settings) settingsPage = null }
+    LaunchedEffect(settingsPage) { if (settingsPage != SettingsPage.Vault) VaultSession.lock() }
     BackHandler(enabled = state.query.isNotEmpty() || state.selectedFolder != null || state.selectedPlaylist != null) { vm.back() }
+    BackHandler(enabled = settingsPage != null) { settingsPage = null }
 
     var addTarget by remember { mutableStateOf<Video?>(null) }
     var sheetFor by remember { mutableStateOf<Video?>(null) }
@@ -73,26 +82,25 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     var deletePlaylist by remember { mutableStateOf<String?>(null) }
     var showNowPlaying by remember { mutableStateOf(false) }
     var audioFor by remember { mutableStateOf<Video?>(null) }
-    var showTheme by remember { mutableStateOf(false) }
+    var folderSheet by remember { mutableStateOf<String?>(null) }
+    var folderVault by remember { mutableStateOf<String?>(null) }
 
-    val title = state.selectedFolder ?: state.selectedPlaylist ?: state.tab.label
-    val inside = state.selectedFolder != null || state.selectedPlaylist != null
+    val title = settingsPage?.title ?: state.selectedFolder ?: state.selectedPlaylist ?: state.tab.label
+    val inside = state.selectedFolder != null || state.selectedPlaylist != null || settingsPage != null
     val longPress: (Video) -> Unit = { sheetFor = it }
 
-    if (showTheme) com.weinet.newvideoplayer.ui.theme.ThemeDialog(onDismiss = { showTheme = false })
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    if (inside) IconButton(onClick = { vm.back() }) { Icon(Icons.Default.ArrowBack, "返回") }
+                    if (inside) IconButton(onClick = { if (settingsPage != null) settingsPage = null else vm.back() }) { Icon(Icons.Default.ArrowBack, "返回") }
                 },
                 actions = {
                     if (state.tab == LibraryTab.Videos && state.videoSub == VideoSub.Recent && state.recent.isNotEmpty())
                         TextButton(onClick = { LibraryStore.clearRecent() }) { Text("清除") }
                     if (state.tab == LibraryTab.Playlists && state.selectedPlaylist == null)
                         IconButton(onClick = { showNewPlaylist = true }) { Icon(Icons.Default.Add, "新增播放清單") }
-                    if (!inside) IconButton(onClick = { showTheme = true }) { Icon(Icons.Default.Palette, "佈景主題") }
                 },
             )
         },
@@ -109,6 +117,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                                     LibraryTab.Videos -> Icons.Default.VideoLibrary
                                     LibraryTab.Music -> Icons.Default.LibraryMusic
                                     LibraryTab.Playlists -> Icons.Default.QueueMusic
+                                    LibraryTab.Settings -> Icons.Default.Settings
                                 }, null)
                             },
                             label = { Text(t.label) },
@@ -120,6 +129,12 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             when {
+                state.tab == LibraryTab.Settings -> when (settingsPage) {
+                    null -> SettingsList(onPage = { settingsPage = it })
+                    SettingsPage.Vault -> VaultScreen(onOpen)
+                    SettingsPage.Licenses -> LicensesPage()
+                    SettingsPage.Privacy -> PrivacyPage()
+                }
                 !granted -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Button(onClick = { launcher.launch(permissions) }) { Text("允許讀取影片和音樂") }
                 }
@@ -127,7 +142,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                     CircularProgressIndicator()
                 }
                 else -> {
-                    if (state.tab != LibraryTab.Playlists && !inside) {
+                    if (state.tab != LibraryTab.Playlists && state.tab != LibraryTab.Settings && !inside) {
                         if (state.tab == LibraryTab.Videos) {
                             TabRow(selectedTabIndex = state.videoSub.ordinal) {
                                 VideoSub.entries.forEach { t ->
@@ -157,7 +172,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                             state.videoSub == VideoSub.Recent ->
                                 if (state.recent.isEmpty()) Empty("還沒有播放紀錄")
                                 else VideoList(state.recent, onOpen, longPress)
-                            else -> FolderList(state.folders, onSelect = vm::selectFolder)
+                            else -> FolderList(state.folders, onSelect = vm::selectFolder, onLongPress = { folderSheet = it })
                         }
                         LibraryTab.Music -> when {
                             state.songs.isEmpty() -> Empty("手機裡沒有找到音樂")
@@ -166,6 +181,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                             state.musicSub == MusicSub.Songs -> SongList(state.songs, onOpen, longPress)
                             else -> MusicGroupList(state.musicGroups, state.musicSub, onSelect = vm::selectFolder)
                         }
+                        LibraryTab.Settings -> {}
                         LibraryTab.Playlists -> {
                             val name = state.selectedPlaylist
                             if (name == null) {
@@ -199,10 +215,21 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
             if (playlistName != null) add(VideoAction("移出這個清單", Icons.Default.PlaylistRemove) { LibraryStore.removeFromPlaylist(playlistName, v.id) })
             add(VideoAction("分享", Icons.Default.Share) { shareVideo(context, v) })
             if (!v.isAudio) add(VideoAction("轉成音訊檔", Icons.Default.MusicNote) { audioFor = v })
+            if (!v.isAudio && v.vaultId == null) add(VideoAction("移到私密資料夾", Icons.Default.Lock) { vm.moveToVault(v) })
             add(VideoAction("重新命名", Icons.Default.Edit) { renameFor = v })
             add(VideoAction("詳細資訊", Icons.Default.Info) { detailsFor = v })
             add(VideoAction("刪除", Icons.Default.Delete) { deleteFor = v })
         }, onDismiss = { sheetFor = null })
+    }
+    folderSheet?.let { name ->
+        ActionSheet(name, listOf(
+            VideoAction("移到私密資料夾", Icons.Default.Lock) { folderVault = name },
+        ), onDismiss = { folderSheet = null })
+    }
+    folderVault?.let { name ->
+        val vids = state.folders[name].orEmpty()
+        ConfirmDialog("移到私密資料夾？", "「$name」裡的 ${vids.size} 部影片會加密存到私密資料夾，原檔會從手機刪除。", "移動",
+            onDismiss = { folderVault = null }, onConfirm = { vm.moveFolderToVault(vids) })
     }
     audioFor?.let { v -> AudioFormatDialog(onDismiss = { audioFor = null }, onPick = { mp3 -> vm.extractAudio(v, mp3) }) }
     renameFor?.let { v -> RenameDialog(v.title, onDismiss = { renameFor = null }, onRename = { vm.rename(v, it) }) }
@@ -232,15 +259,16 @@ internal fun Empty(text: String) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FolderList(folders: Map<String, List<Video>>, onSelect: (String) -> Unit) {
+private fun FolderList(folders: Map<String, List<Video>>, onSelect: (String) -> Unit, onLongPress: (String) -> Unit) {
     LazyColumn {
         items(folders.entries.toList(), key = { it.key }) { (name, videos) ->
             ListItem(
                 leadingContent = { Icon(Icons.Default.Folder, contentDescription = null) },
                 headlineContent = { Text(name) },
                 supportingContent = { Text("${videos.size} 部影片") },
-                modifier = Modifier.clickable { onSelect(name) },
+                modifier = Modifier.combinedClickable(onClick = { onSelect(name) }, onLongClick = { onLongPress(name) }),
             )
         }
     }
