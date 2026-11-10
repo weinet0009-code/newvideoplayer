@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -217,6 +218,38 @@ fun PlayerScreen(onBack: () -> Unit) {
     }
 
     fun currentVideo() = PlayerHolder.queue.getOrNull(player.currentMediaItemIndex)
+
+    fun floatWindow() {
+        if (!Settings.canDrawOverlays(context)) {
+            hint = "請允許「顯示在其他應用程式上層」"
+            context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:${context.packageName}")))
+        } else {
+            PlayerHolder.floating = true
+            PlaybackService.showFloat(context)
+            onBack()
+            activity.moveTaskToBack(true)
+        }
+    }
+
+    // Top-bar actions by priority; whatever doesn't fit the screen width moves into 更多 (更多 is always shown).
+    val topActions = listOf(
+        TopAction("subs", "字幕", Icons.Default.Subtitles) { showSubPicker = true },
+        TopAction("speed", "播放速度", null) { showSpeed = true },
+        TopAction("audio", "音軌", Icons.Default.Audiotrack) { showAudioPicker = true },
+        TopAction("cast", "投放", Icons.Default.Cast) { showCast = true },
+        TopAction("pip", "子母畫面", Icons.Default.PictureInPictureAlt) { enterPip() },
+        TopAction("float", "浮動視窗", Icons.Default.OpenInNew) { floatWindow() },
+    )
+    val screenDp = LocalConfiguration.current.screenWidthDp
+    // back 48 + 更多 48 + padding 8 + title at least 80; speed button ~64, icons 48.
+    val fitCount = run {
+        var left = screenDp - 48 - 48 - 8 - 80
+        var n = 0
+        for (a in topActions) { val w = if (a.key == "speed") 64 else 48; if (left < w) break; left -= w; n++ }
+        n
+    }
+    val overflowActions = topActions.drop(fitCount)
 
     /**
      * Adds an external subtitle to the current video (keeping ones loaded earlier) and switches
@@ -497,29 +530,9 @@ fun PlayerScreen(onBack: () -> Unit) {
                     ) {
                         IconButton(onClick = { exit() }) { Icon(Icons.Default.ArrowBack, "返回", tint = Color.White) }
                         Text(title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                        TextButton(onClick = { touch(); showSpeed = true }) { Text("${speed}x", color = Color.White) }
-                        Ctl(Icons.Default.Subtitles, "字幕") {
-                            touch()
-                            showSubPicker = true
-                        }
-                        Ctl(Icons.Default.Audiotrack, "音軌") {
-                            touch()
-                            showAudioPicker = true
-                        }
-                        Ctl(Icons.Default.Cast, "投放") { touch(); showCast = true }
-                        Ctl(Icons.Default.PictureInPictureAlt, "子母畫面") { touch(); enterPip() }
-                        Ctl(Icons.Default.OpenInNew, "浮動視窗") {
-                            touch()
-                            if (!Settings.canDrawOverlays(context)) {
-                                hint = "請允許「顯示在其他應用程式上層」"
-                                context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                    Uri.parse("package:${context.packageName}")))
-                            } else {
-                                PlayerHolder.floating = true
-                                PlaybackService.showFloat(context)
-                                onBack()
-                                activity.moveTaskToBack(true)
-                            }
+                        topActions.take(fitCount).forEach { a ->
+                            if (a.key == "speed") TextButton(onClick = { touch(); a.run() }) { Text("${speed}x", color = Color.White) }
+                            else Ctl(a.icon!!, a.label) { touch(); a.run() }
                         }
                         Ctl(Icons.Default.MoreVert, "更多") { touch(); showMore = true }
                     }
@@ -662,6 +675,15 @@ fun PlayerScreen(onBack: () -> Unit) {
             title = { Text("更多") },
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
+                    overflowActions.filter { it.key != "cast" }.forEach { a ->
+                        ListItem(
+                            headlineContent = { Text(a.label) },
+                            supportingContent = { if (a.key == "speed") Text("${speed}x") },
+                            leadingContent = { Icon(a.icon ?: Icons.Default.Speed, null) },
+                            modifier = Modifier.clickable { showMore = false; a.run() },
+                        )
+                    }
+                    if (overflowActions.any { it.key != "cast" }) HorizontalDivider()
                     ListItem(
                         headlineContent = { Text("循環播放") },
                         supportingContent = { Text(REPEAT_LABELS[repeat]) },
@@ -760,6 +782,8 @@ fun PlayerScreen(onBack: () -> Unit) {
         )
     }
 }
+
+private class TopAction(val key: String, val label: String, val icon: ImageVector?, val run: () -> Unit)
 
 @Composable
 private fun Ctl(icon: ImageVector, label: String, onClick: () -> Unit) {
