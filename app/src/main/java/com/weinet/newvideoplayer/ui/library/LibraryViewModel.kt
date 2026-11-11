@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.library
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.app.Application
 import android.content.IntentSender
 import androidx.lifecycle.AndroidViewModel
@@ -18,9 +21,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-enum class LibraryTab(val label: String) { Videos("影片"), Music("音樂"), Playlists("播放清單"), Settings("設定") }
-enum class VideoSub(val label: String) { Folders("資料夾"), Recent("最近播放") }
-enum class MusicSub(val label: String) { Songs("歌曲"), Albums("專輯"), Artists("演出者"), Folders("資料夾") }
+enum class LibraryTab(val label: String) { Videos(tr(R.string.s063)), Music(tr(R.string.s064)), Playlists(tr(R.string.s065)), Settings(tr(R.string.s066)) }
+enum class VideoSub(val label: String) { Folders(tr(R.string.s067)), Recent(tr(R.string.s068)) }
+enum class MusicSub(val label: String) { Songs(tr(R.string.s069)), Albums(tr(R.string.s070)), Artists(tr(R.string.s071)), Folders(tr(R.string.s067)) }
 
 data class LibraryState(
     val loading: Boolean = false,
@@ -45,8 +48,8 @@ data class LibraryState(
     /** Songs grouped for the current music sub-tab (albums, artists or folders). */
     val musicGroups: Map<String, List<Video>>
         get() = when (musicSub) {
-            MusicSub.Albums -> songs.groupBy { it.album.ifBlank { "未知專輯" } }
-            MusicSub.Artists -> songs.groupBy { it.artist.ifBlank { "未知演出者" } }
+            MusicSub.Albums -> songs.groupBy { it.album.ifBlank { tr(R.string.s072) } }
+            MusicSub.Artists -> songs.groupBy { it.artist.ifBlank { tr(R.string.s073) } }
             MusicSub.Folders -> songs.groupBy { it.folder }
             MusicSub.Songs -> emptyMap()
         }.toList().sortedBy { it.first.lowercase() }.toMap()
@@ -136,12 +139,12 @@ class LibraryViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun delete(v: Video) = deleteOriginal(v) { ok ->
-        if (ok) { removeEverywhere(v); message.value = "已刪除"; refresh() } else message.value = "無法刪除"
+        if (ok) { removeEverywhere(v); message.value = tr(R.string.s074); refresh() } else message.value = tr(R.string.s075)
     }
 
     fun rename(v: Video, newName: String) {
         val doIt = {
-            message.value = if (MediaActions.rename(app, v, newName)) "已重新命名" else "無法重新命名"
+            message.value = if (MediaActions.rename(app, v, newName)) tr(R.string.s076) else tr(R.string.s077)
             refresh()
         }
         val sender = MediaActions.writeRequest(app, v.uri)
@@ -150,16 +153,16 @@ class LibraryViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun moveToVault(v: Video) = viewModelScope.launch {
-        busy.value = Busy("加密中…", 0f)
+        busy.value = Busy(tr(R.string.s078), 0f)
         val entry = try {
-            VaultStore.import(app, v) { p -> busy.value = Busy("加密中…", p) }
+            VaultStore.import(app, v) { p -> busy.value = Busy(tr(R.string.s078), p) }
         } catch (e: Exception) {
-            busy.value = null; message.value = "加密失敗"; return@launch
+            busy.value = null; message.value = tr(R.string.s079); return@launch
         }
         busy.value = null
         deleteOriginal(v) { ok ->
-            if (ok) { removeEverywhere(v); message.value = "已移到私密資料夾"; refresh() }
-            else { VaultStore.delete(app, entry); message.value = "已取消，原檔保留" }
+            if (ok) { removeEverywhere(v); message.value = tr(R.string.s080); refresh() }
+            else { VaultStore.delete(app, entry); message.value = tr(R.string.s081) }
         }
     }
 
@@ -169,22 +172,22 @@ class LibraryViewModel(private val app: Application) : AndroidViewModel(app) {
         if (list.isEmpty()) return@launch
         val done = mutableListOf<Pair<Video, com.weinet.newvideoplayer.vault.VaultEntry>>()
         list.forEachIndexed { i, v ->
-            val label = "加密中 ${i + 1}/${list.size}…"
+            val label = tr(R.string.s082, i + 1, list.size)
             busy.value = Busy(label, 0f)
             runCatching { VaultStore.import(app, v) { p -> busy.value = Busy(label, p) } }.getOrNull()?.let { done += v to it }
         }
         busy.value = null
-        if (done.isEmpty()) { message.value = "加密失敗"; return@launch }
+        if (done.isEmpty()) { message.value = tr(R.string.s079); return@launch }
         val failed = list.size - done.size
         fun report(moved: Int) {
-            message.value = "已將 $moved 部影片移到私密資料夾" + if (failed > 0) "，$failed 部失敗" else ""
+            message.value = tr(R.string.s083, moved) + if (failed > 0) tr(R.string.s084, failed) else ""
             refresh()
         }
         if (android.os.Build.VERSION.SDK_INT >= 30) {
             val sender = android.provider.MediaStore.createDeleteRequest(app.contentResolver, done.map { it.first.uri }).intentSender
             consent.value = Consent(sender) { ok ->
                 if (ok) { done.forEach { removeEverywhere(it.first) }; report(done.size) }
-                else { done.forEach { VaultStore.delete(app, it.second) }; message.value = "已取消，原檔保留" }
+                else { done.forEach { VaultStore.delete(app, it.second) }; message.value = tr(R.string.s081) }
             }
         } else {
             var moved = 0
@@ -196,10 +199,10 @@ class LibraryViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun extractAudio(v: Video, mp3: Boolean) = viewModelScope.launch {
-        val label = if (mp3) "轉成 MP3…" else "轉成音訊…"
+        val label = if (mp3) tr(R.string.s085) else tr(R.string.s086)
         busy.value = Busy(label, 0f)
         message.value = try {
-            "已存到 " + AudioExtractor.toMusic(app, v, mp3) { p -> busy.value = Busy(label, p) }
+            tr(R.string.s087) + AudioExtractor.toMusic(app, v, mp3) { p -> busy.value = Busy(label, p) }
         } catch (e: Exception) { audioErrorText(e) }
         busy.value = null
     }

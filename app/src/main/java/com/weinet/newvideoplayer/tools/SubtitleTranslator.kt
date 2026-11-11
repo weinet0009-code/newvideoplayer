@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.tools
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.content.Context
 import android.os.Build
 import com.google.android.gms.tasks.Task
@@ -27,22 +30,22 @@ import kotlin.coroutines.resumeWithException
 object SubtitleTranslator {
     /** Target languages offered: code used in file names, label, ML Kit language, name for the LLM. */
     enum class Target(val code: String, val label: String, val mlkit: String, val llmName: String) {
-        ZhTw("zh-TW", "繁體中文", TranslateLanguage.CHINESE, "Traditional Chinese as written in Taiwan (台灣繁體中文用語)"),
-        En("en", "英文", TranslateLanguage.ENGLISH, "English"),
-        Ja("ja", "日文", TranslateLanguage.JAPANESE, "Japanese"),
-        Ko("ko", "韓文", TranslateLanguage.KOREAN, "Korean"),
+        ZhTw("zh-TW", tr(R.string.s017), TranslateLanguage.CHINESE, "Traditional Chinese as written in Taiwan (台灣繁體中文用語)"),
+        En("en", tr(R.string.s018), TranslateLanguage.ENGLISH, "English"),
+        Ja("ja", tr(R.string.s019), TranslateLanguage.JAPANESE, "Japanese"),
+        Ko("ko", tr(R.string.s020), TranslateLanguage.KOREAN, "Korean"),
     }
 
-    class QuotaExhausted : IOException("今天的 Groq 免費額度已用完，明天再試或改用離線翻譯")
+    class QuotaExhausted : IOException(tr(R.string.s021))
     class Unsupported(msg: String) : IOException(msg)
 
     fun read(file: File): List<Segment> {
         val ext = file.extension.lowercase()
         if (ext == "ass" || ext == "ssa" || ext == "ttml" || ext == "xml" || ext == "dfxp") {
-            throw Unsupported("目前只能翻譯 SRT 或 VTT 字幕")
+            throw Unsupported(tr(R.string.s022))
         }
         val segs = Srt.parse(file.readText())
-        if (segs.isEmpty()) throw Unsupported("字幕檔裡沒有可翻譯的內容")
+        if (segs.isEmpty()) throw Unsupported(tr(R.string.s023))
         return segs
     }
 
@@ -92,11 +95,11 @@ object SubtitleTranslator {
                 r.code == 429 || r.code >= 500 -> {
                     val waitS = (r.retryAfter ?: 20L)
                     if (r.code == 429 && waitS > 900) throw QuotaExhausted()
-                    onStatus(if (r.code == 429) "Groq 每分鐘額度已滿，約 ${waitS.coerceAtLeast(1)} 秒後繼續…" else "伺服器忙碌，稍後重試…")
+                    onStatus(if (r.code == 429) tr(R.string.s024, waitS.coerceAtLeast(1)) else tr(R.string.s007))
                     delay(waitS.coerceIn(2L, 900L) * 1000)
                     onStatus(null)
                 }
-                else -> throw IOException("Groq 錯誤 ${r.code}")
+                else -> throw IOException(tr(R.string.s025, r.code))
             }
         }
         writeOut(context, out)
@@ -153,17 +156,17 @@ object SubtitleTranslator {
         val langId = LanguageIdentification.getClient()
         val tag = try { langId.identifyLanguage(sample).awaitTask() } finally { langId.close() }
         val source = TranslateLanguage.fromLanguageTag(tag)
-            ?: throw Unsupported(if (tag == "und") "認不出字幕的語言" else "離線翻譯不支援這個語言（$tag）")
+            ?: throw Unsupported(if (tag == "und") tr(R.string.s026) else tr(R.string.s027, tag))
         val toTraditional = target == Target.ZhTw
         if (source == target.mlkit) {
-            if (!toTraditional) throw Unsupported("字幕已經是${target.label}")
+            if (!toTraditional) throw Unsupported(tr(R.string.s028, target.label))
         }
         val translated = if (source == target.mlkit) segs else {
             val translator = Translation.getClient(
                 TranslatorOptions.Builder().setSourceLanguage(source).setTargetLanguage(target.mlkit).build(),
             )
             try {
-                onStatus("下載離線翻譯模型（每種語言約 30 MB，只需一次）…")
+                onStatus(tr(R.string.s029))
                 translator.downloadModelIfNeeded(DownloadConditions.Builder().build()).awaitTask()
                 onStatus(null)
                 segs.mapIndexed { k, s ->

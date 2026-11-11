@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.theme
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,8 +59,8 @@ fun ThemeDialog(onDismiss: () -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("佈景主題") },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("完成") } },
+        title = { Text(tr(R.string.s288)) },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s265)) } },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 FlowRow {
@@ -71,44 +74,44 @@ fun ThemeDialog(onDismiss: () -> Unit) {
                 }
                 when (cfg.mode) {
                     ThemeMode.Fixed -> {
-                        Text("深色・白字", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
+                        Text(tr(R.string.s359), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
                         FlowRow { Palette.entries.filter { it.dark }.forEach { p -> Swatch(p, cfg.palette == p) { set(cfg.copy(palette = p)) } } }
-                        Text("淺色・黑字", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
+                        Text(tr(R.string.s360), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
                         FlowRow { Palette.entries.filter { !it.dark }.forEach { p -> Swatch(p, cfg.palette == p) { set(cfg.copy(palette = p)) } } }
                     }
                     ThemeMode.Auto -> {
-                        Text("手機切到深色模式時", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
+                        Text(tr(R.string.s361), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
                         FlowRow { Palette.entries.filter { it.dark }.forEach { p -> Swatch(p, cfg.autoDark == p) { set(cfg.copy(autoDark = p)) } } }
-                        Text("手機切到淺色模式時", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
+                        Text(tr(R.string.s362), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
                         FlowRow { Palette.entries.filter { !it.dark }.forEach { p -> Swatch(p, cfg.autoLight == p) { set(cfg.copy(autoLight = p)) } } }
                     }
                     ThemeMode.Custom -> {
-                        Text("預覽", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
+                        Text(tr(R.string.s363), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
                         Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).clip(RoundedCornerShape(8.dp))
                             .background(Color(cfg.customBg)).padding(12.dp)) {
-                            Text("影片 · 音樂 · 播放清單", color = Color(cfg.customText))
+                            Text(tr(R.string.s364), color = Color(cfg.customText))
                         }
                         val ratio = ColorUtils.calculateContrast(cfg.customText.toInt(), cfg.customBg.toInt() or 0xFF000000.toInt())
-                        if (ratio < 4.5) Text("文字和背景太接近，可能不易閱讀", color = MaterialTheme.colorScheme.error,
+                        if (ratio < 4.5) Text(tr(R.string.s365), color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall)
-                        ColorEditor("背景顏色", cfg.customBg, BG_PRESETS) { set(ThemeStore.state.value.copy(customBg = it)) }
-                        ColorEditor("文字顏色", cfg.customText, TEXT_PRESETS) { set(ThemeStore.state.value.copy(customText = it)) }
-                        Text("按鈕顏色依背景深淺自動調整。播放畫面一律維持黑底。", style = MaterialTheme.typography.bodySmall)
+                        ColorEditor(tr(R.string.s366), cfg.customBg, BG_PRESETS) { set(ThemeStore.state.value.copy(customBg = it)) }
+                        ColorEditor(tr(R.string.s367), cfg.customText, TEXT_PRESETS) { set(ThemeStore.state.value.copy(customText = it)) }
+                        Text(tr(R.string.s368), style = MaterialTheme.typography.bodySmall)
                     }
                     ThemeMode.Image -> {
                         TextButton(onClick = {
                             pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        }) { Text(if (cfg.imagePath == null) "選擇圖片" else "換一張圖片") }
-                        Text("文字顏色", style = MaterialTheme.typography.labelLarge)
+                        }) { Text(if (cfg.imagePath == null) tr(R.string.s369) else tr(R.string.s370)) }
+                        Text(tr(R.string.s367), style = MaterialTheme.typography.labelLarge)
                         Row {
                             FilterChip(selected = !cfg.imageDarkText, onClick = { set(cfg.copy(imageDarkText = false)) },
-                                label = { Text("白字") }, modifier = Modifier.padding(end = 4.dp))
+                                label = { Text(tr(R.string.s371)) }, modifier = Modifier.padding(end = 4.dp))
                             FilterChip(selected = cfg.imageDarkText, onClick = { set(cfg.copy(imageDarkText = true)) },
-                                label = { Text("黑字") })
+                                label = { Text(tr(R.string.s372)) })
                         }
-                        Text(if (cfg.imageDarkText) "圖片亮化程度" else "圖片暗化程度", style = MaterialTheme.typography.labelLarge)
+                        Text(if (cfg.imageDarkText) tr(R.string.s373) else tr(R.string.s374), style = MaterialTheme.typography.labelLarge)
                         Slider(value = cfg.imageScrim, onValueChange = { set(cfg.copy(imageScrim = it)) }, valueRange = 0f..0.85f)
-                        Text("看不清楚字時把這個調高。播放畫面一律維持黑底。", style = MaterialTheme.typography.bodySmall)
+                        Text(tr(R.string.s375), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -140,10 +143,10 @@ private fun ColorEditor(label: String, color: Long, presets: List<Long>, onChang
                 })
         }
     }
-    Text("色相", style = MaterialTheme.typography.bodySmall)
+    Text(tr(R.string.s376), style = MaterialTheme.typography.bodySmall)
     Slider(value = h, onValueChange = { h = it; emit() }, valueRange = 0f..360f)
-    Text("飽和度", style = MaterialTheme.typography.bodySmall)
+    Text(tr(R.string.s377), style = MaterialTheme.typography.bodySmall)
     Slider(value = sat, onValueChange = { sat = it; emit() })
-    Text("亮度", style = MaterialTheme.typography.bodySmall)
+    Text(tr(R.string.s378), style = MaterialTheme.typography.bodySmall)
     Slider(value = v, onValueChange = { v = it; emit() })
 }

@@ -9,6 +9,7 @@ import com.weinet.newvideoplayer.data.LibraryStore
 class App : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
+        I18n.init(this)
         LibraryStore.init(this)
     }
 

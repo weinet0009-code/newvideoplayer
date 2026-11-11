@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.theme
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.content.Context
 import android.graphics.Color as AColor
 import android.net.Uri
@@ -31,16 +34,16 @@ import java.io.File
 
 /** A colour set: dark ones use white text, light ones black text. */
 enum class Palette(val label: String, val dark: Boolean, val bg: Long, val surface: Long, val accent: Long, val onAccent: Long) {
-    Obsidian("曜石黑", true, 0xFF000000, 0xFF0A0A0A, 0xFF8AB4F8, 0xFF00224D),
-    BlackGold("黑金", true, 0xFF0E0D0B, 0xFF17150F, 0xFFD4AF37, 0xFF1A1400),
-    DeepSea("深海藍", true, 0xFF0A1626, 0xFF0F1E33, 0xFF4FC3F7, 0xFF002233),
-    Graphite("石墨灰", true, 0xFF1E1F22, 0xFF26282C, 0xFF9FA8DA, 0xFF1A1F4D),
-    White("純白", false, 0xFFFFFFFF, 0xFFFFFFFF, 0xFF3D7BFF, 0xFFFFFFFF),
-    Ivory("米白", false, 0xFFFAF6EE, 0xFFFFFBF3, 0xFF8D6E2F, 0xFFFFFFFF),
-    Mist("霧藍", false, 0xFFEEF3F8, 0xFFF6F9FC, 0xFF3A6EA5, 0xFFFFFFFF),
+    Obsidian(tr(R.string.s351), true, 0xFF000000, 0xFF0A0A0A, 0xFF8AB4F8, 0xFF00224D),
+    BlackGold(tr(R.string.s352), true, 0xFF0E0D0B, 0xFF17150F, 0xFFD4AF37, 0xFF1A1400),
+    DeepSea(tr(R.string.s353), true, 0xFF0A1626, 0xFF0F1E33, 0xFF4FC3F7, 0xFF002233),
+    Graphite(tr(R.string.s354), true, 0xFF1E1F22, 0xFF26282C, 0xFF9FA8DA, 0xFF1A1F4D),
+    White(tr(R.string.s355), false, 0xFFFFFFFF, 0xFFFFFFFF, 0xFF3D7BFF, 0xFFFFFFFF),
+    Ivory(tr(R.string.s356), false, 0xFFFAF6EE, 0xFFFFFBF3, 0xFF8D6E2F, 0xFFFFFFFF),
+    Mist(tr(R.string.s357), false, 0xFFEEF3F8, 0xFFF6F9FC, 0xFF3A6EA5, 0xFFFFFFFF),
 }
 
-enum class ThemeMode(val label: String) { Auto("自動"), Fixed("配色"), Custom("自由配色"), Image("自選圖片") }
+enum class ThemeMode(val label: String) { Auto(tr(R.string.s236)), Fixed(tr(R.string.s358)), Custom(tr(R.string.s291)), Image(tr(R.string.s292)) }
 
 data class ThemeConfig(
     val mode: ThemeMode = ThemeMode.Auto,

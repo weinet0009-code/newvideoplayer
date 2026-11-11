@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.vault
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -46,12 +49,12 @@ class VaultViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun restore(e: VaultEntry) = viewModelScope.launch {
-        busy.value = Busy("還原中…", 0f)
-        val ok = VaultStore.restore(app, e) { p -> busy.value = Busy("還原中…", p) }
+        busy.value = Busy(tr(R.string.s402), 0f)
+        val ok = VaultStore.restore(app, e) { p -> busy.value = Busy(tr(R.string.s402), p) }
         busy.value = null
-        message.value = if (ok) "已還原到 Movies/NewVideoPlayer" else "還原失敗"
+        message.value = if (ok) tr(R.string.s403) else tr(R.string.s404)
     }
 
-    fun delete(e: VaultEntry) { VaultStore.delete(app, e); message.value = "已永久刪除" }
-    fun rename(e: VaultEntry, name: String) { VaultStore.rename(app, e, name); message.value = "已重新命名" }
+    fun delete(e: VaultEntry) { VaultStore.delete(app, e); message.value = tr(R.string.s405) }
+    fun rename(e: VaultEntry, name: String) { VaultStore.rename(app, e, name); message.value = tr(R.string.s076) }
 }

@@ -38,6 +38,7 @@ android {
     // so native libs must be extracted to disk instead of mapped from the APK.
     packaging { jniLibs { useLegacyPackaging = true } }
     buildFeatures { compose = true; buildConfig = true }
+    androidResources { generateLocaleConfig = true }
 }
 
 dependencies {

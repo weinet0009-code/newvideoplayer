@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.tools
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.content.Context
 import com.weinet.newvideoplayer.data.Video
 import kotlinx.coroutines.CancellationException
@@ -24,10 +27,10 @@ object LocalWhisper {
     init { System.loadLibrary("nvpwhisper") }
 
     enum class Model(val file: String, val label: String, val sizeMb: Int, val sha256: String) {
-        Tiny("ggml-tiny-q5_1.bin", "快速（tiny）", 30, "818710568da3ca15689e31a743197b520007872ff9576237bda97bd1b469c3d7"),
-        Base("ggml-base-q5_1.bin", "推薦（base）", 56, "422f1ae452ade6f30a004d7e5c6a43195e4433bc370bf23fac9cc591f01a8898"),
-        Small("ggml-small-q5_1.bin", "較準（small）", 181, "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb"),
-        Turbo("ggml-large-v3-turbo-q5_0.bin", "最準（large-v3-turbo）", 547, "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2"),
+        Tiny("ggml-tiny-q5_1.bin", tr(R.string.s009), 30, "818710568da3ca15689e31a743197b520007872ff9576237bda97bd1b469c3d7"),
+        Base("ggml-base-q5_1.bin", tr(R.string.s010), 56, "422f1ae452ade6f30a004d7e5c6a43195e4433bc370bf23fac9cc591f01a8898"),
+        Small("ggml-small-q5_1.bin", tr(R.string.s011), 181, "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb"),
+        Turbo("ggml-large-v3-turbo-q5_0.bin", tr(R.string.s012), 547, "394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2"),
     }
 
     /**
@@ -115,8 +118,8 @@ object LocalWhisper {
             }
         }
         val hex = digest.digest().joinToString("") { "%02x".format(it) }
-        if (hex != sha256) { part.delete(); throw IOException("模型檔驗證失敗") }
-        if (!part.renameTo(target)) throw IOException("無法儲存模型")
+        if (hex != sha256) { part.delete(); throw IOException(tr(R.string.s013)) }
+        if (!part.renameTo(target)) throw IOException(tr(R.string.s014))
         target
     }
 
@@ -131,7 +134,7 @@ object LocalWhisper {
             val vad = if (skipSilence) ensureVad(context)?.path else null
             nativeAbort(false)
             val ctx = nativeInit(modelFile(context, m).path)
-            if (ctx == 0L) throw IOException("模型載入失敗，請重新下載")
+            if (ctx == 0L) throw IOException(tr(R.string.s015))
             val threads = Runtime.getRuntime().availableProcessors().coerceIn(2, 4)
             val segments = mutableListOf<Segment>()
             var detected: String? = language
@@ -152,7 +155,7 @@ object LocalWhisper {
                     val lang = detected
                     val bytes = nativeTranscribe(ctx, pcm, lang, LangCodes.prompt(lang), threads, vad)
                     job?.ensureActive()
-                    if (bytes == null) throw IOException("辨識失敗")
+                    if (bytes == null) throw IOException(tr(R.string.s016))
                     segments += Srt.parseNative(bytes, offsetMs)
                     if (detected == null) detected = LangCodes.normalize(nativeLastLang(ctx)).takeIf { it != "und" }
                     done = progress

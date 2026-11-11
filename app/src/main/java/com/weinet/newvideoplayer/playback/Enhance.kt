@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.playback
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.content.Context
 import android.opengl.GLES20
 import androidx.annotation.OptIn
@@ -17,7 +20,7 @@ import androidx.media3.effect.BaseGlShaderProgram
 
 /** Picture enhancement levels: off, light, strong. Runs on the GPU through Media3 effects. */
 object Enhance {
-    val LABELS = listOf("關閉", "輕度", "強")
+    val LABELS = listOf(tr(R.string.s002), tr(R.string.s003), tr(R.string.s004))
 
     @OptIn(UnstableApi::class)
     fun effects(level: Int): List<Effect> = when (level) {

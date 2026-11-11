@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.library
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.content.Context
 import android.content.Intent
 import android.text.format.DateFormat
@@ -45,12 +48,12 @@ fun RenameDialog(current: String, onDismiss: () -> Unit, onRename: (String) -> U
     var name by remember { mutableStateOf(current.substringBeforeLast('.')) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("重新命名") },
+        title = { Text(tr(R.string.s045)) },
         text = { OutlinedTextField(value = name, onValueChange = { name = it }, singleLine = true) },
         confirmButton = {
-            TextButton(enabled = name.isNotBlank() && !name.contains('/'), onClick = { onRename(name.trim()); onDismiss() }) { Text("確定") }
+            TextButton(enabled = name.isNotBlank() && !name.contains('/'), onClick = { onRename(name.trim()); onDismiss() }) { Text(tr(R.string.s104)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s056)) } },
     )
 }
 
@@ -61,24 +64,24 @@ fun ConfirmDialog(title: String, text: String, confirm: String, onDismiss: () ->
         title = { Text(title) },
         text = { Text(text) },
         confirmButton = { TextButton(onClick = { onConfirm(); onDismiss() }) { Text(confirm) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s056)) } },
     )
 }
 
 @Composable
 fun DetailsDialog(context: Context, video: Video, onDismiss: () -> Unit) {
     val rows = buildList {
-        add("名稱" to video.title)
-        if (video.vaultId == null) add("位置" to video.path.ifEmpty { video.folder })
-        add("長度" to formatDuration(video.durationMs))
-        add("大小" to formatSize(video.sizeBytes))
-        if (video.width > 0) add("解析度" to "${video.width} × ${video.height}")
-        add("格式" to video.mimeType)
-        add("加入日期" to DateFormat.getMediumDateFormat(context).format(video.dateAdded * 1000))
+        add(tr(R.string.s061) to video.title)
+        if (video.vaultId == null) add(tr(R.string.s105) to video.path.ifEmpty { video.folder })
+        add(tr(R.string.s106) to formatDuration(video.durationMs))
+        add(tr(R.string.s107) to formatSize(video.sizeBytes))
+        if (video.width > 0) add(tr(R.string.s108) to "${video.width} × ${video.height}")
+        add(tr(R.string.s109) to video.mimeType)
+        add(tr(R.string.s110) to DateFormat.getMediumDateFormat(context).format(video.dateAdded * 1000))
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("詳細資訊") },
+        title = { Text(tr(R.string.s046)) },
         text = {
             Column {
                 rows.forEach { (k, v) ->
@@ -89,7 +92,7 @@ fun DetailsDialog(context: Context, video: Video, onDismiss: () -> Unit) {
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("關閉") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s002)) } },
     )
 }
 
@@ -99,7 +102,7 @@ fun shareVideo(context: Context, video: Video) {
         putExtra(Intent.EXTRA_STREAM, video.uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
-    context.startActivity(Intent.createChooser(send, "分享影片"))
+    context.startActivity(Intent.createChooser(send, tr(R.string.s111)))
 }
 
 @Composable
@@ -123,28 +126,28 @@ fun BusyDialog(label: String, progress: Float) {
 fun AudioFormatDialog(onDismiss: () -> Unit, onPick: (mp3: Boolean) -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("轉成音訊檔") },
+        title = { Text(tr(R.string.s043)) },
         text = {
             Column {
                 ListItem(
-                    headlineContent = { Text("MP3（192 kbps）") },
-                    supportingContent = { Text("重新編碼，每台裝置都能播，比較慢") },
+                    headlineContent = { Text(tr(R.string.s112)) },
+                    supportingContent = { Text(tr(R.string.s113)) },
                     modifier = Modifier.clickable { onDismiss(); onPick(true) },
                 )
                 ListItem(
-                    headlineContent = { Text("原始音訊（M4A／WebM）") },
-                    supportingContent = { Text("直接複製音軌，很快、不失真，部分格式不支援") },
+                    headlineContent = { Text(tr(R.string.s114)) },
+                    supportingContent = { Text(tr(R.string.s115)) },
                     modifier = Modifier.clickable { onDismiss(); onPick(false) },
                 )
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s056)) } },
     )
 }
 
 fun audioErrorText(e: Exception): String = when (e) {
-    is com.weinet.newvideoplayer.tools.AudioExtractor.Unsupported -> "此音訊格式（${e.mime}）無法轉出，可改選 MP3 試試"
-    is com.weinet.newvideoplayer.tools.AudioExtractor.NoAudio -> "這部影片沒有聲音"
-    else -> "轉換失敗"
+    is com.weinet.newvideoplayer.tools.AudioExtractor.Unsupported -> tr(R.string.s116, e.mime)
+    is com.weinet.newvideoplayer.tools.AudioExtractor.NoAudio -> tr(R.string.s117)
+    else -> tr(R.string.s118)
 }

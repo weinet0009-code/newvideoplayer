@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.vault
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
@@ -34,7 +37,7 @@ data class VaultEntry(
     fun toVideo() = Video(
         id = UUID.fromString(id).mostSignificantBits,
         uri = Uri.parse("vault://$id"),
-        title = name, folder = "私密資料夾", durationMs = durationMs, sizeBytes = size,
+        title = name, folder = tr(R.string.s284), durationMs = durationMs, sizeBytes = size,
         dateAdded = addedAt / 1000, mimeType = mime, width = width, height = height, vaultId = id,
     )
 }

@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.player
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,9 +52,9 @@ fun selectTextTrack(player: Player, group: Tracks.Group?) = selectTrack(player, 
 
 private fun trackLabel(f: Format, index: Int, fallback: String): String {
     val lang = f.language?.takeIf { it.isNotBlank() && it != "und" }
-        ?.let { Locale.forLanguageTag(it).getDisplayName(Locale.TRADITIONAL_CHINESE) }
+        ?.let { Locale.forLanguageTag(it).getDisplayName(com.weinet.newvideoplayer.I18n.resources().configuration.locales[0]) }
     return when {
-        !f.label.isNullOrBlank() && lang != null -> "${f.label}（$lang）"
+        !f.label.isNullOrBlank() && lang != null -> tr(R.string.s194, f.label, lang)
         !f.label.isNullOrBlank() -> f.label!!
         lang != null -> lang
         else -> "$fallback ${index + 1}"
@@ -83,41 +86,41 @@ fun SubtitlePickerDialog(
             RadioButton(selected = selected, onClick = null)
             Spacer(Modifier.width(12.dp))
             Text(label, Modifier.weight(1f))
-            if (onTrash != null) IconButton(onClick = onTrash) { Icon(Icons.Default.Delete, "刪除字幕") }
+            if (onTrash != null) IconButton(onClick = onTrash) { Icon(Icons.Default.Delete, tr(R.string.s195)) }
         }
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("字幕") },
+        title = { Text(tr(R.string.s142)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                Option("關閉字幕", off) { selectTextTrack(player, null); onSelected(null) }
+                Option(tr(R.string.s196), off) { selectTextTrack(player, null); onSelected(null) }
                 groups.forEachIndexed { i, g ->
                     val fid = g.getTrackFormat(0).id
                     val info = remember(fid) { deletable(fid) }
-                    Option(trackLabel(g.getTrackFormat(0), i, "字幕"), !off && g.isSelected,
+                    Option(trackLabel(g.getTrackFormat(0), i, tr(R.string.s142)), !off && g.isSelected,
                         onTrash = info?.let { { confirm = fid to it } }) { selectTextTrack(player, g); onSelected(fid) }
                 }
                 if (groups.isEmpty()) {
-                    Text("這部影片沒有字幕。可以載入字幕檔，或從「更多」線上搜尋、AI 產生。",
+                    Text(tr(R.string.s197),
                         style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 8.dp))
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onLoadFile) { Text("載入字幕檔") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("關閉") } },
+        confirmButton = { TextButton(onClick = onLoadFile) { Text(tr(R.string.s198)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s002)) } },
     )
     confirm?.let { (fid, info) ->
         AlertDialog(
             onDismissRequest = { confirm = null },
-            title = { Text("刪除字幕？") },
+            title = { Text(tr(R.string.s199)) },
             text = {
-                Text(if (info.second != null) "「${info.first}」會從播放器移除，影片資料夾裡的 ${info.second} 也會一起刪除。"
-                else "「${info.first}」會從播放器移除。你原本載入的字幕檔不會被刪除。")
+                Text(if (info.second != null) tr(R.string.s200, info.first, info.second)
+                else tr(R.string.s201, info.first))
             },
-            confirmButton = { TextButton(onClick = { confirm = null; onDelete(fid); onDismiss() }) { Text("刪除") } },
-            dismissButton = { TextButton(onClick = { confirm = null }) { Text("取消") } },
+            confirmButton = { TextButton(onClick = { confirm = null; onDelete(fid); onDismiss() }) { Text(tr(R.string.s047)) } },
+            dismissButton = { TextButton(onClick = { confirm = null }) { Text(tr(R.string.s056)) } },
         )
     }
 }
@@ -130,13 +133,13 @@ fun AudioTrackPickerDialog(player: Player, onDismiss: () -> Unit) {
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("音軌") },
+        title = { Text(tr(R.string.s144)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 groups.forEachIndexed { i, g ->
                     val f = g.getTrackFormat(0)
-                    val ch = when (f.channelCount) { 1 -> "單聲道"; 2 -> "立體聲"; 6 -> "5.1"; 8 -> "7.1"; else -> null }
-                    val label = listOfNotNull(trackLabel(f, i, "音軌"), ch).joinToString(" · ")
+                    val ch = when (f.channelCount) { 1 -> tr(R.string.s202); 2 -> tr(R.string.s203); 6 -> "5.1"; 8 -> "7.1"; else -> null }
+                    val label = listOfNotNull(trackLabel(f, i, tr(R.string.s144)), ch).joinToString(" · ")
                     Row(
                         Modifier.fillMaxWidth().clickable { selectTrack(player, C.TRACK_TYPE_AUDIO, g); onDismiss() }
                             .padding(vertical = 10.dp),
@@ -147,9 +150,9 @@ fun AudioTrackPickerDialog(player: Player, onDismiss: () -> Unit) {
                         Text(label)
                     }
                 }
-                if (groups.isEmpty()) Text("這部影片沒有可切換的音軌。", style = MaterialTheme.typography.bodySmall)
+                if (groups.isEmpty()) Text(tr(R.string.s204), style = MaterialTheme.typography.bodySmall)
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("關閉") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s002)) } },
     )
 }

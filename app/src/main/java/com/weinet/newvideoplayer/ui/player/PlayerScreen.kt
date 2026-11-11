@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.player
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.Manifest
 import android.app.Activity
 import android.app.PendingIntent
@@ -96,26 +99,26 @@ private const val ACTION_PIP_PREV = "com.weinet.newvideoplayer.PIP_PREV"
 
 @OptIn(UnstableApi::class)
 private enum class Aspect(val label: String, val mode: Int) {
-    Fit("適應", AspectRatioFrameLayout.RESIZE_MODE_FIT),
-    Fill("拉伸", AspectRatioFrameLayout.RESIZE_MODE_FILL),
-    Zoom("裁切", AspectRatioFrameLayout.RESIZE_MODE_ZOOM),
-    Width("寬度", AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH),
+    Fit(tr(R.string.s130), AspectRatioFrameLayout.RESIZE_MODE_FIT),
+    Fill(tr(R.string.s131), AspectRatioFrameLayout.RESIZE_MODE_FILL),
+    Zoom(tr(R.string.s132), AspectRatioFrameLayout.RESIZE_MODE_ZOOM),
+    Width(tr(R.string.s133), AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH),
 }
 
 private enum class Rotation(val label: String, val value: Int) {
-    Auto("自動旋轉", ActivityInfo.SCREEN_ORIENTATION_SENSOR),
-    Landscape("橫向", ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE),
-    Portrait("直向", ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT),
+    Auto(tr(R.string.s134), ActivityInfo.SCREEN_ORIENTATION_SENSOR),
+    Landscape(tr(R.string.s135), ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE),
+    Portrait(tr(R.string.s136), ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT),
 }
 
-private val REPEAT_LABELS = listOf("關閉", "單部循環", "全部循環")
+private val REPEAT_LABELS = listOf(tr(R.string.s002), tr(R.string.s137), tr(R.string.s138))
 
 private fun sleepLabel(s: SleepTimer.State): String = when (s) {
-    SleepTimer.State.Off -> "關閉"
-    SleepTimer.State.EndOfVideo -> "播完這部後暫停"
+    SleepTimer.State.Off -> tr(R.string.s002)
+    SleepTimer.State.EndOfVideo -> tr(R.string.s139)
     is SleepTimer.State.At -> {
         val min = ((s.epochMs - System.currentTimeMillis()).coerceAtLeast(0) + 59_999) / 60_000
-        "約 $min 分鐘後暫停"
+        tr(R.string.s140, min)
     }
 }
 
@@ -137,10 +140,10 @@ private fun pipParams(context: Context, player: ExoPlayer, playing: Boolean, aut
         PendingIntent.getBroadcast(context, code, Intent(act).setPackage(context.packageName), PendingIntent.FLAG_IMMUTABLE),
     )
     val actions = buildList {
-        if (player.hasPreviousMediaItem()) add(action(android.R.drawable.ic_media_previous, "上一部", ACTION_PIP_PREV, 3))
-        add(if (playing) action(android.R.drawable.ic_media_pause, "暫停", ACTION_PIP_TOGGLE, 1)
-            else action(android.R.drawable.ic_media_play, "播放", ACTION_PIP_TOGGLE, 1))
-        if (player.hasNextMediaItem()) add(action(android.R.drawable.ic_media_next, "下一部", ACTION_PIP_NEXT, 2))
+        if (player.hasPreviousMediaItem()) add(action(android.R.drawable.ic_media_previous, tr(R.string.s125), ACTION_PIP_PREV, 3))
+        add(if (playing) action(android.R.drawable.ic_media_pause, tr(R.string.s092), ACTION_PIP_TOGGLE, 1)
+            else action(android.R.drawable.ic_media_play, tr(R.string.s093), ACTION_PIP_TOGGLE, 1))
+        if (player.hasNextMediaItem()) add(action(android.R.drawable.ic_media_next, tr(R.string.s128), ACTION_PIP_NEXT, 2))
     }
     val b = PictureInPictureParams.Builder().setAspectRatio(ratio).setActions(actions)
     if (Build.VERSION.SDK_INT >= 31) b.setAutoEnterEnabled(autoEnter).setSeamlessResizeEnabled(true)
@@ -221,7 +224,7 @@ fun PlayerScreen(onBack: () -> Unit) {
 
     fun floatWindow() {
         if (!Settings.canDrawOverlays(context)) {
-            hint = "請允許「顯示在其他應用程式上層」"
+            hint = tr(R.string.s141)
             context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:${context.packageName}")))
         } else {
@@ -234,12 +237,12 @@ fun PlayerScreen(onBack: () -> Unit) {
 
     // Top-bar actions by priority; whatever doesn't fit the screen width moves into 更多 (更多 is always shown).
     val topActions = listOf(
-        TopAction("subs", "字幕", Icons.Default.Subtitles) { showSubPicker = true },
-        TopAction("speed", "播放速度", null) { showSpeed = true },
-        TopAction("audio", "音軌", Icons.Default.Audiotrack) { showAudioPicker = true },
-        TopAction("cast", "投放", Icons.Default.Cast) { showCast = true },
-        TopAction("pip", "子母畫面", Icons.Default.PictureInPictureAlt) { enterPip() },
-        TopAction("float", "浮動視窗", Icons.Default.OpenInNew) { floatWindow() },
+        TopAction("subs", tr(R.string.s142), Icons.Default.Subtitles) { showSubPicker = true },
+        TopAction("speed", tr(R.string.s143), null) { showSpeed = true },
+        TopAction("audio", tr(R.string.s144), Icons.Default.Audiotrack) { showAudioPicker = true },
+        TopAction("cast", tr(R.string.s145), Icons.Default.Cast) { showCast = true },
+        TopAction("pip", tr(R.string.s146), Icons.Default.PictureInPictureAlt) { enterPip() },
+        TopAction("float", tr(R.string.s147), Icons.Default.OpenInNew) { floatWindow() },
     )
     val screenDp = LocalConfiguration.current.screenWidthDp
     // back 48 + 更多 48 + padding 8 + title at least 80; speed button ~64, icons 48.
@@ -294,7 +297,7 @@ fun PlayerScreen(onBack: () -> Unit) {
         player.setMediaItems(items, index, pos)
         player.prepare()
         player.playWhenReady = play
-        hint = "已載入字幕：$label"
+        hint = tr(R.string.s148, label)
     }
 
     /** Removes a saved subtitle (and the copy beside the video, if Hark wrote one) and drops its track. */
@@ -312,7 +315,7 @@ fun PlayerScreen(onBack: () -> Unit) {
         player.setMediaItems(items, index, pos)
         player.prepare()
         player.playWhenReady = play
-        hint = if (sideOk) "已刪除字幕" else "已從播放器移除，但影片資料夾裡的檔案刪不掉（資料夾未授權）"
+        hint = if (sideOk) tr(R.string.s149) else tr(R.string.s150)
     }
 
     val pickSubtitle = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { picked ->
@@ -333,9 +336,9 @@ fun PlayerScreen(onBack: () -> Unit) {
         scope.launch {
             hint = try {
                 withContext(Dispatchers.IO) { SubtitleStore.export(context, item.mediaId, formatId, title) }
-                    ?.let { "已存到 $it" } ?: "沒有可匯出的字幕（先載入或產生字幕，內建字幕無法匯出）"
+                    ?.let { tr(R.string.s151, it) } ?: tr(R.string.s152)
             } catch (e: Exception) {
-                "匯出失敗：${e.message}"
+                tr(R.string.s153, e.message)
             }
         }
     }
@@ -343,10 +346,10 @@ fun PlayerScreen(onBack: () -> Unit) {
     fun extractAudio(mp3: Boolean) {
         val v = currentVideo() ?: return
         scope.launch {
-            val label = if (mp3) "轉成 MP3…" else "轉成音訊…"
+            val label = if (mp3) tr(R.string.s085) else tr(R.string.s086)
             busy = Busy(label, 0f)
             hint = try {
-                "已存到 " + AudioExtractor.toMusic(context, v, mp3) { p -> busy = Busy(label, p) }
+                tr(R.string.s087) + AudioExtractor.toMusic(context, v, mp3) { p -> busy = Busy(label, p) }
             } catch (e: Exception) { audioErrorText(e) }
             busy = null
         }
@@ -436,7 +439,7 @@ fun PlayerScreen(onBack: () -> Unit) {
     }
     LaunchedEffect(hint) { if (hint != null) { delay(if (hint!!.length > 12) 2500 else 900); hint = null } }
     LaunchedEffect(rotation) { activity.requestedOrientation = rotation.value }
-    BackHandler { if (locked) hint = "螢幕已鎖定" else exit() }
+    BackHandler { if (locked) hint = tr(R.string.s154) else exit() }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         AndroidView(
@@ -458,8 +461,8 @@ fun PlayerScreen(onBack: () -> Unit) {
                             if (locked) return@detectTapGestures
                             val third = size.width / 3
                             when {
-                                o.x < third -> { player.seekTo((player.currentPosition - 10_000).coerceAtLeast(0)); hint = "-10 秒" }
-                                o.x > third * 2 -> { player.seekTo(player.currentPosition + 10_000); hint = "+10 秒" }
+                                o.x < third -> { player.seekTo((player.currentPosition - 10_000).coerceAtLeast(0)); hint = tr(R.string.s126) }
+                                o.x > third * 2 -> { player.seekTo(player.currentPosition + 10_000); hint = tr(R.string.s127) }
                                 else -> player.playWhenReady = !player.playWhenReady
                             }
                         },
@@ -491,7 +494,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                                 val cur = if (lp.screenBrightness < 0) 0.5f else lp.screenBrightness
                                 lp.screenBrightness = (cur - drag.y / size.height).coerceIn(0.01f, 1f)
                                 activity.window.attributes = lp
-                                hint = "亮度 ${(lp.screenBrightness * 100).toInt()}%"
+                                hint = tr(R.string.s155, (lp.screenBrightness * 100).toInt())
                             }
                             DragMode.Volume -> {
                                 val steps = (-accY / (size.height / maxVolume)).toInt()
@@ -499,7 +502,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                                     val v = (audio.getStreamVolume(AudioManager.STREAM_MUSIC) + steps).coerceIn(0, maxVolume)
                                     audio.setStreamVolume(AudioManager.STREAM_MUSIC, v, 0)
                                     accY = 0f
-                                    hint = "音量 ${v * 100 / maxVolume}%"
+                                    hint = tr(R.string.s156, v * 100 / maxVolume)
                                 }
                             }
                             DragMode.None -> Unit
@@ -516,7 +519,7 @@ fun PlayerScreen(onBack: () -> Unit) {
         if (locked) {
             AnimatedVisibility(controlsVisible, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.CenterStart)) {
                 IconButton(onClick = { touch(); locked = false }, modifier = Modifier.padding(24.dp).background(Color(0x99000000), MaterialTheme.shapes.extraLarge)) {
-                    Icon(Icons.Default.Lock, contentDescription = "解鎖", tint = Color.White)
+                    Icon(Icons.Default.Lock, contentDescription = tr(R.string.s157), tint = Color.White)
                 }
             }
         } else {
@@ -528,26 +531,26 @@ fun PlayerScreen(onBack: () -> Unit) {
                             .statusBarsPadding().padding(horizontal = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        IconButton(onClick = { exit() }) { Icon(Icons.Default.ArrowBack, "返回", tint = Color.White) }
+                        IconButton(onClick = { exit() }) { Icon(Icons.Default.ArrowBack, tr(R.string.s030), tint = Color.White) }
                         Text(title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                         topActions.take(fitCount).forEach { a ->
                             if (a.key == "speed") TextButton(onClick = { touch(); a.run() }) { Text("${speed}x", color = Color.White) }
                             else Ctl(a.icon!!, a.label) { touch(); a.run() }
                         }
-                        Ctl(Icons.Default.MoreVert, "更多") { touch(); showMore = true }
+                        Ctl(Icons.Default.MoreVert, tr(R.string.s158)) { touch(); showMore = true }
                     }
                     // Center: previous / play-pause / next
                     Row(Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                        if (hasPrev) Ctl(Icons.Default.SkipPrevious, "上一部") { touch(); skip(false) }
+                        if (hasPrev) Ctl(Icons.Default.SkipPrevious, tr(R.string.s125)) { touch(); skip(false) }
                         IconButton(
                             onClick = { touch(); player.playWhenReady = !player.playWhenReady },
                             modifier = Modifier.size(72.dp).background(Color(0x66000000), MaterialTheme.shapes.extraLarge),
                         ) {
                             Icon(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                if (isPlaying) "暫停" else "播放", tint = Color.White, modifier = Modifier.size(48.dp))
+                                if (isPlaying) tr(R.string.s092) else tr(R.string.s093), tint = Color.White, modifier = Modifier.size(48.dp))
                         }
-                        if (hasNext) Ctl(Icons.Default.SkipNext, "下一部") { touch(); skip(true) }
+                        if (hasNext) Ctl(Icons.Default.SkipNext, tr(R.string.s128)) { touch(); skip(true) }
                     }
                     // Bottom bar
                     Column(Modifier.fillMaxWidth().align(Alignment.BottomCenter).background(Color(0x88000000))
@@ -563,19 +566,19 @@ fun PlayerScreen(onBack: () -> Unit) {
                             Text(formatDuration(duration), color = Color.White, style = MaterialTheme.typography.labelMedium)
                         }
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                            Ctl(Icons.Default.Lock, "鎖定螢幕") { touch(); locked = true }
-                            Ctl(if (muted) Icons.Default.VolumeOff else Icons.Default.VolumeUp, "靜音") {
+                            Ctl(Icons.Default.Lock, tr(R.string.s159)) { touch(); locked = true }
+                            Ctl(if (muted) Icons.Default.VolumeOff else Icons.Default.VolumeUp, tr(R.string.s160)) {
                                 touch(); muted = !muted; player.volume = if (muted) 0f else 1f
-                                hint = if (muted) "已靜音" else "取消靜音"
+                                hint = if (muted) tr(R.string.s161) else tr(R.string.s162)
                             }
-                            Ctl(Icons.Default.AspectRatio, "畫面比例") {
+                            Ctl(Icons.Default.AspectRatio, tr(R.string.s163)) {
                                 touch(); aspect = Aspect.entries[(aspect.ordinal + 1) % Aspect.entries.size]; hint = aspect.label
                             }
-                            Ctl(Icons.Default.ScreenRotation, "旋轉") {
+                            Ctl(Icons.Default.ScreenRotation, tr(R.string.s164)) {
                                 touch(); rotation = Rotation.entries[(rotation.ordinal + 1) % Rotation.entries.size]; hint = rotation.label
                             }
-                            Ctl(if (night) Icons.Default.DarkMode else Icons.Default.LightMode, "夜間模式") {
-                                touch(); night = !night; hint = if (night) "夜間模式開" else "夜間模式關"
+                            Ctl(if (night) Icons.Default.DarkMode else Icons.Default.LightMode, tr(R.string.s165)) {
+                                touch(); night = !night; hint = if (night) tr(R.string.s166) else tr(R.string.s167)
                             }
                         }
                     }
@@ -622,8 +625,8 @@ fun PlayerScreen(onBack: () -> Unit) {
     if (showSpeed) {
         AlertDialog(
             onDismissRequest = { showSpeed = false },
-            confirmButton = { TextButton(onClick = { showSpeed = false }) { Text("關閉") } },
-            title = { Text("播放速度") },
+            confirmButton = { TextButton(onClick = { showSpeed = false }) { Text(tr(R.string.s002)) } },
+            title = { Text(tr(R.string.s143)) },
             text = {
                 LazyColumn {
                     items(SPEEDS) { s ->
@@ -643,24 +646,24 @@ fun PlayerScreen(onBack: () -> Unit) {
     if (showSleep) {
         AlertDialog(
             onDismissRequest = { showSleep = false },
-            confirmButton = { TextButton(onClick = { showSleep = false }) { Text("關閉") } },
-            title = { Text("定時關閉") },
+            confirmButton = { TextButton(onClick = { showSleep = false }) { Text(tr(R.string.s002)) } },
+            title = { Text(tr(R.string.s098)) },
             text = {
                 Column {
                     Row(Modifier.fillMaxWidth().clickable { SleepTimer.cancel(); showSleep = false }
                         .padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(selected = sleep == SleepTimer.State.Off, onClick = null)
                         Spacer(Modifier.width(12.dp))
-                        Text("關閉")
+                        Text(tr(R.string.s002))
                     }
                     SleepTimer.OPTIONS.forEach { m ->
                         Row(Modifier.fillMaxWidth().clickable {
                             SleepTimer.set(player, m); showSleep = false
-                            hint = if (m == 0) "這部播完後暫停" else "$m 分鐘後暫停"
+                            hint = if (m == 0) tr(R.string.s168) else tr(R.string.s169, m)
                         }.padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(selected = m == 0 && sleep == SleepTimer.State.EndOfVideo, onClick = null)
                             Spacer(Modifier.width(12.dp))
-                            Text(if (m == 0) "播完這部" else "$m 分鐘")
+                            Text(if (m == 0) tr(R.string.s170) else tr(R.string.s103, m))
                         }
                     }
                 }
@@ -671,8 +674,8 @@ fun PlayerScreen(onBack: () -> Unit) {
     if (showMore) {
         AlertDialog(
             onDismissRequest = { showMore = false },
-            confirmButton = { TextButton(onClick = { showMore = false }) { Text("關閉") } },
-            title = { Text("更多") },
+            confirmButton = { TextButton(onClick = { showMore = false }) { Text(tr(R.string.s002)) } },
+            title = { Text(tr(R.string.s158)) },
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
                     overflowActions.filter { it.key != "cast" }.forEach { a ->
@@ -685,7 +688,7 @@ fun PlayerScreen(onBack: () -> Unit) {
                     }
                     if (overflowActions.any { it.key != "cast" }) HorizontalDivider()
                     ListItem(
-                        headlineContent = { Text("循環播放") },
+                        headlineContent = { Text(tr(R.string.s171)) },
                         supportingContent = { Text(REPEAT_LABELS[repeat]) },
                         modifier = Modifier.clickable {
                             repeat = (repeat + 1) % 3
@@ -693,64 +696,64 @@ fun PlayerScreen(onBack: () -> Unit) {
                         },
                     )
                     ListItem(
-                        headlineContent = { Text("定時關閉") },
+                        headlineContent = { Text(tr(R.string.s098)) },
                         supportingContent = { Text(sleepLabel(sleep)) },
                         modifier = Modifier.clickable { showMore = false; showSleep = true },
                     )
                     ListItem(
-                        headlineContent = { Text("畫質增強") },
-                        supportingContent = { Text(Enhance.LABELS[enhance] + "（對比、色彩、銳利度）") },
+                        headlineContent = { Text(tr(R.string.s172)) },
+                        supportingContent = { Text(Enhance.LABELS[enhance] + tr(R.string.s173)) },
                         modifier = Modifier.clickable {
                             enhance = (enhance + 1) % Enhance.LABELS.size
                             PlayerHolder.setEnhance(context, enhance)
                         },
                     )
                     ListItem(
-                        headlineContent = { Text("載入外掛字幕") },
-                        supportingContent = { Text("SRT、ASS/SSA、VTT、TTML") },
+                        headlineContent = { Text(tr(R.string.s174)) },
+                        supportingContent = { Text(tr(R.string.s175)) },
                         modifier = Modifier.clickable {
                             showMore = false
                             pickSubtitle.launch(arrayOf("*/*"))
                         },
                     )
                     ListItem(
-                        headlineContent = { Text("線上搜尋字幕") },
+                        headlineContent = { Text(tr(R.string.s176)) },
                         supportingContent = { Text("OpenSubtitles") },
                         modifier = Modifier.clickable { showMore = false; showOnlineSubs = true },
                     )
                     ListItem(
-                        headlineContent = { Text("AI 產生字幕（Beta）") },
-                        supportingContent = { Text("手機離線或 Groq 雲端辨識，免費") },
+                        headlineContent = { Text(tr(R.string.s177)) },
+                        supportingContent = { Text(tr(R.string.s178)) },
                         modifier = Modifier.clickable { showMore = false; showAi = true },
                     )
                     ListItem(
-                        headlineContent = { Text("翻譯字幕") },
-                        supportingContent = { Text("Groq 或離線 ML Kit，免費") },
+                        headlineContent = { Text(tr(R.string.s179)) },
+                        supportingContent = { Text(tr(R.string.s180)) },
                         modifier = Modifier.clickable { showMore = false; showTranslate = true },
                     )
                     ListItem(
-                        headlineContent = { Text("匯出字幕檔") },
-                        supportingContent = { Text("目前選用的字幕，存到 Download/NewVideoPlayer") },
+                        headlineContent = { Text(tr(R.string.s181)) },
+                        supportingContent = { Text(tr(R.string.s182)) },
                         modifier = Modifier.clickable { showMore = false; exportSubtitle() },
                     )
                     ListItem(
-                        headlineContent = { Text("轉成音訊檔") },
-                        supportingContent = { Text("存到 Music/NewVideoPlayer") },
+                        headlineContent = { Text(tr(R.string.s043)) },
+                        supportingContent = { Text(tr(R.string.s183)) },
                         modifier = Modifier.clickable { showMore = false; showAudioFormat = true },
                     )
                     ListItem(
-                        headlineContent = { Text("投放到電視") },
-                        supportingContent = { Text("Chromecast，需在同一個 Wi-Fi") },
+                        headlineContent = { Text(tr(R.string.s184)) },
+                        supportingContent = { Text(tr(R.string.s185)) },
                         modifier = Modifier.clickable { showMore = false; showCast = true },
                     )
                     ListItem(
-                        headlineContent = { Text("OpenSubtitles 帳號") },
-                        supportingContent = { Text("選填，登入可提高每日下載數") },
+                        headlineContent = { Text(tr(R.string.s186)) },
+                        supportingContent = { Text(tr(R.string.s187)) },
                         modifier = Modifier.clickable { showMore = false; showApi = true },
                     )
                     ListItem(
-                        headlineContent = { Text("背景播放") },
-                        supportingContent = { Text("離開 app 後繼續播放聲音，可從通知列控制") },
+                        headlineContent = { Text(tr(R.string.s188)) },
+                        supportingContent = { Text(tr(R.string.s189)) },
                         trailingContent = {
                             Switch(checked = backgroundPlay, onCheckedChange = { on ->
                                 backgroundPlay = on; settings.backgroundPlay = on
@@ -761,14 +764,14 @@ fun PlayerScreen(onBack: () -> Unit) {
                         },
                     )
                     ListItem(
-                        headlineContent = { Text("按主畫面鍵自動子母畫面") },
+                        headlineContent = { Text(tr(R.string.s190)) },
                         trailingContent = {
                             Switch(checked = autoPip, onCheckedChange = { autoPip = it; settings.autoPip = it })
                         },
                     )
                     ListItem(
-                        headlineContent = { Text("解碼方式") },
-                        supportingContent = { Text(if (softwareDecoder) "軟體解碼（相容性較高）" else "硬體加速（較省電）") },
+                        headlineContent = { Text(tr(R.string.s191)) },
+                        supportingContent = { Text(if (softwareDecoder) tr(R.string.s192) else tr(R.string.s193)) },
                         trailingContent = {
                             Switch(checked = !softwareDecoder, onCheckedChange = { hw ->
                                 settings.preferSoftwareDecoder = !hw

@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.library
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.Manifest
 import android.app.Activity
 import android.os.Build
@@ -94,13 +97,13 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
             TopAppBar(
                 title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    if (inside) IconButton(onClick = { if (settingsPage != null) settingsPage = null else vm.back() }) { Icon(Icons.Default.ArrowBack, "返回") }
+                    if (inside) IconButton(onClick = { if (settingsPage != null) settingsPage = null else vm.back() }) { Icon(Icons.Default.ArrowBack, tr(R.string.s030)) }
                 },
                 actions = {
                     if (state.tab == LibraryTab.Videos && state.videoSub == VideoSub.Recent && state.recent.isNotEmpty())
-                        TextButton(onClick = { LibraryStore.clearRecent() }) { Text("清除") }
+                        TextButton(onClick = { LibraryStore.clearRecent() }) { Text(tr(R.string.s031)) }
                     if (state.tab == LibraryTab.Playlists && state.selectedPlaylist == null)
-                        IconButton(onClick = { showNewPlaylist = true }) { Icon(Icons.Default.Add, "新增播放清單") }
+                        IconButton(onClick = { showNewPlaylist = true }) { Icon(Icons.Default.Add, tr(R.string.s032)) }
                 },
             )
         },
@@ -136,7 +139,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                     SettingsPage.Privacy -> PrivacyPage()
                 }
                 !granted -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Button(onClick = { launcher.launch(permissions) }) { Text("允許讀取影片和音樂") }
+                    Button(onClick = { launcher.launch(permissions) }) { Text(tr(R.string.s033)) }
                 }
                 state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -159,7 +162,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                         val searchable = state.tab == LibraryTab.Music || state.videoSub == VideoSub.Folders
                         if (searchable) OutlinedTextField(
                             value = state.query, onValueChange = vm::search,
-                            placeholder = { Text(if (state.tab == LibraryTab.Music) "搜尋歌曲、專輯、演出者" else "搜尋影片") },
+                            placeholder = { Text(if (state.tab == LibraryTab.Music) tr(R.string.s034) else tr(R.string.s035)) },
                             singleLine = true,
                             leadingIcon = { Icon(Icons.Default.Search, null) },
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -170,12 +173,12 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                             state.query.isNotBlank() -> VideoList(state.searchResults, onOpen, longPress)
                             state.selectedFolder != null -> VideoList(state.selectedItems, onOpen, longPress)
                             state.videoSub == VideoSub.Recent ->
-                                if (state.recent.isEmpty()) Empty("還沒有播放紀錄")
+                                if (state.recent.isEmpty()) Empty(tr(R.string.s036))
                                 else VideoList(state.recent, onOpen, longPress)
                             else -> FolderList(state.folders, onSelect = vm::selectFolder, onLongPress = { folderSheet = it })
                         }
                         LibraryTab.Music -> when {
-                            state.songs.isEmpty() -> Empty("手機裡沒有找到音樂")
+                            state.songs.isEmpty() -> Empty(tr(R.string.s037))
                             state.query.isNotBlank() -> SongList(state.searchResults, onOpen, longPress)
                             state.selectedFolder != null -> SongList(state.selectedItems, onOpen, longPress)
                             state.musicSub == MusicSub.Songs -> SongList(state.songs, onOpen, longPress)
@@ -185,11 +188,11 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                         LibraryTab.Playlists -> {
                             val name = state.selectedPlaylist
                             if (name == null) {
-                                if (state.playlists.isEmpty()) Empty("點右上角 + 建立播放清單，長按影片或歌曲加入")
+                                if (state.playlists.isEmpty()) Empty(tr(R.string.s038))
                                 else PlaylistList(state.playlists, onSelect = vm::selectPlaylist, onLongPress = { deletePlaylist = it })
                             } else {
                                 val items = state.playlistItems(name)
-                                if (items.isEmpty()) Empty("長按任何影片或歌曲即可加入這個清單")
+                                if (items.isEmpty()) Empty(tr(R.string.s039))
                                 else MediaList(items, onOpen, longPress)
                             }
                         }
@@ -211,30 +214,30 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     sheetFor?.let { v ->
         val playlistName = state.selectedPlaylist.takeIf { state.tab == LibraryTab.Playlists }
         VideoActionSheet(v, buildList {
-            add(VideoAction("加入播放清單", Icons.Default.PlaylistAdd) { addTarget = v })
-            if (playlistName != null) add(VideoAction("移出這個清單", Icons.Default.PlaylistRemove) { LibraryStore.removeFromPlaylist(playlistName, v.id) })
-            add(VideoAction("分享", Icons.Default.Share) { shareVideo(context, v) })
-            if (!v.isAudio) add(VideoAction("轉成音訊檔", Icons.Default.MusicNote) { audioFor = v })
-            if (!v.isAudio && v.vaultId == null) add(VideoAction("移到私密資料夾", Icons.Default.Lock) { vm.moveToVault(v) })
-            add(VideoAction("重新命名", Icons.Default.Edit) { renameFor = v })
-            add(VideoAction("詳細資訊", Icons.Default.Info) { detailsFor = v })
-            add(VideoAction("刪除", Icons.Default.Delete) { deleteFor = v })
+            add(VideoAction(tr(R.string.s040), Icons.Default.PlaylistAdd) { addTarget = v })
+            if (playlistName != null) add(VideoAction(tr(R.string.s041), Icons.Default.PlaylistRemove) { LibraryStore.removeFromPlaylist(playlistName, v.id) })
+            add(VideoAction(tr(R.string.s042), Icons.Default.Share) { shareVideo(context, v) })
+            if (!v.isAudio) add(VideoAction(tr(R.string.s043), Icons.Default.MusicNote) { audioFor = v })
+            if (!v.isAudio && v.vaultId == null) add(VideoAction(tr(R.string.s044), Icons.Default.Lock) { vm.moveToVault(v) })
+            add(VideoAction(tr(R.string.s045), Icons.Default.Edit) { renameFor = v })
+            add(VideoAction(tr(R.string.s046), Icons.Default.Info) { detailsFor = v })
+            add(VideoAction(tr(R.string.s047), Icons.Default.Delete) { deleteFor = v })
         }, onDismiss = { sheetFor = null })
     }
     folderSheet?.let { name ->
         ActionSheet(name, listOf(
-            VideoAction("移到私密資料夾", Icons.Default.Lock) { folderVault = name },
+            VideoAction(tr(R.string.s044), Icons.Default.Lock) { folderVault = name },
         ), onDismiss = { folderSheet = null })
     }
     folderVault?.let { name ->
         val vids = state.folders[name].orEmpty()
-        ConfirmDialog("移到私密資料夾？", "「$name」裡的 ${vids.size} 部影片會加密存到私密資料夾，原檔會從手機刪除。", "移動",
+        ConfirmDialog(tr(R.string.s048), tr(R.string.s049, name, vids.size), tr(R.string.s050),
             onDismiss = { folderVault = null }, onConfirm = { vm.moveFolderToVault(vids) })
     }
     audioFor?.let { v -> AudioFormatDialog(onDismiss = { audioFor = null }, onPick = { mp3 -> vm.extractAudio(v, mp3) }) }
     renameFor?.let { v -> RenameDialog(v.title, onDismiss = { renameFor = null }, onRename = { vm.rename(v, it) }) }
     deleteFor?.let { v ->
-        ConfirmDialog(if (v.isAudio) "刪除歌曲？" else "刪除影片？", "「${v.title}」會從手機刪除。", "刪除", onDismiss = { deleteFor = null }, onConfirm = { vm.delete(v) })
+        ConfirmDialog(if (v.isAudio) tr(R.string.s051) else tr(R.string.s052), tr(R.string.s053, v.title), tr(R.string.s047), onDismiss = { deleteFor = null }, onConfirm = { vm.delete(v) })
     }
     detailsFor?.let { v -> DetailsDialog(context, v, onDismiss = { detailsFor = null }) }
     busy?.let { BusyDialog(it.label, it.progress) }
@@ -244,10 +247,10 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     deletePlaylist?.let { name ->
         AlertDialog(
             onDismissRequest = { deletePlaylist = null },
-            title = { Text("刪除「$name」？") },
-            text = { Text("只會刪除清單，影片和歌曲不會被刪除。") },
-            confirmButton = { TextButton(onClick = { LibraryStore.deletePlaylist(name); deletePlaylist = null }) { Text("刪除") } },
-            dismissButton = { TextButton(onClick = { deletePlaylist = null }) { Text("取消") } },
+            title = { Text(tr(R.string.s054, name)) },
+            text = { Text(tr(R.string.s055)) },
+            confirmButton = { TextButton(onClick = { LibraryStore.deletePlaylist(name); deletePlaylist = null }) { Text(tr(R.string.s047)) } },
+            dismissButton = { TextButton(onClick = { deletePlaylist = null }) { Text(tr(R.string.s056)) } },
         )
     }
 }
@@ -267,7 +270,7 @@ private fun FolderList(folders: Map<String, List<Video>>, onSelect: (String) -> 
             ListItem(
                 leadingContent = { Icon(Icons.Default.Folder, contentDescription = null) },
                 headlineContent = { Text(name) },
-                supportingContent = { Text("${videos.size} 部影片") },
+                supportingContent = { Text(tr(R.string.s057, videos.size)) },
                 modifier = Modifier.combinedClickable(onClick = { onSelect(name) }, onLongClick = { onLongPress(name) }),
             )
         }
@@ -282,7 +285,7 @@ private fun PlaylistList(playlists: Map<String, List<Long>>, onSelect: (String) 
             ListItem(
                 leadingContent = { Icon(Icons.Default.QueueMusic, contentDescription = null) },
                 headlineContent = { Text(name) },
-                supportingContent = { Text("${ids.size} 個項目") },
+                supportingContent = { Text(tr(R.string.s058, ids.size)) },
                 modifier = Modifier.combinedClickable(onClick = { onSelect(name) }, onLongClick = { onLongPress(name) }),
             )
         }
@@ -335,7 +338,7 @@ private fun AddToPlaylistDialog(video: Video, playlists: List<String>, onDismiss
     var newName by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("加入播放清單") },
+        title = { Text(tr(R.string.s040)) },
         text = {
             Column {
                 Text(video.title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium)
@@ -347,7 +350,7 @@ private fun AddToPlaylistDialog(video: Video, playlists: List<String>, onDismiss
                     )
                 }
                 OutlinedTextField(value = newName, onValueChange = { newName = it }, singleLine = true,
-                    placeholder = { Text("新清單名稱") }, modifier = Modifier.fillMaxWidth())
+                    placeholder = { Text(tr(R.string.s059)) }, modifier = Modifier.fillMaxWidth())
             }
         },
         confirmButton = {
@@ -355,9 +358,9 @@ private fun AddToPlaylistDialog(video: Video, playlists: List<String>, onDismiss
                 LibraryStore.createPlaylist(newName.trim())
                 LibraryStore.addToPlaylist(newName.trim(), video.id)
                 onDismiss()
-            }) { Text("建立並加入") }
+            }) { Text(tr(R.string.s060)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s056)) } },
     )
 }
 
@@ -366,9 +369,9 @@ private fun NewPlaylistDialog(onDismiss: () -> Unit, onCreate: (String) -> Unit)
     var name by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("新增播放清單") },
-        text = { OutlinedTextField(value = name, onValueChange = { name = it }, singleLine = true, placeholder = { Text("名稱") }) },
-        confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onCreate(name.trim()); onDismiss() }) { Text("建立") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        title = { Text(tr(R.string.s032)) },
+        text = { OutlinedTextField(value = name, onValueChange = { name = it }, singleLine = true, placeholder = { Text(tr(R.string.s061)) }) },
+        confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onCreate(name.trim()); onDismiss() }) { Text(tr(R.string.s062)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s056)) } },
     )
 }

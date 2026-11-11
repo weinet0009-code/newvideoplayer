@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.library
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,7 +54,7 @@ private fun SongRow(song: Video, onClick: () -> Unit, onLongClick: () -> Unit) {
         leadingContent = { Cover(song.artUri, 48.dp) },
         headlineContent = { Text(song.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         supportingContent = {
-            Text(listOf(song.artist.ifBlank { "未知演出者" }, formatDuration(song.durationMs)).joinToString(" · "),
+            Text(listOf(song.artist.ifBlank { tr(R.string.s073) }, formatDuration(song.durationMs)).joinToString(" · "),
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
@@ -64,14 +67,14 @@ fun SongList(songs: List<Video>, onOpen: (List<Video>, Int) -> Unit, onLongPress
         item {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 TextButton(onClick = { if (songs.isNotEmpty()) onOpen(songs, 0) }) {
-                    Icon(Icons.Default.PlayArrow, null); Spacer(Modifier.width(4.dp)); Text("全部播放（${songs.size}）")
+                    Icon(Icons.Default.PlayArrow, null); Spacer(Modifier.width(4.dp)); Text(tr(R.string.s088, songs.size))
                 }
                 TextButton(onClick = {
                     if (songs.isNotEmpty()) {
                         onOpen(songs, songs.indices.random())
                         PlayerHolder.player.value?.shuffleModeEnabled = true
                     }
-                }) { Icon(Icons.Default.Shuffle, null); Spacer(Modifier.width(4.dp)); Text("隨機播放") }
+                }) { Icon(Icons.Default.Shuffle, null); Spacer(Modifier.width(4.dp)); Text(tr(R.string.s089)) }
             }
         }
         items(songs.size, key = { songs[it].id }) { i ->
@@ -95,7 +98,7 @@ fun MusicGroupList(groups: Map<String, List<Video>>, sub: MusicSub, onSelect: (S
                 headlineContent = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 supportingContent = {
                     val extra = if (sub == MusicSub.Albums) songs.firstOrNull()?.artist?.takeIf { it.isNotBlank() } else null
-                    Text(listOfNotNull(extra, "${songs.size} 首").joinToString(" · "))
+                    Text(listOfNotNull(extra, tr(R.string.s090, songs.size)).joinToString(" · "))
                 },
                 modifier = Modifier.clickable { onSelect(name) },
             )
@@ -121,7 +124,7 @@ fun MediaList(items: List<Video>, onOpen: (List<Video>, Int) -> Unit, onLongPres
                     )
                 },
                 headlineContent = { Text(v.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                supportingContent = { Text("影片 · " + formatDuration(v.durationMs)) },
+                supportingContent = { Text(tr(R.string.s091) + formatDuration(v.durationMs)) },
                 modifier = Modifier.combinedClickable(onClick = { onOpen(items, i) }, onLongClick = { onLongPress(v) }),
             )
         }
@@ -173,9 +176,9 @@ fun MiniPlayer(onExpand: () -> Unit) {
                 if (np.artist.isNotBlank()) Text(np.artist, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
             }
             IconButton(onClick = { if (np.playing) player.pause() else player.play() }) {
-                Icon(if (np.playing) Icons.Default.Pause else Icons.Default.PlayArrow, if (np.playing) "暫停" else "播放")
+                Icon(if (np.playing) Icons.Default.Pause else Icons.Default.PlayArrow, if (np.playing) tr(R.string.s092) else tr(R.string.s093))
             }
-            IconButton(enabled = np.hasNext, onClick = { player.seekToNextMediaItem() }) { Icon(Icons.Default.SkipNext, "下一首") }
+            IconButton(enabled = np.hasNext, onClick = { player.seekToNextMediaItem() }) { Icon(Icons.Default.SkipNext, tr(R.string.s094)) }
         }
     }
 }
@@ -204,7 +207,7 @@ fun NowPlayingSheet(onDismiss: () -> Unit) {
             Cover(np.art, 260.dp, 12.dp)
             Spacer(Modifier.height(20.dp))
             Text(np.title, style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(np.artist.ifBlank { "未知演出者" }, style = MaterialTheme.typography.bodyMedium)
+            Text(np.artist.ifBlank { tr(R.string.s073) }, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(12.dp))
             Slider(
                 value = dragging ?: if (duration > 0) position.toFloat() / duration else 0f,
@@ -218,14 +221,14 @@ fun NowPlayingSheet(onDismiss: () -> Unit) {
             Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { player.shuffleModeEnabled = !np.shuffle }) {
-                    Icon(Icons.Default.Shuffle, "隨機", tint = if (np.shuffle) MaterialTheme.colorScheme.primary else LocalContentColor.current)
+                    Icon(Icons.Default.Shuffle, tr(R.string.s095), tint = if (np.shuffle) MaterialTheme.colorScheme.primary else LocalContentColor.current)
                 }
-                IconButton(onClick = { player.seekToPreviousMediaItem() }) { Icon(Icons.Default.SkipPrevious, "上一首") }
+                IconButton(onClick = { player.seekToPreviousMediaItem() }) { Icon(Icons.Default.SkipPrevious, tr(R.string.s096)) }
                 FilledIconButton(onClick = { if (np.playing) player.pause() else player.play() }, modifier = Modifier.size(64.dp)) {
-                    Icon(if (np.playing) Icons.Default.Pause else Icons.Default.PlayArrow, if (np.playing) "暫停" else "播放",
+                    Icon(if (np.playing) Icons.Default.Pause else Icons.Default.PlayArrow, if (np.playing) tr(R.string.s092) else tr(R.string.s093),
                         modifier = Modifier.size(36.dp))
                 }
-                IconButton(enabled = np.hasNext, onClick = { player.seekToNextMediaItem() }) { Icon(Icons.Default.SkipNext, "下一首") }
+                IconButton(enabled = np.hasNext, onClick = { player.seekToNextMediaItem() }) { Icon(Icons.Default.SkipNext, tr(R.string.s094)) }
                 IconButton(onClick = {
                     player.repeatMode = when (np.repeat) {
                         Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
@@ -233,17 +236,17 @@ fun NowPlayingSheet(onDismiss: () -> Unit) {
                         else -> Player.REPEAT_MODE_OFF
                     }
                 }) {
-                    Icon(if (np.repeat == Player.REPEAT_MODE_ONE) Icons.Default.RepeatOne else Icons.Default.Repeat, "循環",
+                    Icon(if (np.repeat == Player.REPEAT_MODE_ONE) Icons.Default.RepeatOne else Icons.Default.Repeat, tr(R.string.s097),
                         tint = if (np.repeat != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else LocalContentColor.current)
                 }
             }
             Row(horizontalArrangement = Arrangement.Center) {
                 TextButton(onClick = { showSleep = true }) {
                     Icon(Icons.Default.Bedtime, null); Spacer(Modifier.width(4.dp))
-                    Text(if (sleep == SleepTimer.State.Off) "定時關閉" else "已設定定時關閉")
+                    Text(if (sleep == SleepTimer.State.Off) tr(R.string.s098) else tr(R.string.s099))
                 }
                 TextButton(onClick = { SleepTimer.cancel(); PlayerHolder.stop(context); onDismiss() }) {
-                    Icon(Icons.Default.Stop, null); Spacer(Modifier.width(4.dp)); Text("停止播放")
+                    Icon(Icons.Default.Stop, null); Spacer(Modifier.width(4.dp)); Text(tr(R.string.s100))
                 }
             }
             Spacer(Modifier.height(24.dp))
@@ -253,14 +256,14 @@ fun NowPlayingSheet(onDismiss: () -> Unit) {
         val exo = PlayerHolder.player.value
         AlertDialog(
             onDismissRequest = { showSleep = false },
-            confirmButton = { TextButton(onClick = { showSleep = false }) { Text("關閉") } },
-            title = { Text("定時關閉") },
+            confirmButton = { TextButton(onClick = { showSleep = false }) { Text(tr(R.string.s002)) } },
+            title = { Text(tr(R.string.s098)) },
             text = {
                 Column {
-                    ListItem(headlineContent = { Text("不使用") }, modifier = Modifier.clickable { SleepTimer.cancel(); showSleep = false })
+                    ListItem(headlineContent = { Text(tr(R.string.s101)) }, modifier = Modifier.clickable { SleepTimer.cancel(); showSleep = false })
                     SleepTimer.OPTIONS.forEach { m ->
                         ListItem(
-                            headlineContent = { Text(if (m == 0) "播完這首" else "$m 分鐘") },
+                            headlineContent = { Text(if (m == 0) tr(R.string.s102) else tr(R.string.s103, m)) },
                             modifier = Modifier.clickable { exo?.let { SleepTimer.set(it, m) }; showSleep = false },
                         )
                     }

@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.ui.player
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -32,9 +35,9 @@ fun CastRouteDialog(onDismiss: () -> Unit) {
     if (!ok) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            confirmButton = { TextButton(onClick = onDismiss) { Text("關閉") } },
-            title = { Text("無法投放") },
-            text = { Text("這台裝置沒有 Google Play 服務，無法使用 Chromecast。") },
+            confirmButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s002)) } },
+            title = { Text(tr(R.string.s119)) },
+            text = { Text(tr(R.string.s120)) },
         )
         return
     }
@@ -54,13 +57,13 @@ fun CastRouteDialog(onDismiss: () -> Unit) {
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("取消") } },
-        title = { Text("投放到") },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(tr(R.string.s056)) } },
+        title = { Text(tr(R.string.s121)) },
         text = {
             if (routes.isEmpty()) Row(verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(Modifier.size(24.dp))
                 Spacer(Modifier.width(12.dp))
-                Text("正在搜尋同一個 Wi-Fi 上的電視…")
+                Text(tr(R.string.s122))
             } else LazyColumn {
                 items(routes, key = { it.id }) { r ->
                     ListItem(
@@ -101,7 +104,7 @@ fun CastPanel(modifier: Modifier = Modifier) {
     ) {
         Icon(Icons.Default.CastConnected, null, tint = Color.White, modifier = Modifier.size(64.dp))
         Spacer(Modifier.height(12.dp))
-        Text("正在投放到 ${name ?: "電視"}", color = Color.White, style = MaterialTheme.typography.titleMedium)
+        Text(tr(R.string.s124, name ?: tr(R.string.s123)), color = Color.White, style = MaterialTheme.typography.titleMedium)
         Text(title, color = Color.LightGray, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -115,16 +118,16 @@ fun CastPanel(modifier: Modifier = Modifier) {
             Text(formatDuration(dur), color = Color.White, style = MaterialTheme.typography.labelMedium)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { cp.seekToPreviousMediaItem() }) { Icon(Icons.Default.SkipPrevious, "上一部", tint = Color.White) }
-            IconButton(onClick = { cp.seekTo((cp.currentPosition - 10_000).coerceAtLeast(0)) }) { Icon(Icons.Default.Replay10, "-10 秒", tint = Color.White) }
+            IconButton(onClick = { cp.seekToPreviousMediaItem() }) { Icon(Icons.Default.SkipPrevious, tr(R.string.s125), tint = Color.White) }
+            IconButton(onClick = { cp.seekTo((cp.currentPosition - 10_000).coerceAtLeast(0)) }) { Icon(Icons.Default.Replay10, tr(R.string.s126), tint = Color.White) }
             IconButton(onClick = { cp.playWhenReady = !cp.playWhenReady }, modifier = Modifier.size(64.dp)) {
-                Icon(if (playing) Icons.Default.Pause else Icons.Default.PlayArrow, if (playing) "暫停" else "播放",
+                Icon(if (playing) Icons.Default.Pause else Icons.Default.PlayArrow, if (playing) tr(R.string.s092) else tr(R.string.s093),
                     tint = Color.White, modifier = Modifier.size(48.dp))
             }
-            IconButton(onClick = { cp.seekTo(cp.currentPosition + 10_000) }) { Icon(Icons.Default.Forward10, "+10 秒", tint = Color.White) }
-            IconButton(onClick = { cp.seekToNextMediaItem() }) { Icon(Icons.Default.SkipNext, "下一部", tint = Color.White) }
+            IconButton(onClick = { cp.seekTo(cp.currentPosition + 10_000) }) { Icon(Icons.Default.Forward10, tr(R.string.s127), tint = Color.White) }
+            IconButton(onClick = { cp.seekToNextMediaItem() }) { Icon(Icons.Default.SkipNext, tr(R.string.s128), tint = Color.White) }
         }
         Spacer(Modifier.height(16.dp))
-        OutlinedButton(onClick = { CastManager.endSession() }) { Text("停止投放", color = Color.White) }
+        OutlinedButton(onClick = { CastManager.endSession() }) { Text(tr(R.string.s129), color = Color.White) }
     }
 }

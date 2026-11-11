@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.cast
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.cast.CastPlayer
@@ -57,7 +60,7 @@ object CastManager {
         deviceName.value = castContext?.sessionManager?.currentCastSession?.castDevice?.friendlyName
         if (local == null || videos.isEmpty()) return
         val urls = LocalMediaServer.serve(app, videos)
-        if (urls == null) { error.value = "手機沒有連上 Wi-Fi"; endSession(); return }
+        if (urls == null) { error.value = tr(R.string.s001); endSession(); return }
         val index = local.currentMediaItemIndex.coerceIn(0, videos.size - 1)
         val position = local.currentPosition
         local.pause()

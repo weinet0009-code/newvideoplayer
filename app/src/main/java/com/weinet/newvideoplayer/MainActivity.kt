@@ -30,8 +30,13 @@ class MainActivity : FragmentActivity() {
         PipState.inPip.value = it.isInPictureInPictureMode
     }
 
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(I18n.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (I18n.restartIfChanged(this)) return
         enableEdgeToEdge()
         addOnPictureInPictureModeChangedListener(pipListener)
         handleIntent(intent)

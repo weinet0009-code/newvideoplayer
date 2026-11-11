@@ -1,5 +1,8 @@
 package com.weinet.newvideoplayer.tools
 
+import com.weinet.newvideoplayer.tr
+import com.weinet.newvideoplayer.R
+
 import android.content.Context
 import com.weinet.newvideoplayer.data.Video
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +33,7 @@ object GroqWhisper {
     private const val CHUNK_SECONDS = 600
     private const val SAMPLE_RATE = 16_000
 
-    class InvalidKey : IOException("Groq 金鑰無效")
+    class InvalidKey : IOException(tr(R.string.s005))
 
     /**
      * Transcribes [video] and writes an SRT file to the cache. [onStatus] gets a line to show
@@ -62,13 +65,13 @@ object GroqWhisper {
                     (r.code == 429 || r.code >= 500) && attempt < 30 -> {
                         // Free-plan limit (or a hiccup): wait as long as Groq asks, then retry.
                         val waitS = (r.retryAfter ?: 20L).coerceIn(5L, 3600L)
-                        onStatus(if (r.code == 429) "已達 Groq 免費額度上限，約 ${(waitS + 59) / 60} 分鐘後自動繼續…" else "伺服器忙碌，稍後重試…")
+                        onStatus(if (r.code == 429) tr(R.string.s006, (waitS + 59) / 60) else tr(R.string.s007))
                         var left = waitS * 1000
                         while (left > 0) { job?.ensureActive(); Thread.sleep(500); left -= 500 }
                         onStatus(null)
                         attempt++
                     }
-                    else -> throw IOException("Groq 錯誤 ${r.code}：${errorMessage(r.body)}")
+                    else -> throw IOException(tr(R.string.s008, r.code, errorMessage(r.body)))
                 }
             }
             onProgress(progress)
