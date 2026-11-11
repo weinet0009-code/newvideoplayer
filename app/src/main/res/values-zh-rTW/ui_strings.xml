@@ -86,11 +86,11 @@
     <string name="s084">，%1$s 部失敗</string>
     <string name="s085">轉成 MP3…</string>
     <string name="s086">轉成音訊…</string>
-    <string name="s087">已存到 </string>
+    <string name="s087">已存到\u0020</string>
     <string name="s088">全部播放（%1$s）</string>
     <string name="s089">隨機播放</string>
     <string name="s090">%1$s 首</string>
-    <string name="s091">影片 · </string>
+    <string name="s091">影片 ·\u0020</string>
     <string name="s092">暫停</string>
     <string name="s093">播放</string>
     <string name="s094">下一首</string>
