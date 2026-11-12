@@ -408,4 +408,18 @@
     <string name="lang_title">اللغة</string>
     <string name="lang_system">حسب إعداد الهاتف</string>
     <string name="lang_restart">سيُعاد فتح التطبيق بعد تغيير اللغة.</string>
+    <string name="eq_title">المعادل</string>
+    <string name="eq_flat">عادي</string>
+    <string name="eq_theater">مسرح</string>
+    <string name="eq_voice">الصوت (الحوار)</string>
+    <string name="eq_night">ليلي</string>
+    <string name="eq_pop">بوب</string>
+    <string name="eq_rock">روك</string>
+    <string name="eq_jazz">جاز</string>
+    <string name="eq_blues">بلوز</string>
+    <string name="eq_classical">كلاسيكي</string>
+    <string name="eq_bass">تعزيز الجهير</string>
+    <string name="eq_custom">مخصص</string>
+    <string name="eq_reset">إعادة ضبط</string>
+    <string name="eq_note">وضع المسرح يوسّع الصوت المجسم، والوضع الليلي يوازن بين المقاطع العالية والهادئة. لا يُطبّق أثناء الإرسال إلى التلفزيون.</string>
 </resources>

@@ -408,4 +408,18 @@
     <string name="lang_title">ভাষা</string>
     <string name="lang_system">ফোনের সেটিং অনুযায়ী</string>
     <string name="lang_restart">ভাষা বদলালে অ্যাপ আবার চালু হবে।</string>
+    <string name="eq_title">ইকুয়ালাইজার</string>
+    <string name="eq_flat">সাধারণ</string>
+    <string name="eq_theater">থিয়েটার</string>
+    <string name="eq_voice">কণ্ঠ (সংলাপ)</string>
+    <string name="eq_night">রাত</string>
+    <string name="eq_pop">পপ</string>
+    <string name="eq_rock">রক</string>
+    <string name="eq_jazz">জ্যাজ</string>
+    <string name="eq_blues">ব্লুজ</string>
+    <string name="eq_classical">ক্লাসিক্যাল</string>
+    <string name="eq_bass">বেস বুস্ট</string>
+    <string name="eq_custom">কাস্টম</string>
+    <string name="eq_reset">রিসেট</string>
+    <string name="eq_note">থিয়েটার স্টেরিও প্রশস্ত করে; রাত জোরালো ও মৃদু অংশের পার্থক্য কমায়। টিভিতে কাস্ট করার সময় প্রযোজ্য নয়।</string>
 </resources>

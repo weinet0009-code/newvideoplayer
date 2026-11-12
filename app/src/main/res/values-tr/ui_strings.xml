@@ -408,4 +408,18 @@
     <string name="lang_title">Dil</string>
     <string name="lang_system">Telefon ayarını izle</string>
     <string name="lang_restart">Dil değiştirildiğinde uygulama yeniden açılır.</string>
+    <string name="eq_title">Ekolayzer</string>
+    <string name="eq_flat">Normal</string>
+    <string name="eq_theater">Sinema</string>
+    <string name="eq_voice">Ses (diyalog)</string>
+    <string name="eq_night">Gece</string>
+    <string name="eq_pop">Pop</string>
+    <string name="eq_rock">Rock</string>
+    <string name="eq_jazz">Caz</string>
+    <string name="eq_blues">Blues</string>
+    <string name="eq_classical">Klasik</string>
+    <string name="eq_bass">Bas güçlendirme</string>
+    <string name="eq_custom">Özel</string>
+    <string name="eq_reset">Sıfırla</string>
+    <string name="eq_note">Sinema stereoyu genişletir; Gece yüksek ve alçak sesleri dengeler. TV\'ye yayın yaparken uygulanmaz.</string>
 </resources>

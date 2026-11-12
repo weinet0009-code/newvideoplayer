@@ -408,4 +408,18 @@
     <string name="lang_title">Jazyk</string>
     <string name="lang_system">Podle nastavení telefonu</string>
     <string name="lang_restart">Po změně jazyka se aplikace restartuje.</string>
+    <string name="eq_title">Ekvalizér</string>
+    <string name="eq_flat">Normální</string>
+    <string name="eq_theater">Kino</string>
+    <string name="eq_voice">Hlas (dialogy)</string>
+    <string name="eq_night">Noc</string>
+    <string name="eq_pop">Pop</string>
+    <string name="eq_rock">Rock</string>
+    <string name="eq_jazz">Jazz</string>
+    <string name="eq_blues">Blues</string>
+    <string name="eq_classical">Klasika</string>
+    <string name="eq_bass">Zesílení basů</string>
+    <string name="eq_custom">Vlastní</string>
+    <string name="eq_reset">Resetovat</string>
+    <string name="eq_note">Kino rozšiřuje stereo; Noc vyrovnává hlasité a tiché pasáže. Při odesílání do TV se nepoužije.</string>
 </resources>

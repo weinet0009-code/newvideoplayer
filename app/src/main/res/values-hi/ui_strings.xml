@@ -408,4 +408,18 @@
     <string name="lang_title">भाषा</string>
     <string name="lang_system">फ़ोन सेटिंग के अनुसार</string>
     <string name="lang_restart">भाषा बदलने पर ऐप फिर से खुलेगा।</string>
+    <string name="eq_title">इक्वलाइज़र</string>
+    <string name="eq_flat">सामान्य</string>
+    <string name="eq_theater">थिएटर</string>
+    <string name="eq_voice">आवाज़ (संवाद)</string>
+    <string name="eq_night">रात</string>
+    <string name="eq_pop">पॉप</string>
+    <string name="eq_rock">रॉक</string>
+    <string name="eq_jazz">जैज़</string>
+    <string name="eq_blues">ब्लूज़</string>
+    <string name="eq_classical">क्लासिकल</string>
+    <string name="eq_bass">बास बूस्ट</string>
+    <string name="eq_custom">कस्टम</string>
+    <string name="eq_reset">रीसेट करें</string>
+    <string name="eq_note">थिएटर स्टीरियो को चौड़ा करता है; रात तेज़ और धीमे हिस्सों को बराबर करता है। TV पर कास्ट करते समय लागू नहीं होता।</string>
 </resources>

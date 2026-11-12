@@ -408,4 +408,18 @@
     <string name="lang_title">שפה</string>
     <string name="lang_system">לפי הגדרות הטלפון</string>
     <string name="lang_restart">האפליקציה תיפתח מחדש אחרי החלפת השפה.</string>
+    <string name="eq_title">אקולייזר</string>
+    <string name="eq_flat">רגיל</string>
+    <string name="eq_theater">קולנוע</string>
+    <string name="eq_voice">קול (דיאלוג)</string>
+    <string name="eq_night">לילה</string>
+    <string name="eq_pop">פופ</string>
+    <string name="eq_rock">רוק</string>
+    <string name="eq_jazz">ג\'אז</string>
+    <string name="eq_blues">בלוז</string>
+    <string name="eq_classical">קלאסי</string>
+    <string name="eq_bass">הגברת בס</string>
+    <string name="eq_custom">מותאם אישית</string>
+    <string name="eq_reset">איפוס</string>
+    <string name="eq_note">קולנוע מרחיב את הסטריאו; לילה מאזן בין קטעים חזקים ושקטים. לא פעיל בזמן העברה לטלוויזיה.</string>
 </resources>

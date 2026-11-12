@@ -408,4 +408,18 @@
     <string name="lang_title">Язык</string>
     <string name="lang_system">Как в системе</string>
     <string name="lang_restart">После смены языка приложение перезапустится.</string>
+    <string name="eq_title">Эквалайзер</string>
+    <string name="eq_flat">Обычный</string>
+    <string name="eq_theater">Кинотеатр</string>
+    <string name="eq_voice">Голос (диалоги)</string>
+    <string name="eq_night">Ночной</string>
+    <string name="eq_pop">Поп</string>
+    <string name="eq_rock">Рок</string>
+    <string name="eq_jazz">Джаз</string>
+    <string name="eq_blues">Блюз</string>
+    <string name="eq_classical">Классика</string>
+    <string name="eq_bass">Усиление басов</string>
+    <string name="eq_custom">Пользовательский</string>
+    <string name="eq_reset">Сбросить</string>
+    <string name="eq_note">Кинотеатр расширяет стереобазу; Ночной выравнивает громкие и тихие фрагменты. Не применяется при трансляции на телевизор.</string>
 </resources>

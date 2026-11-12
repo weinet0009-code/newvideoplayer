@@ -408,4 +408,18 @@
     <string name="lang_title">Ngôn ngữ</string>
     <string name="lang_system">Theo cài đặt điện thoại</string>
     <string name="lang_restart">Ứng dụng sẽ khởi động lại sau khi đổi ngôn ngữ.</string>
+    <string name="eq_title">Bộ cân bằng</string>
+    <string name="eq_flat">Bình thường</string>
+    <string name="eq_theater">Rạp hát</string>
+    <string name="eq_voice">Giọng nói (lời thoại)</string>
+    <string name="eq_night">Ban đêm</string>
+    <string name="eq_pop">Pop</string>
+    <string name="eq_rock">Rock</string>
+    <string name="eq_jazz">Jazz</string>
+    <string name="eq_blues">Blues</string>
+    <string name="eq_classical">Cổ điển</string>
+    <string name="eq_bass">Tăng âm trầm</string>
+    <string name="eq_custom">Tùy chỉnh</string>
+    <string name="eq_reset">Đặt lại</string>
+    <string name="eq_note">Rạp hát mở rộng âm thanh nổi; Ban đêm cân bằng đoạn to và nhỏ. Không áp dụng khi truyền lên TV.</string>
 </resources>

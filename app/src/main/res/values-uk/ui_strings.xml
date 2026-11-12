@@ -408,4 +408,18 @@
     <string name="lang_title">Мова</string>
     <string name="lang_system">Як у системі</string>
     <string name="lang_restart">Після зміни мови програма перезапуститься.</string>
+    <string name="eq_title">Еквалайзер</string>
+    <string name="eq_flat">Звичайний</string>
+    <string name="eq_theater">Кінотеатр</string>
+    <string name="eq_voice">Голос (діалоги)</string>
+    <string name="eq_night">Нічний</string>
+    <string name="eq_pop">Поп</string>
+    <string name="eq_rock">Рок</string>
+    <string name="eq_jazz">Джаз</string>
+    <string name="eq_blues">Блюз</string>
+    <string name="eq_classical">Класика</string>
+    <string name="eq_bass">Підсилення басів</string>
+    <string name="eq_custom">Власний</string>
+    <string name="eq_reset">Скинути</string>
+    <string name="eq_note">Кінотеатр розширює стереобазу; Нічний вирівнює гучні й тихі фрагменти. Не застосовується під час трансляції на телевізор.</string>
 </resources>

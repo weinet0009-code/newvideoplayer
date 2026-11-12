@@ -408,4 +408,18 @@
     <string name="lang_title">言語</string>
     <string name="lang_system">端末の設定に従う</string>
     <string name="lang_restart">言語を変更するとアプリが再起動します。</string>
+    <string name="eq_title">イコライザー</string>
+    <string name="eq_flat">標準</string>
+    <string name="eq_theater">シアター</string>
+    <string name="eq_voice">ボイス（会話）</string>
+    <string name="eq_night">ナイト</string>
+    <string name="eq_pop">ポップ</string>
+    <string name="eq_rock">ロック</string>
+    <string name="eq_jazz">ジャズ</string>
+    <string name="eq_blues">ブルース</string>
+    <string name="eq_classical">クラシック</string>
+    <string name="eq_bass">低音ブースト</string>
+    <string name="eq_custom">カスタム</string>
+    <string name="eq_reset">リセット</string>
+    <string name="eq_note">シアターはステレオ感を広げ、ナイトは音量差を抑えます。テレビへのキャスト中は適用されません。</string>
 </resources>

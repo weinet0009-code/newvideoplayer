@@ -408,4 +408,18 @@
     <string name="lang_title">زبان</string>
     <string name="lang_system">فون کی ترتیب کے مطابق</string>
     <string name="lang_restart">زبان بدلنے پر ایپ دوبارہ کھلے گی۔</string>
+    <string name="eq_title">ایکولائزر</string>
+    <string name="eq_flat">نارمل</string>
+    <string name="eq_theater">تھیٹر</string>
+    <string name="eq_voice">آواز (مکالمہ)</string>
+    <string name="eq_night">رات</string>
+    <string name="eq_pop">پاپ</string>
+    <string name="eq_rock">راک</string>
+    <string name="eq_jazz">جاز</string>
+    <string name="eq_blues">بلوز</string>
+    <string name="eq_classical">کلاسیکی</string>
+    <string name="eq_bass">باس بوسٹ</string>
+    <string name="eq_custom">حسب ضرورت</string>
+    <string name="eq_reset">ری سیٹ</string>
+    <string name="eq_note">تھیٹر سٹیریو کو وسیع کرتا ہے؛ رات اونچی اور دھیمی آوازوں کا فرق کم کرتی ہے۔ TV پر کاسٹ کرتے وقت لاگو نہیں ہوتا۔</string>
 </resources>

@@ -408,4 +408,18 @@
     <string name="lang_title">언어</string>
     <string name="lang_system">휴대폰 설정 따름</string>
     <string name="lang_restart">언어를 변경하면 앱이 다시 시작됩니다.</string>
+    <string name="eq_title">이퀄라이저</string>
+    <string name="eq_flat">기본</string>
+    <string name="eq_theater">극장</string>
+    <string name="eq_voice">음성(대사)</string>
+    <string name="eq_night">야간</string>
+    <string name="eq_pop">팝</string>
+    <string name="eq_rock">록</string>
+    <string name="eq_jazz">재즈</string>
+    <string name="eq_blues">블루스</string>
+    <string name="eq_classical">클래식</string>
+    <string name="eq_bass">저음 강화</string>
+    <string name="eq_custom">사용자 지정</string>
+    <string name="eq_reset">초기화</string>
+    <string name="eq_note">극장은 스테레오를 넓히고, 야간은 음량 차이를 줄입니다. TV로 전송 중에는 적용되지 않습니다.</string>
 </resources>
