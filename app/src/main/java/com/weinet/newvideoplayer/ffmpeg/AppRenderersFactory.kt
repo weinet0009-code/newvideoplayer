@@ -7,6 +7,8 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.Renderer
 import androidx.media3.exoplayer.audio.AudioRendererEventListener
 import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
+import com.weinet.newvideoplayer.playback.EqAudioProcessor
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.video.VideoRendererEventListener
 
@@ -53,4 +55,12 @@ class AppRenderersFactory(context: Context) : DefaultRenderersFactory(context) {
         if (extensionRendererMode == EXTENSION_RENDERER_MODE_OFF || !FfmpegLibrary.isAvailable()) return
         out.add(FfmpegAudioRenderer(eventHandler, eventListener, audioSink))
     }
+
+    /** Same sink as the default, with the app's equalizer in the chain. */
+    override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioTrackPlaybackParams: Boolean): AudioSink =
+        DefaultAudioSink.Builder(context)
+            .setEnableFloatOutput(enableFloatOutput)
+            .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+            .setAudioProcessors(arrayOf(EqAudioProcessor()))
+            .build()
 }

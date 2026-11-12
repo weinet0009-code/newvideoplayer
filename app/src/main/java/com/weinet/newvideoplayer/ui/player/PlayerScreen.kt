@@ -194,6 +194,8 @@ fun PlayerScreen(onBack: () -> Unit) {
     var showAudioPicker by remember { mutableStateOf(false) }
     var showApi by remember { mutableStateOf(false) }
     var showSleep by remember { mutableStateOf(false) }
+    var showEq by remember { mutableStateOf(false) }
+    val eqState by com.weinet.newvideoplayer.playback.AudioEq.state.collectAsState()
     var showAudioFormat by remember { mutableStateOf(false) }
     var repeat by remember { mutableIntStateOf(player.repeatMode) }
     var enhance by remember { mutableIntStateOf(settings.enhance) }
@@ -643,6 +645,8 @@ fun PlayerScreen(onBack: () -> Unit) {
         )
     }
 
+    if (showEq) EqualizerDialog(onDismiss = { showEq = false })
+
     if (showSleep) {
         AlertDialog(
             onDismissRequest = { showSleep = false },
@@ -699,6 +703,11 @@ fun PlayerScreen(onBack: () -> Unit) {
                         headlineContent = { Text(tr(R.string.s098)) },
                         supportingContent = { Text(sleepLabel(sleep)) },
                         modifier = Modifier.clickable { showMore = false; showSleep = true },
+                    )
+                    ListItem(
+                        headlineContent = { Text(tr(R.string.eq_title)) },
+                        supportingContent = { Text(eqSummary(eqState)) },
+                        modifier = Modifier.clickable { showMore = false; showEq = true },
                     )
                     ListItem(
                         headlineContent = { Text(tr(R.string.s172)) },

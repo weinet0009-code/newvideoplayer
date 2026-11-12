@@ -408,4 +408,18 @@
     <string name="lang_title">語言</string>
     <string name="lang_system">跟隨手機設定</string>
     <string name="lang_restart">切換語言後 app 會重新開啟。</string>
+    <string name="eq_title">等化器</string>
+    <string name="eq_flat">標準</string>
+    <string name="eq_theater">劇院</string>
+    <string name="eq_voice">人聲對白</string>
+    <string name="eq_night">夜間</string>
+    <string name="eq_pop">流行</string>
+    <string name="eq_rock">搖滾</string>
+    <string name="eq_jazz">爵士</string>
+    <string name="eq_blues">藍調</string>
+    <string name="eq_classical">古典</string>
+    <string name="eq_bass">重低音</string>
+    <string name="eq_custom">自訂</string>
+    <string name="eq_reset">重設</string>
+    <string name="eq_note">劇院會加寬立體聲，夜間會壓縮音量差距。投放到電視時不生效。</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import com.weinet.newvideoplayer.ui.player.EqualizerDialog
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -194,6 +195,8 @@ fun NowPlayingSheet(onDismiss: () -> Unit) {
     var duration by remember { mutableLongStateOf(player.duration.coerceAtLeast(0)) }
     var dragging by remember { mutableStateOf<Float?>(null) }
     var showSleep by remember { mutableStateOf(false) }
+    var showEq by remember { mutableStateOf(false) }
+    if (showEq) EqualizerDialog(onDismiss = { showEq = false })
     val sleep by SleepTimer.state.collectAsStateWithLifecycle()
     LaunchedEffect(player) {
         while (true) {
@@ -241,6 +244,10 @@ fun NowPlayingSheet(onDismiss: () -> Unit) {
                 }
             }
             Row(horizontalArrangement = Arrangement.Center) {
+                TextButton(onClick = { showEq = true }) {
+                    Icon(Icons.Default.Equalizer, null); Spacer(Modifier.width(4.dp))
+                    Text(tr(R.string.eq_title))
+                }
                 TextButton(onClick = { showSleep = true }) {
                     Icon(Icons.Default.Bedtime, null); Spacer(Modifier.width(4.dp))
                     Text(if (sleep == SleepTimer.State.Off) tr(R.string.s098) else tr(R.string.s099))

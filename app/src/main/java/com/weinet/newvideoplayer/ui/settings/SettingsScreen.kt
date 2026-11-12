@@ -22,6 +22,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.weinet.newvideoplayer.BuildConfig
 import com.weinet.newvideoplayer.I18n
+import com.weinet.newvideoplayer.ui.player.EqualizerDialog
+import com.weinet.newvideoplayer.ui.player.eqSummary
 import com.weinet.newvideoplayer.data.LibraryStore
 import com.weinet.newvideoplayer.data.PlayerSettings
 import com.weinet.newvideoplayer.data.SecretStore
@@ -47,6 +49,7 @@ fun SettingsList(onPage: (SettingsPage) -> Unit) {
     val context = LocalContext.current
     val settings = remember { PlayerSettings(context) }
     val theme by ThemeStore.state.collectAsState()
+    val eqState by com.weinet.newvideoplayer.playback.AudioEq.state.collectAsState()
     var sw by remember { mutableStateOf(settings.preferSoftwareDecoder) }
     var bg by remember { mutableStateOf(settings.backgroundPlay) }
     var pip by remember { mutableStateOf(settings.autoPip) }
@@ -91,6 +94,7 @@ fun SettingsList(onPage: (SettingsPage) -> Unit) {
             I18n.chosenTag(context)?.let { t -> I18n.LANGUAGES.firstOrNull { it.first == t }?.second ?: t } ?: tr(R.string.lang_system)) { dialog = "lang" }
 
         Header(tr(R.string.s093))
+        Item(Icons.Default.Equalizer, tr(R.string.eq_title), eqSummary(eqState)) { dialog = "eq" }
         Toggle(Icons.Default.Memory, tr(R.string.s293), tr(R.string.s294), sw) { sw = it; settings.preferSoftwareDecoder = it }
         Toggle(Icons.Default.Headphones, tr(R.string.s188), tr(R.string.s295), bg) { bg = it; settings.backgroundPlay = it }
         Toggle(Icons.Default.PictureInPictureAlt, tr(R.string.s296), tr(R.string.s297), pip) { pip = it; settings.autoPip = it }
@@ -116,6 +120,7 @@ fun SettingsList(onPage: (SettingsPage) -> Unit) {
     when (dialog) {
         "theme" -> ThemeDialog(onDismiss = { dialog = null })
         "lang" -> LanguageDialog(onDismiss = { dialog = null })
+        "eq" -> EqualizerDialog(onDismiss = { dialog = null })
         "groq" -> GroqKeyDialog(onDismiss = { dialog = null })
         "os" -> ApiSettingsDialog(onDismiss = { dialog = null })
         "models" -> ModelsDialog(onDismiss = { dialog = null })

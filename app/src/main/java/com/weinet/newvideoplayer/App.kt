@@ -10,6 +10,7 @@ class App : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         I18n.init(this)
+        com.weinet.newvideoplayer.playback.AudioEq.init(this)
         LibraryStore.init(this)
     }
 
