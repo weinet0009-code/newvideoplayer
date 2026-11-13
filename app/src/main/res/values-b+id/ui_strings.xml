@@ -422,4 +422,5 @@
     <string name="eq_custom">Kustom</string>
     <string name="eq_reset">Reset</string>
     <string name="eq_note">Teater memperlebar stereo; Malam meratakan bagian keras dan pelan. Tidak berlaku saat mentransmisikan ke TV.</string>
+    <string name="eq_preamp">Preamp</string>
 </resources>

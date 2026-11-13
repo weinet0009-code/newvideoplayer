@@ -422,4 +422,5 @@
     <string name="eq_custom">Custom</string>
     <string name="eq_reset">I-reset</string>
     <string name="eq_note">Pinalalawak ng Teatro ang stereo; pinapantay ng Gabi ang malakas at mahinang bahagi. Hindi gumagana habang nagka-cast sa TV.</string>
+    <string name="eq_preamp">Preamp</string>
 </resources>

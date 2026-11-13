@@ -422,4 +422,5 @@
     <string name="eq_custom">Tersuai</string>
     <string name="eq_reset">Tetap semula</string>
     <string name="eq_note">Teater meluaskan stereo; Malam meratakan bahagian kuat dan perlahan. Tidak digunakan semasa menghantar ke TV.</string>
+    <string name="eq_preamp">Prapenguat</string>
 </resources>

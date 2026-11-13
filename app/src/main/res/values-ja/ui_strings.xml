@@ -422,4 +422,5 @@
     <string name="eq_custom">カスタム</string>
     <string name="eq_reset">リセット</string>
     <string name="eq_note">シアターはステレオ感を広げ、ナイトは音量差を抑えます。テレビへのキャスト中は適用されません。</string>
+    <string name="eq_preamp">プリアンプ</string>
 </resources>

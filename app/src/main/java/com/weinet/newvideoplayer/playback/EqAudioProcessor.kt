@@ -73,8 +73,7 @@ class EqAudioProcessor : BaseAudioProcessor() {
         }
         if (newBands != bands || st.size != newBands * channels * 4) st = FloatArray(newBands * channels * 4)
         bands = newBands; coef = c
-        val maxBoost = max(0f, p.gains.maxOrNull() ?: 0f)
-        preamp = 10f.pow(-maxBoost / 20f) * (if (p.widen > 0f) 1f / (1f + p.widen / 2f) else 1f)
+        preamp = 10f.pow(p.preampDb / 20f)
         widen = if (channels == 2) p.widen else 0f
         compress = p.compress
         atk = exp(-1f / (0.005f * rate))

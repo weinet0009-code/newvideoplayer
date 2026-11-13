@@ -422,4 +422,5 @@
     <string name="eq_custom">Personalizado</string>
     <string name="eq_reset">Restablecer</string>
     <string name="eq_note">Cine amplía el estéreo; Noche equilibra las partes fuertes y suaves. No se aplica al enviar contenido a una TV.</string>
+    <string name="eq_preamp">Preamplificador</string>
 </resources>

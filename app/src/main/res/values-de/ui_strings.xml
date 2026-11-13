@@ -422,4 +422,5 @@
     <string name="eq_custom">Benutzerdefiniert</string>
     <string name="eq_reset">Zurücksetzen</string>
     <string name="eq_note">Kino verbreitert das Stereobild; Nacht gleicht laute und leise Stellen aus. Beim Streamen auf einen Fernseher nicht aktiv.</string>
+    <string name="eq_preamp">Vorverstärker</string>
 </resources>

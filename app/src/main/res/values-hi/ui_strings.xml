@@ -422,4 +422,5 @@
     <string name="eq_custom">कस्टम</string>
     <string name="eq_reset">रीसेट करें</string>
     <string name="eq_note">थिएटर स्टीरियो को चौड़ा करता है; रात तेज़ और धीमे हिस्सों को बराबर करता है। TV पर कास्ट करते समय लागू नहीं होता।</string>
+    <string name="eq_preamp">प्रीएम्प</string>
 </resources>

@@ -422,4 +422,5 @@
     <string name="eq_custom">سفارشی</string>
     <string name="eq_reset">بازنشانی</string>
     <string name="eq_note">حالت سینما صدای استریو را گسترده‌تر می‌کند و حالت شب اختلاف صدای بلند و آرام را کم می‌کند. هنگام پخش روی تلویزیون اعمال نمی‌شود.</string>
+    <string name="eq_preamp">پیش‌تقویت</string>
 </resources>

@@ -422,4 +422,5 @@
     <string name="eq_custom">Tùy chỉnh</string>
     <string name="eq_reset">Đặt lại</string>
     <string name="eq_note">Rạp hát mở rộng âm thanh nổi; Ban đêm cân bằng đoạn to và nhỏ. Không áp dụng khi truyền lên TV.</string>
+    <string name="eq_preamp">Tiền khuếch đại</string>
 </resources>

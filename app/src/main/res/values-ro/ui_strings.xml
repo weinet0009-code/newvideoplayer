@@ -422,4 +422,5 @@
     <string name="eq_custom">Personalizat</string>
     <string name="eq_reset">Resetează</string>
     <string name="eq_note">Cinema lărgește stereo; Noapte echilibrează părțile tari și cele încete. Nu se aplică în timpul proiectării pe un televizor.</string>
+    <string name="eq_preamp">Preamplificator</string>
 </resources>

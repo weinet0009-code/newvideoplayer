@@ -422,4 +422,5 @@
     <string name="eq_custom">Personalizado</string>
     <string name="eq_reset">Redefinir</string>
     <string name="eq_note">Cinema amplia o estéreo; Noite equilibra as partes altas e baixas. Não é aplicado ao transmitir para uma TV.</string>
+    <string name="eq_preamp">Pré-amplificador</string>
 </resources>

@@ -422,4 +422,5 @@
     <string name="eq_custom">Anpassad</string>
     <string name="eq_reset">Återställ</string>
     <string name="eq_note">Biograf breddar stereoljudet; Natt jämnar ut starka och svaga partier. Används inte vid castning till en tv.</string>
+    <string name="eq_preamp">Förförstärkare</string>
 </resources>

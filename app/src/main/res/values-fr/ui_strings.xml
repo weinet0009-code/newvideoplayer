@@ -422,4 +422,5 @@
     <string name="eq_custom">Personnalisé</string>
     <string name="eq_reset">Réinitialiser</string>
     <string name="eq_note">Cinéma élargit la stéréo ; Nuit atténue les écarts de volume. Non appliqué pendant la diffusion sur un téléviseur.</string>
+    <string name="eq_preamp">Préampli</string>
 </resources>

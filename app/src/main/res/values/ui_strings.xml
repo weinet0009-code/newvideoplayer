@@ -425,4 +425,5 @@
     <string name="eq_hz" translatable="false">%1$s Hz</string>
     <string name="eq_khz" translatable="false">%1$s kHz</string>
     <string name="eq_db" translatable="false">%1$s dB</string>
+    <string name="eq_preamp">Preamp</string>
 </resources>

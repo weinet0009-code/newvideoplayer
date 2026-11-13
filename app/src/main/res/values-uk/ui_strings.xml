@@ -422,4 +422,5 @@
     <string name="eq_custom">Власний</string>
     <string name="eq_reset">Скинути</string>
     <string name="eq_note">Кінотеатр розширює стереобазу; Нічний вирівнює гучні й тихі фрагменти. Не застосовується під час трансляції на телевізор.</string>
+    <string name="eq_preamp">Підсилювач</string>
 </resources>

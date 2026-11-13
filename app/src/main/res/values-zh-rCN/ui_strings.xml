@@ -422,4 +422,5 @@
     <string name="eq_custom">自定义</string>
     <string name="eq_reset">重置</string>
     <string name="eq_note">影院会加宽立体声，夜间会压缩音量差距。投屏到电视时不生效。</string>
+    <string name="eq_preamp">前置放大</string>
 </resources>

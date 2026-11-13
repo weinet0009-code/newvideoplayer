@@ -422,4 +422,5 @@
     <string name="eq_custom">Vlastní</string>
     <string name="eq_reset">Resetovat</string>
     <string name="eq_note">Kino rozšiřuje stereo; Noc vyrovnává hlasité a tiché pasáže. Při odesílání do TV se nepoužije.</string>
+    <string name="eq_preamp">Předzesilovač</string>
 </resources>

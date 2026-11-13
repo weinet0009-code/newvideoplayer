@@ -422,4 +422,5 @@
     <string name="eq_custom">Aangepast</string>
     <string name="eq_reset">Resetten</string>
     <string name="eq_note">Theater verbreedt het stereobeeld; Nacht vlakt harde en zachte delen af. Niet actief tijdens casten naar een tv.</string>
+    <string name="eq_preamp">Voorversterker</string>
 </resources>

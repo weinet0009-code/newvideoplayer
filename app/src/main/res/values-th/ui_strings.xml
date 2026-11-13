@@ -422,4 +422,5 @@
     <string name="eq_custom">กำหนดเอง</string>
     <string name="eq_reset">รีเซ็ต</string>
     <string name="eq_note">โรงภาพยนตร์จะขยายเสียงสเตอริโอให้กว้างขึ้น ส่วนกลางคืนจะลดความต่างระหว่างเสียงดังและเบา ไม่มีผลขณะแคสต์ไปยังทีวี</string>
+    <string name="eq_preamp">ปรีแอมป์</string>
 </resources>

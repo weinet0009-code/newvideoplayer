@@ -422,4 +422,5 @@
     <string name="eq_custom">自訂</string>
     <string name="eq_reset">重設</string>
     <string name="eq_note">劇院會加寬立體聲，夜間會壓縮音量差距。投放到電視時不生效。</string>
+    <string name="eq_preamp">前級增益</string>
 </resources>

@@ -422,4 +422,5 @@
     <string name="eq_custom">Własny</string>
     <string name="eq_reset">Resetuj</string>
     <string name="eq_note">Kino poszerza stereo; Noc wyrównuje głośne i ciche fragmenty. Nie działa podczas przesyłania na telewizor.</string>
+    <string name="eq_preamp">Przedwzmacniacz</string>
 </resources>

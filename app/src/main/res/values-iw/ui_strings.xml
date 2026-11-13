@@ -422,4 +422,5 @@
     <string name="eq_custom">מותאם אישית</string>
     <string name="eq_reset">איפוס</string>
     <string name="eq_note">קולנוע מרחיב את הסטריאו; לילה מאזן בין קטעים חזקים ושקטים. לא פעיל בזמן העברה לטלוויזיה.</string>
+    <string name="eq_preamp">קדם-מגבר</string>
 </resources>

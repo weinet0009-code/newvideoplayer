@@ -422,4 +422,5 @@
     <string name="eq_custom">Özel</string>
     <string name="eq_reset">Sıfırla</string>
     <string name="eq_note">Sinema stereoyu genişletir; Gece yüksek ve alçak sesleri dengeler. TV\'ye yayın yaparken uygulanmaz.</string>
+    <string name="eq_preamp">Ön yükseltme</string>
 </resources>

@@ -422,4 +422,5 @@
     <string name="eq_custom">مخصص</string>
     <string name="eq_reset">إعادة ضبط</string>
     <string name="eq_note">وضع المسرح يوسّع الصوت المجسم، والوضع الليلي يوازن بين المقاطع العالية والهادئة. لا يُطبّق أثناء الإرسال إلى التلفزيون.</string>
+    <string name="eq_preamp">مضخم أولي</string>
 </resources>

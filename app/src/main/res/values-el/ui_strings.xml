@@ -422,4 +422,5 @@
     <string name="eq_custom">Προσαρμογή</string>
     <string name="eq_reset">Επαναφορά</string>
     <string name="eq_note">Ο Κινηματογράφος διευρύνει το στερεοφωνικό ήχο· η Νύχτα εξισορροπεί τα δυνατά και τα σιγανά σημεία. Δεν εφαρμόζεται κατά τη μετάδοση σε τηλεόραση.</string>
+    <string name="eq_preamp">Προενισχυτής</string>
 </resources>

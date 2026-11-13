@@ -422,4 +422,5 @@
     <string name="eq_custom">কাস্টম</string>
     <string name="eq_reset">রিসেট</string>
     <string name="eq_note">থিয়েটার স্টেরিও প্রশস্ত করে; রাত জোরালো ও মৃদু অংশের পার্থক্য কমায়। টিভিতে কাস্ট করার সময় প্রযোজ্য নয়।</string>
+    <string name="eq_preamp">প্রিঅ্যাম্প</string>
 </resources>
