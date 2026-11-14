@@ -426,4 +426,23 @@
     <string name="eq_khz" translatable="false">%1$s kHz</string>
     <string name="eq_db" translatable="false">%1$s dB</string>
     <string name="eq_preamp">Preamp</string>
+    <string name="sub_style">Subtitle style</string>
+    <string name="sub_style_hint">Size, color, outline, background, position</string>
+    <string name="sub_preview">Subtitle preview 123</string>
+    <string name="sub_size">Size</string>
+    <string name="sub_color">Text color</string>
+    <string name="sub_bold">Bold</string>
+    <string name="sub_edge">Outline</string>
+    <string name="sub_none">None</string>
+    <string name="sub_edge_outline">Outline</string>
+    <string name="sub_edge_shadow">Shadow</string>
+    <string name="sub_bg">Background</string>
+    <string name="sub_bg_box">Translucent box</string>
+    <string name="sub_position">Position (from bottom)</string>
+    <string name="sub_embedded">Use styles from the subtitle file</string>
+    <string name="sub_embedded_hint">Colors and fonts in ASS / VTT files</string>
+    <string name="ab_set_a">Point A set at %1$s. Tap again to set B</string>
+    <string name="ab_on">A-B loop %1$s – %2$s</string>
+    <string name="ab_off">A-B loop off</string>
+    <string name="ab_too_short">B must come after A</string>
 </resources>

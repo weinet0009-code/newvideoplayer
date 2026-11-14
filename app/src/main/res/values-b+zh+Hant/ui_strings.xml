@@ -423,4 +423,23 @@
     <string name="eq_reset">重設</string>
     <string name="eq_note">劇院會加寬立體聲，夜間會壓縮音量差距。投放到電視時不生效。</string>
     <string name="eq_preamp">前級增益</string>
+    <string name="sub_style">字幕樣式</string>
+    <string name="sub_style_hint">大小、顏色、外框、背景、位置</string>
+    <string name="sub_preview">預覽字幕 Subtitle 123</string>
+    <string name="sub_size">大小</string>
+    <string name="sub_color">文字顏色</string>
+    <string name="sub_bold">粗體</string>
+    <string name="sub_edge">外框</string>
+    <string name="sub_none">無</string>
+    <string name="sub_edge_outline">描邊</string>
+    <string name="sub_edge_shadow">陰影</string>
+    <string name="sub_bg">背景</string>
+    <string name="sub_bg_box">半透明底</string>
+    <string name="sub_position">位置（離底部）</string>
+    <string name="sub_embedded">使用字幕檔內建樣式</string>
+    <string name="sub_embedded_hint">ASS／VTT 檔裡的顏色與字型</string>
+    <string name="ab_set_a">已設 A 點 %1$s，再按一次設 B 點</string>
+    <string name="ab_on">A-B 循環 %1$s – %2$s</string>
+    <string name="ab_off">已取消 A-B 循環</string>
+    <string name="ab_too_short">B 點要在 A 點之後</string>
 </resources>

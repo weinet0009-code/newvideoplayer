@@ -11,6 +11,7 @@ class App : Application(), ImageLoaderFactory {
         super.onCreate()
         I18n.init(this)
         com.weinet.newvideoplayer.playback.AudioEq.init(this)
+        com.weinet.newvideoplayer.playback.SubtitleStyle.init(this)
         LibraryStore.init(this)
     }
 

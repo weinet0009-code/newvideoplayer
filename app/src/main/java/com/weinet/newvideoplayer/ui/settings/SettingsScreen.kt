@@ -100,6 +100,7 @@ fun SettingsList(onPage: (SettingsPage) -> Unit) {
         Toggle(Icons.Default.PictureInPictureAlt, tr(R.string.s296), tr(R.string.s297), pip) { pip = it; settings.autoPip = it }
 
         Header(tr(R.string.s298))
+        Item(Icons.Default.FormatSize, tr(R.string.sub_style), tr(R.string.sub_style_hint)) { dialog = "substyle" }
         Item(Icons.Default.Key, tr(R.string.s299), if (SecretStore.get(context, GroqWhisper.KEY_NAME) != null) tr(R.string.s300) else tr(R.string.s301)) { dialog = "groq" }
         Item(Icons.Default.Subtitles, tr(R.string.s186), tr(R.string.s187)) { dialog = "os" }
         Item(Icons.Default.Download, tr(R.string.s302), tr(R.string.s303)) { dialog = "models" }
@@ -121,6 +122,7 @@ fun SettingsList(onPage: (SettingsPage) -> Unit) {
         "theme" -> ThemeDialog(onDismiss = { dialog = null })
         "lang" -> LanguageDialog(onDismiss = { dialog = null })
         "eq" -> EqualizerDialog(onDismiss = { dialog = null })
+        "substyle" -> com.weinet.newvideoplayer.ui.player.SubtitleStyleDialog(onDismiss = { dialog = null })
         "groq" -> GroqKeyDialog(onDismiss = { dialog = null })
         "os" -> ApiSettingsDialog(onDismiss = { dialog = null })
         "models" -> ModelsDialog(onDismiss = { dialog = null })

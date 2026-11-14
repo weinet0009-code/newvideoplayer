@@ -195,6 +195,12 @@ fun PlayerScreen(onBack: () -> Unit) {
     var showApi by remember { mutableStateOf(false) }
     var showSleep by remember { mutableStateOf(false) }
     var showEq by remember { mutableStateOf(false) }
+    var showSubStyle by remember { mutableStateOf(false) }
+    val subStyle by com.weinet.newvideoplayer.playback.SubtitleStyle.state.collectAsState()
+    // A-B loop points in ms; both set = looping. Cleared when the video changes.
+    var abA by remember { mutableStateOf<Long?>(null) }
+    var abB by remember { mutableStateOf<Long?>(null) }
+    var abItem by remember { mutableStateOf<String?>(null) }
     val eqState by com.weinet.newvideoplayer.playback.AudioEq.state.collectAsState()
     var showAudioFormat by remember { mutableStateOf(false) }
     var repeat by remember { mutableIntStateOf(player.repeatMode) }
@@ -441,12 +447,24 @@ fun PlayerScreen(onBack: () -> Unit) {
     }
     LaunchedEffect(hint) { if (hint != null) { delay(if (hint!!.length > 12) 2500 else 900); hint = null } }
     LaunchedEffect(rotation) { activity.requestedOrientation = rotation.value }
+    LaunchedEffect(abA, abB) {
+        val a = abA; val b = abB
+        if (a == null || b == null) return@LaunchedEffect
+        while (true) {
+            if (player.currentMediaItem?.mediaId != abItem) { abA = null; abB = null; break }
+            if (player.currentPosition >= b || player.currentPosition < a - 1000) player.seekTo(a)
+            delay(40)
+        }
+    }
     BackHandler { if (locked) hint = tr(R.string.s154) else exit() }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         AndroidView(
             factory = { PlayerView(it).apply { useController = false } },
-            update = { it.player = player; it.resizeMode = aspect.mode },
+            update = {
+                it.player = player; it.resizeMode = aspect.mode
+                com.weinet.newvideoplayer.playback.SubtitleStyle.apply(it.subtitleView, subStyle)
+            },
             onRelease = { it.player = null },
             modifier = Modifier.fillMaxSize(),
         )
@@ -557,6 +575,11 @@ fun PlayerScreen(onBack: () -> Unit) {
                     // Bottom bar
                     Column(Modifier.fillMaxWidth().align(Alignment.BottomCenter).background(Color(0x88000000))
                         .navigationBarsPadding().padding(horizontal = 12.dp)) {
+                        if (abA != null) Text(
+                            if (abB == null) "A ${formatDuration(abA!!)} → B ?" else tr(R.string.ab_on, formatDuration(abA!!), formatDuration(abB!!)),
+                            color = Color(0xFFFFD54F), style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(top = 4.dp).clickable { abA = null; abB = null; hint = tr(R.string.ab_off) },
+                        )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(formatDuration(position), color = Color.White, style = MaterialTheme.typography.labelMedium)
                             Slider(
@@ -569,6 +592,18 @@ fun PlayerScreen(onBack: () -> Unit) {
                         }
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                             Ctl(Icons.Default.Lock, tr(R.string.s159)) { touch(); locked = true }
+                            AbButton(abA, abB) {
+                                touch()
+                                val pos = player.currentPosition
+                                when {
+                                    abA == null -> { abA = pos; abItem = player.currentMediaItem?.mediaId; hint = tr(R.string.ab_set_a, formatDuration(pos)) }
+                                    abB == null -> {
+                                        if (pos > abA!! + 500) { abB = pos; hint = tr(R.string.ab_on, formatDuration(abA!!), formatDuration(pos)) }
+                                        else hint = tr(R.string.ab_too_short)
+                                    }
+                                    else -> { abA = null; abB = null; hint = tr(R.string.ab_off) }
+                                }
+                            }
                             Ctl(if (muted) Icons.Default.VolumeOff else Icons.Default.VolumeUp, tr(R.string.s160)) {
                                 touch(); muted = !muted; player.volume = if (muted) 0f else 1f
                                 hint = if (muted) tr(R.string.s161) else tr(R.string.s162)
@@ -646,6 +681,7 @@ fun PlayerScreen(onBack: () -> Unit) {
     }
 
     if (showEq) EqualizerDialog(onDismiss = { showEq = false })
+    if (showSubStyle) SubtitleStyleDialog(onDismiss = { showSubStyle = false })
 
     if (showSleep) {
         AlertDialog(
@@ -716,6 +752,11 @@ fun PlayerScreen(onBack: () -> Unit) {
                             enhance = (enhance + 1) % Enhance.LABELS.size
                             PlayerHolder.setEnhance(context, enhance)
                         },
+                    )
+                    ListItem(
+                        headlineContent = { Text(tr(R.string.sub_style)) },
+                        supportingContent = { Text(tr(R.string.sub_style_hint)) },
+                        modifier = Modifier.clickable { showMore = false; showSubStyle = true },
                     )
                     ListItem(
                         headlineContent = { Text(tr(R.string.s174)) },
@@ -800,4 +841,13 @@ private class TopAction(val key: String, val label: String, val icon: ImageVecto
 @Composable
 private fun Ctl(icon: ImageVector, label: String, onClick: () -> Unit) {
     IconButton(onClick = onClick) { Icon(icon, contentDescription = label, tint = Color.White) }
+}
+
+/** A-B loop button: "A-B" text, gold when a point is set. */
+@Composable
+private fun AbButton(a: Long?, b: Long?, onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Text(if (a != null && b == null) "A·" else "A-B", color = if (a != null) Color(0xFFFFD54F) else Color.White,
+            style = MaterialTheme.typography.labelLarge)
+    }
 }

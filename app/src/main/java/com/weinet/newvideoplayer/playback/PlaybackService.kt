@@ -109,6 +109,7 @@ class PlaybackService : MediaSessionService() {
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             setShutterBackgroundColor(Color.BLACK)
             this.player = player
+            SubtitleStyle.apply(subtitleView)
         }
         val btn = (32 * density).toInt()
         val close = ImageView(ctx).apply {
