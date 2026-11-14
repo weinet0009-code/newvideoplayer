@@ -423,4 +423,23 @@
     <string name="eq_reset">Resetovat</string>
     <string name="eq_note">Kino rozšiřuje stereo; Noc vyrovnává hlasité a tiché pasáže. Při odesílání do TV se nepoužije.</string>
     <string name="eq_preamp">Předzesilovač</string>
+    <string name="sub_style">Styl titulků</string>
+    <string name="sub_style_hint">Velikost, barva, obrys, pozadí, pozice</string>
+    <string name="sub_preview">Náhled titulků 123</string>
+    <string name="sub_size">Velikost</string>
+    <string name="sub_color">Barva textu</string>
+    <string name="sub_bold">Tučné</string>
+    <string name="sub_edge">Okraj</string>
+    <string name="sub_none">Žádné</string>
+    <string name="sub_edge_outline">Obrys</string>
+    <string name="sub_edge_shadow">Stín</string>
+    <string name="sub_bg">Pozadí</string>
+    <string name="sub_bg_box">Průsvitný box</string>
+    <string name="sub_position">Pozice (odspodu)</string>
+    <string name="sub_embedded">Použít styly ze souboru titulků</string>
+    <string name="sub_embedded_hint">Barvy a písma v souborech ASS / VTT</string>
+    <string name="ab_set_a">Bod A nastaven na %1$s. Klepněte znovu pro nastavení B</string>
+    <string name="ab_on">Smyčka A-B %1$s – %2$s</string>
+    <string name="ab_off">Smyčka A-B vypnuta</string>
+    <string name="ab_too_short">B musí být za A</string>
 </resources>

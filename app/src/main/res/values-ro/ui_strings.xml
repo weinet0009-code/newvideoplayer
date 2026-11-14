@@ -423,4 +423,23 @@
     <string name="eq_reset">Resetează</string>
     <string name="eq_note">Cinema lărgește stereo; Noapte echilibrează părțile tari și cele încete. Nu se aplică în timpul proiectării pe un televizor.</string>
     <string name="eq_preamp">Preamplificator</string>
+    <string name="sub_style">Stil subtitrare</string>
+    <string name="sub_style_hint">Mărime, culoare, contur, fundal, poziție</string>
+    <string name="sub_preview">Previzualizare subtitrare 123</string>
+    <string name="sub_size">Mărime</string>
+    <string name="sub_color">Culoare text</string>
+    <string name="sub_bold">Aldin</string>
+    <string name="sub_edge">Margine</string>
+    <string name="sub_none">Niciunul</string>
+    <string name="sub_edge_outline">Contur</string>
+    <string name="sub_edge_shadow">Umbră</string>
+    <string name="sub_bg">Fundal</string>
+    <string name="sub_bg_box">Casetă translucidă</string>
+    <string name="sub_position">Poziție (de jos)</string>
+    <string name="sub_embedded">Folosește stilurile din fișierul de subtitrare</string>
+    <string name="sub_embedded_hint">Culori și fonturi din fișierele ASS / VTT</string>
+    <string name="ab_set_a">Punctul A setat la %1$s. Atinge din nou pentru B</string>
+    <string name="ab_on">Buclă A-B %1$s – %2$s</string>
+    <string name="ab_off">Buclă A-B dezactivată</string>
+    <string name="ab_too_short">B trebuie să fie după A</string>
 </resources>

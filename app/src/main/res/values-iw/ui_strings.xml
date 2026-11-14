@@ -423,4 +423,23 @@
     <string name="eq_reset">איפוס</string>
     <string name="eq_note">קולנוע מרחיב את הסטריאו; לילה מאזן בין קטעים חזקים ושקטים. לא פעיל בזמן העברה לטלוויזיה.</string>
     <string name="eq_preamp">קדם-מגבר</string>
+    <string name="sub_style">סגנון כתוביות</string>
+    <string name="sub_style_hint">גודל, צבע, קו מתאר, רקע, מיקום</string>
+    <string name="sub_preview">תצוגה מקדימה של כתוביות 123</string>
+    <string name="sub_size">גודל</string>
+    <string name="sub_color">צבע טקסט</string>
+    <string name="sub_bold">מודגש</string>
+    <string name="sub_edge">שוליים</string>
+    <string name="sub_none">ללא</string>
+    <string name="sub_edge_outline">קו מתאר</string>
+    <string name="sub_edge_shadow">צל</string>
+    <string name="sub_bg">רקע</string>
+    <string name="sub_bg_box">תיבה שקופה למחצה</string>
+    <string name="sub_position">מיקום (מלמטה)</string>
+    <string name="sub_embedded">שימוש בסגנונות מקובץ הכתוביות</string>
+    <string name="sub_embedded_hint">צבעים וגופנים בקובצי ASS / VTT</string>
+    <string name="ab_set_a">נקודה A נקבעה ב-%1$s. הקש שוב כדי לקבוע את B</string>
+    <string name="ab_on">לולאת A-B ‏%1$s – %2$s</string>
+    <string name="ab_off">לולאת A-B כבויה</string>
+    <string name="ab_too_short">B חייבת להיות אחרי A</string>
 </resources>

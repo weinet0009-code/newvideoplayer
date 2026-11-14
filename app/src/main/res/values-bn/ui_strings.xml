@@ -423,4 +423,23 @@
     <string name="eq_reset">রিসেট</string>
     <string name="eq_note">থিয়েটার স্টেরিও প্রশস্ত করে; রাত জোরালো ও মৃদু অংশের পার্থক্য কমায়। টিভিতে কাস্ট করার সময় প্রযোজ্য নয়।</string>
     <string name="eq_preamp">প্রিঅ্যাম্প</string>
+    <string name="sub_style">সাবটাইটেল স্টাইল</string>
+    <string name="sub_style_hint">আকার, রং, আউটলাইন, ব্যাকগ্রাউন্ড, অবস্থান</string>
+    <string name="sub_preview">সাবটাইটেল প্রিভিউ 123</string>
+    <string name="sub_size">আকার</string>
+    <string name="sub_color">লেখার রং</string>
+    <string name="sub_bold">বোল্ড</string>
+    <string name="sub_edge">কিনারা</string>
+    <string name="sub_none">কিছু না</string>
+    <string name="sub_edge_outline">আউটলাইন</string>
+    <string name="sub_edge_shadow">ছায়া</string>
+    <string name="sub_bg">ব্যাকগ্রাউন্ড</string>
+    <string name="sub_bg_box">স্বচ্ছ বাক্স</string>
+    <string name="sub_position">অবস্থান (নিচ থেকে)</string>
+    <string name="sub_embedded">সাবটাইটেল ফাইলের স্টাইল ব্যবহার করুন</string>
+    <string name="sub_embedded_hint">ASS / VTT ফাইলের রং ও ফন্ট</string>
+    <string name="ab_set_a">পয়েন্ট A %1$s-এ সেট হয়েছে। B সেট করতে আবার ট্যাপ করুন</string>
+    <string name="ab_on">A-B লুপ %1$s – %2$s</string>
+    <string name="ab_off">A-B লুপ বন্ধ</string>
+    <string name="ab_too_short">B অবশ্যই A-এর পরে হতে হবে</string>
 </resources>

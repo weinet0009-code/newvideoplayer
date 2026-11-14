@@ -423,4 +423,23 @@
     <string name="eq_reset">I-reset</string>
     <string name="eq_note">Pinalalawak ng Teatro ang stereo; pinapantay ng Gabi ang malakas at mahinang bahagi. Hindi gumagana habang nagka-cast sa TV.</string>
     <string name="eq_preamp">Preamp</string>
+    <string name="sub_style">Istilo ng subtitle</string>
+    <string name="sub_style_hint">Laki, kulay, outline, background, posisyon</string>
+    <string name="sub_preview">Preview ng subtitle 123</string>
+    <string name="sub_size">Laki</string>
+    <string name="sub_color">Kulay ng teksto</string>
+    <string name="sub_bold">Bold</string>
+    <string name="sub_edge">Gilid</string>
+    <string name="sub_none">Wala</string>
+    <string name="sub_edge_outline">Outline</string>
+    <string name="sub_edge_shadow">Anino</string>
+    <string name="sub_bg">Background</string>
+    <string name="sub_bg_box">Translucent na kahon</string>
+    <string name="sub_position">Posisyon (mula sa ibaba)</string>
+    <string name="sub_embedded">Gamitin ang istilo ng subtitle file</string>
+    <string name="sub_embedded_hint">Mga kulay at font sa ASS / VTT file</string>
+    <string name="ab_set_a">Naitakda ang A sa %1$s. I-tap ulit para itakda ang B</string>
+    <string name="ab_on">A-B loop %1$s – %2$s</string>
+    <string name="ab_off">Naka-off ang A-B loop</string>
+    <string name="ab_too_short">Dapat nasa kasunod ng A ang B</string>
 </resources>

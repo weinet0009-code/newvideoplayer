@@ -423,4 +423,23 @@
     <string name="eq_reset">Réinitialiser</string>
     <string name="eq_note">Cinéma élargit la stéréo ; Nuit atténue les écarts de volume. Non appliqué pendant la diffusion sur un téléviseur.</string>
     <string name="eq_preamp">Préampli</string>
+    <string name="sub_style">Style des sous-titres</string>
+    <string name="sub_style_hint">Taille, couleur, contour, fond, position</string>
+    <string name="sub_preview">Aperçu des sous-titres 123</string>
+    <string name="sub_size">Taille</string>
+    <string name="sub_color">Couleur du texte</string>
+    <string name="sub_bold">Gras</string>
+    <string name="sub_edge">Bordure</string>
+    <string name="sub_none">Aucun</string>
+    <string name="sub_edge_outline">Contour</string>
+    <string name="sub_edge_shadow">Ombre</string>
+    <string name="sub_bg">Fond</string>
+    <string name="sub_bg_box">Encadré translucide</string>
+    <string name="sub_position">Position (depuis le bas)</string>
+    <string name="sub_embedded">Utiliser les styles du fichier de sous-titres</string>
+    <string name="sub_embedded_hint">Couleurs et polices des fichiers ASS / VTT</string>
+    <string name="ab_set_a">Point A défini à %1$s. Touchez à nouveau pour définir B</string>
+    <string name="ab_on">Boucle A-B %1$s – %2$s</string>
+    <string name="ab_off">Boucle A-B désactivée</string>
+    <string name="ab_too_short">B doit être après A</string>
 </resources>

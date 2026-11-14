@@ -423,4 +423,23 @@
     <string name="eq_reset">Đặt lại</string>
     <string name="eq_note">Rạp hát mở rộng âm thanh nổi; Ban đêm cân bằng đoạn to và nhỏ. Không áp dụng khi truyền lên TV.</string>
     <string name="eq_preamp">Tiền khuếch đại</string>
+    <string name="sub_style">Kiểu phụ đề</string>
+    <string name="sub_style_hint">Cỡ chữ, màu, viền, nền, vị trí</string>
+    <string name="sub_preview">Xem trước phụ đề 123</string>
+    <string name="sub_size">Cỡ chữ</string>
+    <string name="sub_color">Màu chữ</string>
+    <string name="sub_bold">In đậm</string>
+    <string name="sub_edge">Viền</string>
+    <string name="sub_none">Không</string>
+    <string name="sub_edge_outline">Viền chữ</string>
+    <string name="sub_edge_shadow">Bóng đổ</string>
+    <string name="sub_bg">Nền</string>
+    <string name="sub_bg_box">Hộp nền mờ</string>
+    <string name="sub_position">Vị trí (từ dưới lên)</string>
+    <string name="sub_embedded">Dùng kiểu trong tệp phụ đề</string>
+    <string name="sub_embedded_hint">Màu và phông chữ trong tệp ASS / VTT</string>
+    <string name="ab_set_a">Đã đặt điểm A tại %1$s. Nhấn lần nữa để đặt B</string>
+    <string name="ab_on">Lặp A-B %1$s – %2$s</string>
+    <string name="ab_off">Đã tắt lặp A-B</string>
+    <string name="ab_too_short">B phải sau A</string>
 </resources>

@@ -423,4 +423,23 @@
     <string name="eq_reset">Sıfırla</string>
     <string name="eq_note">Sinema stereoyu genişletir; Gece yüksek ve alçak sesleri dengeler. TV\'ye yayın yaparken uygulanmaz.</string>
     <string name="eq_preamp">Ön yükseltme</string>
+    <string name="sub_style">Altyazı stili</string>
+    <string name="sub_style_hint">Boyut, renk, kontur, arka plan, konum</string>
+    <string name="sub_preview">Altyazı önizlemesi 123</string>
+    <string name="sub_size">Boyut</string>
+    <string name="sub_color">Metin rengi</string>
+    <string name="sub_bold">Kalın</string>
+    <string name="sub_edge">Kenar</string>
+    <string name="sub_none">Yok</string>
+    <string name="sub_edge_outline">Kontur</string>
+    <string name="sub_edge_shadow">Gölge</string>
+    <string name="sub_bg">Arka plan</string>
+    <string name="sub_bg_box">Yarı saydam kutu</string>
+    <string name="sub_position">Konum (alttan)</string>
+    <string name="sub_embedded">Altyazı dosyasındaki stilleri kullan</string>
+    <string name="sub_embedded_hint">ASS / VTT dosyalarındaki renkler ve yazı tipleri</string>
+    <string name="ab_set_a">A noktası %1$s olarak ayarlandı. B için tekrar dokunun</string>
+    <string name="ab_on">A-B döngüsü %1$s – %2$s</string>
+    <string name="ab_off">A-B döngüsü kapalı</string>
+    <string name="ab_too_short">B, A\'dan sonra olmalı</string>
 </resources>

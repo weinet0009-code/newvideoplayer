@@ -423,4 +423,23 @@
     <string name="eq_reset">Επαναφορά</string>
     <string name="eq_note">Ο Κινηματογράφος διευρύνει το στερεοφωνικό ήχο· η Νύχτα εξισορροπεί τα δυνατά και τα σιγανά σημεία. Δεν εφαρμόζεται κατά τη μετάδοση σε τηλεόραση.</string>
     <string name="eq_preamp">Προενισχυτής</string>
+    <string name="sub_style">Στυλ υποτίτλων</string>
+    <string name="sub_style_hint">Μέγεθος, χρώμα, περίγραμμα, φόντο, θέση</string>
+    <string name="sub_preview">Προεπισκόπηση υποτίτλων 123</string>
+    <string name="sub_size">Μέγεθος</string>
+    <string name="sub_color">Χρώμα κειμένου</string>
+    <string name="sub_bold">Έντονα</string>
+    <string name="sub_edge">Άκρη</string>
+    <string name="sub_none">Κανένα</string>
+    <string name="sub_edge_outline">Περίγραμμα</string>
+    <string name="sub_edge_shadow">Σκιά</string>
+    <string name="sub_bg">Φόντο</string>
+    <string name="sub_bg_box">Ημιδιαφανές πλαίσιο</string>
+    <string name="sub_position">Θέση (από κάτω)</string>
+    <string name="sub_embedded">Χρήση στυλ από το αρχείο υποτίτλων</string>
+    <string name="sub_embedded_hint">Χρώματα και γραμματοσειρές σε αρχεία ASS / VTT</string>
+    <string name="ab_set_a">Το σημείο A ορίστηκε στο %1$s. Πατήστε ξανά για το B</string>
+    <string name="ab_on">Επανάληψη A-B %1$s – %2$s</string>
+    <string name="ab_off">Η επανάληψη A-B απενεργοποιήθηκε</string>
+    <string name="ab_too_short">Το B πρέπει να είναι μετά το A</string>
 </resources>

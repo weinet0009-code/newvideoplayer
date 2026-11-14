@@ -423,4 +423,23 @@
     <string name="eq_reset">Reset</string>
     <string name="eq_note">Teater memperlebar stereo; Malam meratakan bagian keras dan pelan. Tidak berlaku saat mentransmisikan ke TV.</string>
     <string name="eq_preamp">Preamp</string>
+    <string name="sub_style">Gaya subtitle</string>
+    <string name="sub_style_hint">Ukuran, warna, garis tepi, latar, posisi</string>
+    <string name="sub_preview">Pratinjau subtitle 123</string>
+    <string name="sub_size">Ukuran</string>
+    <string name="sub_color">Warna teks</string>
+    <string name="sub_bold">Tebal</string>
+    <string name="sub_edge">Tepi</string>
+    <string name="sub_none">Tidak ada</string>
+    <string name="sub_edge_outline">Garis tepi</string>
+    <string name="sub_edge_shadow">Bayangan</string>
+    <string name="sub_bg">Latar</string>
+    <string name="sub_bg_box">Kotak transparan</string>
+    <string name="sub_position">Posisi (dari bawah)</string>
+    <string name="sub_embedded">Gunakan gaya dari file subtitle</string>
+    <string name="sub_embedded_hint">Warna dan font dalam file ASS / VTT</string>
+    <string name="ab_set_a">Titik A diatur di %1$s. Ketuk lagi untuk mengatur B</string>
+    <string name="ab_on">Ulang A-B %1$s – %2$s</string>
+    <string name="ab_off">Ulang A-B dimatikan</string>
+    <string name="ab_too_short">B harus setelah A</string>
 </resources>

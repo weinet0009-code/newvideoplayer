@@ -423,4 +423,23 @@
     <string name="eq_reset">Återställ</string>
     <string name="eq_note">Biograf breddar stereoljudet; Natt jämnar ut starka och svaga partier. Används inte vid castning till en tv.</string>
     <string name="eq_preamp">Förförstärkare</string>
+    <string name="sub_style">Undertextstil</string>
+    <string name="sub_style_hint">Storlek, färg, kontur, bakgrund, position</string>
+    <string name="sub_preview">Förhandsvisning av undertext 123</string>
+    <string name="sub_size">Storlek</string>
+    <string name="sub_color">Textfärg</string>
+    <string name="sub_bold">Fet</string>
+    <string name="sub_edge">Kant</string>
+    <string name="sub_none">Ingen</string>
+    <string name="sub_edge_outline">Kontur</string>
+    <string name="sub_edge_shadow">Skugga</string>
+    <string name="sub_bg">Bakgrund</string>
+    <string name="sub_bg_box">Genomskinlig ruta</string>
+    <string name="sub_position">Position (från botten)</string>
+    <string name="sub_embedded">Använd stilar från undertextfilen</string>
+    <string name="sub_embedded_hint">Färger och typsnitt i ASS- / VTT-filer</string>
+    <string name="ab_set_a">Punkt A satt till %1$s. Tryck igen för att sätta B</string>
+    <string name="ab_on">A-B-slinga %1$s – %2$s</string>
+    <string name="ab_off">A-B-slinga av</string>
+    <string name="ab_too_short">B måste komma efter A</string>
 </resources>

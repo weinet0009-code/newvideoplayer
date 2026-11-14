@@ -423,4 +423,23 @@
     <string name="eq_reset">초기화</string>
     <string name="eq_note">극장은 스테레오를 넓히고, 야간은 음량 차이를 줄입니다. TV로 전송 중에는 적용되지 않습니다.</string>
     <string name="eq_preamp">프리앰프</string>
+    <string name="sub_style">자막 스타일</string>
+    <string name="sub_style_hint">크기, 색상, 테두리, 배경, 위치</string>
+    <string name="sub_preview">자막 미리보기 123</string>
+    <string name="sub_size">크기</string>
+    <string name="sub_color">글자 색상</string>
+    <string name="sub_bold">굵게</string>
+    <string name="sub_edge">테두리</string>
+    <string name="sub_none">없음</string>
+    <string name="sub_edge_outline">외곽선</string>
+    <string name="sub_edge_shadow">그림자</string>
+    <string name="sub_bg">배경</string>
+    <string name="sub_bg_box">반투명 상자</string>
+    <string name="sub_position">위치 (하단 기준)</string>
+    <string name="sub_embedded">자막 파일의 스타일 사용</string>
+    <string name="sub_embedded_hint">ASS / VTT 파일의 색상 및 글꼴</string>
+    <string name="ab_set_a">A 지점 %1$s 설정됨. 다시 탭하여 B 지점 설정</string>
+    <string name="ab_on">A-B 반복 %1$s – %2$s</string>
+    <string name="ab_off">A-B 반복 해제됨</string>
+    <string name="ab_too_short">B 지점은 A 지점 뒤여야 합니다</string>
 </resources>

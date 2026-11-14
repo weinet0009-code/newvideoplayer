@@ -423,4 +423,23 @@
     <string name="eq_reset">ری سیٹ</string>
     <string name="eq_note">تھیٹر سٹیریو کو وسیع کرتا ہے؛ رات اونچی اور دھیمی آوازوں کا فرق کم کرتی ہے۔ TV پر کاسٹ کرتے وقت لاگو نہیں ہوتا۔</string>
     <string name="eq_preamp">پری ایمپ</string>
+    <string name="sub_style">سب ٹائٹل اسٹائل</string>
+    <string name="sub_style_hint">سائز، رنگ، آؤٹ لائن، پس منظر، پوزیشن</string>
+    <string name="sub_preview">سب ٹائٹل پیش نظارہ 123</string>
+    <string name="sub_size">سائز</string>
+    <string name="sub_color">متن کا رنگ</string>
+    <string name="sub_bold">بولڈ</string>
+    <string name="sub_edge">کنارہ</string>
+    <string name="sub_none">کوئی نہیں</string>
+    <string name="sub_edge_outline">آؤٹ لائن</string>
+    <string name="sub_edge_shadow">سایہ</string>
+    <string name="sub_bg">پس منظر</string>
+    <string name="sub_bg_box">نیم شفاف باکس</string>
+    <string name="sub_position">پوزیشن (نیچے سے)</string>
+    <string name="sub_embedded">سب ٹائٹل فائل کے اسٹائل استعمال کریں</string>
+    <string name="sub_embedded_hint">ASS / VTT فائلوں کے رنگ اور فونٹ</string>
+    <string name="ab_set_a">پوائنٹ A %1$s پر سیٹ۔ B سیٹ کرنے کے لیے دوبارہ ٹیپ کریں</string>
+    <string name="ab_on">A-B لوپ %1$s – %2$s</string>
+    <string name="ab_off">A-B لوپ بند</string>
+    <string name="ab_too_short">B کو A کے بعد ہونا چاہیے</string>
 </resources>

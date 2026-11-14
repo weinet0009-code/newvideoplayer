@@ -423,4 +423,23 @@
     <string name="eq_reset">Resetuj</string>
     <string name="eq_note">Kino poszerza stereo; Noc wyrównuje głośne i ciche fragmenty. Nie działa podczas przesyłania na telewizor.</string>
     <string name="eq_preamp">Przedwzmacniacz</string>
+    <string name="sub_style">Styl napisów</string>
+    <string name="sub_style_hint">Rozmiar, kolor, obrys, tło, położenie</string>
+    <string name="sub_preview">Podgląd napisów 123</string>
+    <string name="sub_size">Rozmiar</string>
+    <string name="sub_color">Kolor tekstu</string>
+    <string name="sub_bold">Pogrubienie</string>
+    <string name="sub_edge">Krawędź</string>
+    <string name="sub_none">Brak</string>
+    <string name="sub_edge_outline">Obrys</string>
+    <string name="sub_edge_shadow">Cień</string>
+    <string name="sub_bg">Tło</string>
+    <string name="sub_bg_box">Półprzezroczyste pole</string>
+    <string name="sub_position">Położenie (od dołu)</string>
+    <string name="sub_embedded">Użyj stylów z pliku napisów</string>
+    <string name="sub_embedded_hint">Kolory i czcionki z plików ASS / VTT</string>
+    <string name="ab_set_a">Punkt A ustawiony na %1$s. Dotknij ponownie, by ustawić B</string>
+    <string name="ab_on">Pętla A-B %1$s – %2$s</string>
+    <string name="ab_off">Pętla A-B wyłączona</string>
+    <string name="ab_too_short">B musi być po A</string>
 </resources>

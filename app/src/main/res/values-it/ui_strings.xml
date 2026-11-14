@@ -423,4 +423,23 @@
     <string name="eq_reset">Ripristina</string>
     <string name="eq_note">Cinema allarga lo stereo; Notte bilancia le parti forti e quelle deboli. Non applicato durante la trasmissione a una TV.</string>
     <string name="eq_preamp">Preamplificatore</string>
+    <string name="sub_style">Stile sottotitoli</string>
+    <string name="sub_style_hint">Dimensione, colore, contorno, sfondo, posizione</string>
+    <string name="sub_preview">Anteprima sottotitoli 123</string>
+    <string name="sub_size">Dimensione</string>
+    <string name="sub_color">Colore testo</string>
+    <string name="sub_bold">Grassetto</string>
+    <string name="sub_edge">Bordo</string>
+    <string name="sub_none">Nessuno</string>
+    <string name="sub_edge_outline">Contorno</string>
+    <string name="sub_edge_shadow">Ombra</string>
+    <string name="sub_bg">Sfondo</string>
+    <string name="sub_bg_box">Riquadro traslucido</string>
+    <string name="sub_position">Posizione (dal basso)</string>
+    <string name="sub_embedded">Usa gli stili del file dei sottotitoli</string>
+    <string name="sub_embedded_hint">Colori e caratteri dei file ASS / VTT</string>
+    <string name="ab_set_a">Punto A impostato a %1$s. Tocca di nuovo per impostare B</string>
+    <string name="ab_on">Loop A-B %1$s – %2$s</string>
+    <string name="ab_off">Loop A-B disattivato</string>
+    <string name="ab_too_short">B deve essere dopo A</string>
 </resources>

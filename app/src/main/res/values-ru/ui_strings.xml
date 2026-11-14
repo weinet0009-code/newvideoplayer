@@ -423,4 +423,23 @@
     <string name="eq_reset">Сбросить</string>
     <string name="eq_note">Кинотеатр расширяет стереобазу; Ночной выравнивает громкие и тихие фрагменты. Не применяется при трансляции на телевизор.</string>
     <string name="eq_preamp">Предусилитель</string>
+    <string name="sub_style">Стиль субтитров</string>
+    <string name="sub_style_hint">Размер, цвет, контур, фон, положение</string>
+    <string name="sub_preview">Предпросмотр субтитров 123</string>
+    <string name="sub_size">Размер</string>
+    <string name="sub_color">Цвет текста</string>
+    <string name="sub_bold">Жирный</string>
+    <string name="sub_edge">Обводка</string>
+    <string name="sub_none">Нет</string>
+    <string name="sub_edge_outline">Контур</string>
+    <string name="sub_edge_shadow">Тень</string>
+    <string name="sub_bg">Фон</string>
+    <string name="sub_bg_box">Полупрозрачная подложка</string>
+    <string name="sub_position">Положение (от низа)</string>
+    <string name="sub_embedded">Стили из файла субтитров</string>
+    <string name="sub_embedded_hint">Цвета и шрифты из файлов ASS / VTT</string>
+    <string name="ab_set_a">Точка A: %1$s. Нажмите ещё раз, чтобы задать B</string>
+    <string name="ab_on">Повтор A-B %1$s – %2$s</string>
+    <string name="ab_off">Повтор A-B выключен</string>
+    <string name="ab_too_short">B должна быть после A</string>
 </resources>

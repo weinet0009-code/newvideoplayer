@@ -423,4 +423,23 @@
     <string name="eq_reset">Restablecer</string>
     <string name="eq_note">Cine amplía el estéreo; Noche equilibra las partes fuertes y suaves. No se aplica al enviar contenido a una TV.</string>
     <string name="eq_preamp">Preamplificador</string>
+    <string name="sub_style">Estilo de subtítulos</string>
+    <string name="sub_style_hint">Tamaño, color, contorno, fondo, posición</string>
+    <string name="sub_preview">Vista previa de subtítulos 123</string>
+    <string name="sub_size">Tamaño</string>
+    <string name="sub_color">Color del texto</string>
+    <string name="sub_bold">Negrita</string>
+    <string name="sub_edge">Borde</string>
+    <string name="sub_none">Ninguno</string>
+    <string name="sub_edge_outline">Contorno</string>
+    <string name="sub_edge_shadow">Sombra</string>
+    <string name="sub_bg">Fondo</string>
+    <string name="sub_bg_box">Caja translúcida</string>
+    <string name="sub_position">Posición (desde abajo)</string>
+    <string name="sub_embedded">Usar estilos del archivo de subtítulos</string>
+    <string name="sub_embedded_hint">Colores y fuentes de archivos ASS / VTT</string>
+    <string name="ab_set_a">Punto A en %1$s. Toca de nuevo para fijar B</string>
+    <string name="ab_on">Bucle A-B %1$s – %2$s</string>
+    <string name="ab_off">Bucle A-B desactivado</string>
+    <string name="ab_too_short">B debe ir después de A</string>
 </resources>

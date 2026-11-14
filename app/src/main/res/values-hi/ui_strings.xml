@@ -423,4 +423,23 @@
     <string name="eq_reset">रीसेट करें</string>
     <string name="eq_note">थिएटर स्टीरियो को चौड़ा करता है; रात तेज़ और धीमे हिस्सों को बराबर करता है। TV पर कास्ट करते समय लागू नहीं होता।</string>
     <string name="eq_preamp">प्रीएम्प</string>
+    <string name="sub_style">सबटाइटल स्टाइल</string>
+    <string name="sub_style_hint">आकार, रंग, आउटलाइन, बैकग्राउंड, स्थिति</string>
+    <string name="sub_preview">सबटाइटल प्रीव्यू 123</string>
+    <string name="sub_size">आकार</string>
+    <string name="sub_color">टेक्स्ट का रंग</string>
+    <string name="sub_bold">बोल्ड</string>
+    <string name="sub_edge">किनारा</string>
+    <string name="sub_none">कोई नहीं</string>
+    <string name="sub_edge_outline">आउटलाइन</string>
+    <string name="sub_edge_shadow">छाया</string>
+    <string name="sub_bg">बैकग्राउंड</string>
+    <string name="sub_bg_box">पारभासी बॉक्स</string>
+    <string name="sub_position">स्थिति (नीचे से)</string>
+    <string name="sub_embedded">सबटाइटल फ़ाइल की स्टाइल इस्तेमाल करें</string>
+    <string name="sub_embedded_hint">ASS / VTT फ़ाइलों के रंग और फ़ॉन्ट</string>
+    <string name="ab_set_a">पॉइंट A %1$s पर सेट। B सेट करने के लिए फिर टैप करें</string>
+    <string name="ab_on">A-B लूप %1$s – %2$s</string>
+    <string name="ab_off">A-B लूप बंद</string>
+    <string name="ab_too_short">B, A के बाद होना चाहिए</string>
 </resources>

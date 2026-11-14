@@ -423,4 +423,23 @@
     <string name="eq_reset">Resetten</string>
     <string name="eq_note">Theater verbreedt het stereobeeld; Nacht vlakt harde en zachte delen af. Niet actief tijdens casten naar een tv.</string>
     <string name="eq_preamp">Voorversterker</string>
+    <string name="sub_style">Ondertitelstijl</string>
+    <string name="sub_style_hint">Grootte, kleur, omlijning, achtergrond, positie</string>
+    <string name="sub_preview">Voorbeeld ondertitels 123</string>
+    <string name="sub_size">Grootte</string>
+    <string name="sub_color">Tekstkleur</string>
+    <string name="sub_bold">Vet</string>
+    <string name="sub_edge">Rand</string>
+    <string name="sub_none">Geen</string>
+    <string name="sub_edge_outline">Omlijning</string>
+    <string name="sub_edge_shadow">Schaduw</string>
+    <string name="sub_bg">Achtergrond</string>
+    <string name="sub_bg_box">Doorschijnend vak</string>
+    <string name="sub_position">Positie (vanaf onderkant)</string>
+    <string name="sub_embedded">Stijlen uit ondertitelbestand gebruiken</string>
+    <string name="sub_embedded_hint">Kleuren en lettertypen in ASS- / VTT-bestanden</string>
+    <string name="ab_set_a">Punt A ingesteld op %1$s. Tik opnieuw om B in te stellen</string>
+    <string name="ab_on">A-B-lus %1$s – %2$s</string>
+    <string name="ab_off">A-B-lus uit</string>
+    <string name="ab_too_short">B moet na A liggen</string>
 </resources>

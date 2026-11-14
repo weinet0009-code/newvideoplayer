@@ -423,4 +423,23 @@
     <string name="eq_reset">รีเซ็ต</string>
     <string name="eq_note">โรงภาพยนตร์จะขยายเสียงสเตอริโอให้กว้างขึ้น ส่วนกลางคืนจะลดความต่างระหว่างเสียงดังและเบา ไม่มีผลขณะแคสต์ไปยังทีวี</string>
     <string name="eq_preamp">ปรีแอมป์</string>
+    <string name="sub_style">รูปแบบคำบรรยาย</string>
+    <string name="sub_style_hint">ขนาด สี ขอบ พื้นหลัง ตำแหน่ง</string>
+    <string name="sub_preview">ตัวอย่างคำบรรยาย 123</string>
+    <string name="sub_size">ขนาด</string>
+    <string name="sub_color">สีข้อความ</string>
+    <string name="sub_bold">ตัวหนา</string>
+    <string name="sub_edge">ขอบ</string>
+    <string name="sub_none">ไม่มี</string>
+    <string name="sub_edge_outline">เส้นขอบ</string>
+    <string name="sub_edge_shadow">เงา</string>
+    <string name="sub_bg">พื้นหลัง</string>
+    <string name="sub_bg_box">กล่องโปร่งแสง</string>
+    <string name="sub_position">ตำแหน่ง (จากด้านล่าง)</string>
+    <string name="sub_embedded">ใช้รูปแบบจากไฟล์คำบรรยาย</string>
+    <string name="sub_embedded_hint">สีและแบบอักษรในไฟล์ ASS / VTT</string>
+    <string name="ab_set_a">ตั้งจุด A ที่ %1$s แล้ว แตะอีกครั้งเพื่อตั้งจุด B</string>
+    <string name="ab_on">วนซ้ำ A-B %1$s – %2$s</string>
+    <string name="ab_off">ปิดการวนซ้ำ A-B แล้ว</string>
+    <string name="ab_too_short">จุด B ต้องอยู่หลังจุด A</string>
 </resources>

@@ -423,4 +423,23 @@
     <string name="eq_reset">إعادة ضبط</string>
     <string name="eq_note">وضع المسرح يوسّع الصوت المجسم، والوضع الليلي يوازن بين المقاطع العالية والهادئة. لا يُطبّق أثناء الإرسال إلى التلفزيون.</string>
     <string name="eq_preamp">مضخم أولي</string>
+    <string name="sub_style">نمط الترجمة</string>
+    <string name="sub_style_hint">الحجم واللون والحدود والخلفية والموضع</string>
+    <string name="sub_preview">معاينة الترجمة 123</string>
+    <string name="sub_size">الحجم</string>
+    <string name="sub_color">لون النص</string>
+    <string name="sub_bold">غامق</string>
+    <string name="sub_edge">الحافة</string>
+    <string name="sub_none">بلا</string>
+    <string name="sub_edge_outline">حدود</string>
+    <string name="sub_edge_shadow">ظل</string>
+    <string name="sub_bg">الخلفية</string>
+    <string name="sub_bg_box">مربع شبه شفاف</string>
+    <string name="sub_position">الموضع (من الأسفل)</string>
+    <string name="sub_embedded">استخدام أنماط ملف الترجمة</string>
+    <string name="sub_embedded_hint">الألوان والخطوط في ملفات ASS / VTT</string>
+    <string name="ab_set_a">تم تعيين النقطة A عند %1$s. انقر مجددًا لتعيين B</string>
+    <string name="ab_on">تكرار A-B ‏%1$s – %2$s</string>
+    <string name="ab_off">تم إيقاف تكرار A-B</string>
+    <string name="ab_too_short">يجب أن تكون B بعد A</string>
 </resources>

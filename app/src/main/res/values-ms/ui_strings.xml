@@ -423,4 +423,23 @@
     <string name="eq_reset">Tetap semula</string>
     <string name="eq_note">Teater meluaskan stereo; Malam meratakan bahagian kuat dan perlahan. Tidak digunakan semasa menghantar ke TV.</string>
     <string name="eq_preamp">Prapenguat</string>
+    <string name="sub_style">Gaya sari kata</string>
+    <string name="sub_style_hint">Saiz, warna, garis luar, latar, kedudukan</string>
+    <string name="sub_preview">Pratonton sari kata 123</string>
+    <string name="sub_size">Saiz</string>
+    <string name="sub_color">Warna teks</string>
+    <string name="sub_bold">Tebal</string>
+    <string name="sub_edge">Tepi</string>
+    <string name="sub_none">Tiada</string>
+    <string name="sub_edge_outline">Garis luar</string>
+    <string name="sub_edge_shadow">Bayang</string>
+    <string name="sub_bg">Latar</string>
+    <string name="sub_bg_box">Kotak lut sinar</string>
+    <string name="sub_position">Kedudukan (dari bawah)</string>
+    <string name="sub_embedded">Guna gaya daripada fail sari kata</string>
+    <string name="sub_embedded_hint">Warna dan fon dalam fail ASS / VTT</string>
+    <string name="ab_set_a">Titik A ditetapkan pada %1$s. Ketik lagi untuk tetapkan B</string>
+    <string name="ab_on">Ulang A-B %1$s – %2$s</string>
+    <string name="ab_off">Ulang A-B dimatikan</string>
+    <string name="ab_too_short">B mesti selepas A</string>
 </resources>

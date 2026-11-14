@@ -423,4 +423,23 @@
     <string name="eq_reset">بازنشانی</string>
     <string name="eq_note">حالت سینما صدای استریو را گسترده‌تر می‌کند و حالت شب اختلاف صدای بلند و آرام را کم می‌کند. هنگام پخش روی تلویزیون اعمال نمی‌شود.</string>
     <string name="eq_preamp">پیش‌تقویت</string>
+    <string name="sub_style">سبک زیرنویس</string>
+    <string name="sub_style_hint">اندازه، رنگ، حاشیه، پس‌زمینه، موقعیت</string>
+    <string name="sub_preview">پیش‌نمایش زیرنویس 123</string>
+    <string name="sub_size">اندازه</string>
+    <string name="sub_color">رنگ متن</string>
+    <string name="sub_bold">پررنگ</string>
+    <string name="sub_edge">لبه</string>
+    <string name="sub_none">هیچ</string>
+    <string name="sub_edge_outline">حاشیه</string>
+    <string name="sub_edge_shadow">سایه</string>
+    <string name="sub_bg">پس‌زمینه</string>
+    <string name="sub_bg_box">کادر نیمه‌شفاف</string>
+    <string name="sub_position">موقعیت (از پایین)</string>
+    <string name="sub_embedded">استفاده از سبک فایل زیرنویس</string>
+    <string name="sub_embedded_hint">رنگ‌ها و قلم‌های فایل‌های ASS / VTT</string>
+    <string name="ab_set_a">نقطه A روی %1$s تنظیم شد. برای تنظیم B دوباره بزنید</string>
+    <string name="ab_on">تکرار A-B ‏%1$s – %2$s</string>
+    <string name="ab_off">تکرار A-B خاموش شد</string>
+    <string name="ab_too_short">B باید بعد از A باشد</string>
 </resources>

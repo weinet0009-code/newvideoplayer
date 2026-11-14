@@ -423,4 +423,23 @@
     <string name="eq_reset">リセット</string>
     <string name="eq_note">シアターはステレオ感を広げ、ナイトは音量差を抑えます。テレビへのキャスト中は適用されません。</string>
     <string name="eq_preamp">プリアンプ</string>
+    <string name="sub_style">字幕スタイル</string>
+    <string name="sub_style_hint">サイズ、色、縁取り、背景、位置</string>
+    <string name="sub_preview">字幕プレビュー 123</string>
+    <string name="sub_size">サイズ</string>
+    <string name="sub_color">文字色</string>
+    <string name="sub_bold">太字</string>
+    <string name="sub_edge">縁取り</string>
+    <string name="sub_none">なし</string>
+    <string name="sub_edge_outline">アウトライン</string>
+    <string name="sub_edge_shadow">影</string>
+    <string name="sub_bg">背景</string>
+    <string name="sub_bg_box">半透明ボックス</string>
+    <string name="sub_position">位置（下から）</string>
+    <string name="sub_embedded">字幕ファイルのスタイルを使用</string>
+    <string name="sub_embedded_hint">ASS / VTT ファイルの色とフォント</string>
+    <string name="ab_set_a">A 点を %1$s に設定。もう一度タップで B 点を設定</string>
+    <string name="ab_on">A-B リピート %1$s – %2$s</string>
+    <string name="ab_off">A-B リピートを解除しました</string>
+    <string name="ab_too_short">B 点は A 点より後にしてください</string>
 </resources>

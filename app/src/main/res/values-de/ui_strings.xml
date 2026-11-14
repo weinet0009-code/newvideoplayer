@@ -423,4 +423,23 @@
     <string name="eq_reset">Zurücksetzen</string>
     <string name="eq_note">Kino verbreitert das Stereobild; Nacht gleicht laute und leise Stellen aus. Beim Streamen auf einen Fernseher nicht aktiv.</string>
     <string name="eq_preamp">Vorverstärker</string>
+    <string name="sub_style">Untertitelstil</string>
+    <string name="sub_style_hint">Größe, Farbe, Kontur, Hintergrund, Position</string>
+    <string name="sub_preview">Untertitel-Vorschau 123</string>
+    <string name="sub_size">Größe</string>
+    <string name="sub_color">Textfarbe</string>
+    <string name="sub_bold">Fett</string>
+    <string name="sub_edge">Rand</string>
+    <string name="sub_none">Keine</string>
+    <string name="sub_edge_outline">Kontur</string>
+    <string name="sub_edge_shadow">Schatten</string>
+    <string name="sub_bg">Hintergrund</string>
+    <string name="sub_bg_box">Halbtransparente Box</string>
+    <string name="sub_position">Position (von unten)</string>
+    <string name="sub_embedded">Stile aus der Untertiteldatei verwenden</string>
+    <string name="sub_embedded_hint">Farben und Schriften in ASS- / VTT-Dateien</string>
+    <string name="ab_set_a">Punkt A bei %1$s gesetzt. Erneut tippen, um B zu setzen</string>
+    <string name="ab_on">A-B-Schleife %1$s – %2$s</string>
+    <string name="ab_off">A-B-Schleife aus</string>
+    <string name="ab_too_short">B muss nach A liegen</string>
 </resources>

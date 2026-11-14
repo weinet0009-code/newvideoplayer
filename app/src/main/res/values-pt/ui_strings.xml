@@ -423,4 +423,23 @@
     <string name="eq_reset">Redefinir</string>
     <string name="eq_note">Cinema amplia o estéreo; Noite equilibra as partes altas e baixas. Não é aplicado ao transmitir para uma TV.</string>
     <string name="eq_preamp">Pré-amplificador</string>
+    <string name="sub_style">Estilo da legenda</string>
+    <string name="sub_style_hint">Tamanho, cor, contorno, fundo, posição</string>
+    <string name="sub_preview">Prévia da legenda 123</string>
+    <string name="sub_size">Tamanho</string>
+    <string name="sub_color">Cor do texto</string>
+    <string name="sub_bold">Negrito</string>
+    <string name="sub_edge">Borda</string>
+    <string name="sub_none">Nenhum</string>
+    <string name="sub_edge_outline">Contorno</string>
+    <string name="sub_edge_shadow">Sombra</string>
+    <string name="sub_bg">Fundo</string>
+    <string name="sub_bg_box">Caixa translúcida</string>
+    <string name="sub_position">Posição (a partir de baixo)</string>
+    <string name="sub_embedded">Usar estilos do arquivo de legenda</string>
+    <string name="sub_embedded_hint">Cores e fontes de arquivos ASS / VTT</string>
+    <string name="ab_set_a">Ponto A definido em %1$s. Toque de novo para definir B</string>
+    <string name="ab_on">Loop A-B %1$s – %2$s</string>
+    <string name="ab_off">Loop A-B desativado</string>
+    <string name="ab_too_short">B deve vir depois de A</string>
 </resources>
