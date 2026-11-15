@@ -442,4 +442,17 @@
     <string name="ab_on">לולאת A-B ‏%1$s – %2$s</string>
     <string name="ab_off">לולאת A-B כבויה</string>
     <string name="ab_too_short">B חייבת להיות אחרי A</string>
+    <string name="url_open">פתיחת כתובת URL</string>
+    <string name="url_hint">הדבקת קישור ישיר לסרטון (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">הפעלה</string>
+    <string name="url_download">הורדה</string>
+    <string name="url_recent">קישורים אחרונים</string>
+    <string name="url_invalid">יש להזין קישור שמתחיל ב-http או https</string>
+    <string name="url_unsupported_site">אין תמיכה בקישורים לדפים באתר הזה. יש להשתמש בקישור ישיר לסרטון.</string>
+    <string name="url_stream_no_download">עדיין אי אפשר להוריד שידורים (m3u8, DASH)</string>
+    <string name="url_download_started">מוריד: %1$s</string>
+    <string name="url_download_failed">לא ניתן להוריד: %1$s</string>
+    <string name="url_clear">ניקוי</string>
+    <string name="url_paste">הדבקה</string>
+    <string name="url_network_note">סרטונים אונליין משתמשים בחבילת הגלישה או ב-Wi-Fi</string>
 </resources>

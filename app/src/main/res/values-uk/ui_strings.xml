@@ -442,4 +442,17 @@
     <string name="ab_on">Повтор A-B %1$s – %2$s</string>
     <string name="ab_off">Повтор A-B вимкнено</string>
     <string name="ab_too_short">B має бути після A</string>
+    <string name="url_open">Відкрити URL</string>
+    <string name="url_hint">Вставте пряме посилання на відео (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Відтворити</string>
+    <string name="url_download">Завантажити</string>
+    <string name="url_recent">Нещодавні посилання</string>
+    <string name="url_invalid">Введіть посилання, що починається з http або https</string>
+    <string name="url_unsupported_site">Посилання на сторінки цього сайту не підтримуються. Використовуйте пряме посилання на відео.</string>
+    <string name="url_stream_no_download">Потоки (m3u8, DASH) поки не можна завантажити</string>
+    <string name="url_download_started">Завантаження: %1$s</string>
+    <string name="url_download_failed">Не вдалося завантажити: %1$s</string>
+    <string name="url_clear">Очистити</string>
+    <string name="url_paste">Вставити</string>
+    <string name="url_network_note">Онлайн-відео використовує мобільні дані або Wi-Fi</string>
 </resources>

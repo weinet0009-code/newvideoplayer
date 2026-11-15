@@ -442,4 +442,17 @@
     <string name="ab_on">Boucle A-B %1$s – %2$s</string>
     <string name="ab_off">Boucle A-B désactivée</string>
     <string name="ab_too_short">B doit être après A</string>
+    <string name="url_open">Ouvrir une URL</string>
+    <string name="url_hint">Collez un lien vidéo direct (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Lire</string>
+    <string name="url_download">Télécharger</string>
+    <string name="url_recent">Liens récents</string>
+    <string name="url_invalid">Saisissez un lien commençant par http ou https</string>
+    <string name="url_unsupported_site">Les liens vers les pages de ce site ne sont pas pris en charge. Utilisez un lien vidéo direct.</string>
+    <string name="url_stream_no_download">Les flux (m3u8, DASH) ne peuvent pas encore être téléchargés</string>
+    <string name="url_download_started">Téléchargement : %1$s</string>
+    <string name="url_download_failed">Impossible de télécharger : %1$s</string>
+    <string name="url_clear">Effacer</string>
+    <string name="url_paste">Coller</string>
+    <string name="url_network_note">Les vidéos en ligne utilisent les données mobiles ou le Wi-Fi</string>
 </resources>

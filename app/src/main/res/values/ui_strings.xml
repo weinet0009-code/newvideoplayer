@@ -445,4 +445,17 @@
     <string name="ab_on">A-B loop %1$s – %2$s</string>
     <string name="ab_off">A-B loop off</string>
     <string name="ab_too_short">B must come after A</string>
+    <string name="url_open">Open URL</string>
+    <string name="url_hint">Paste a direct video link (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Play</string>
+    <string name="url_download">Download</string>
+    <string name="url_recent">Recent links</string>
+    <string name="url_invalid">Enter a link starting with http or https</string>
+    <string name="url_unsupported_site">Links to this site\'s pages aren\'t supported. Use a direct video link.</string>
+    <string name="url_stream_no_download">Streams (m3u8, DASH) can\'t be downloaded yet</string>
+    <string name="url_download_started">Downloading: %1$s</string>
+    <string name="url_download_failed">Couldn\'t download: %1$s</string>
+    <string name="url_clear">Clear</string>
+    <string name="url_paste">Paste</string>
+    <string name="url_network_note">Online videos use mobile data or Wi-Fi</string>
 </resources>

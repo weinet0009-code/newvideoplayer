@@ -66,7 +66,8 @@ object CastManager {
         local.pause()
         val items = videos.mapIndexed { i, v ->
             MediaItem.Builder()
-                .setUri(urls[i])
+                // Online videos go straight to the Cast device; local files through our LAN server.
+                .setUri(if (v.uri.scheme == "http" || v.uri.scheme == "https") v.uri.toString() else urls[i])
                 .setMimeType(v.mimeType.takeIf { it != "video/*" } ?: "video/mp4")
                 .setMediaMetadata(MediaMetadata.Builder().setTitle(v.title).build())
                 .build()

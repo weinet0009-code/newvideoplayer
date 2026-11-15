@@ -36,6 +36,10 @@ data class Video(
 fun Video.toMediaItem(): MediaItem = MediaItem.Builder()
     .setMediaId(if (vaultId != null) "v$vaultId" else id.toString())
     .setUri(uri)
+    .apply {
+        if (mimeType == androidx.media3.common.MimeTypes.APPLICATION_M3U8 ||
+            mimeType == androidx.media3.common.MimeTypes.APPLICATION_MPD) setMimeType(mimeType)
+    }
     .setMediaMetadata(
         MediaMetadata.Builder().setTitle(title).setDisplayTitle(title).apply {
             if (isAudio) {

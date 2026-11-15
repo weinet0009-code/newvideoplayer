@@ -13,6 +13,7 @@ class App : Application(), ImageLoaderFactory {
         com.weinet.newvideoplayer.playback.AudioEq.init(this)
         com.weinet.newvideoplayer.playback.SubtitleStyle.init(this)
         LibraryStore.init(this)
+        com.weinet.newvideoplayer.data.OnlineVideo.init(this)
     }
 
     // Lets Coil draw video thumbnails.

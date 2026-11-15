@@ -442,4 +442,17 @@
     <string name="ab_on">Loop A-B %1$s – %2$s</string>
     <string name="ab_off">Loop A-B desativado</string>
     <string name="ab_too_short">B deve vir depois de A</string>
+    <string name="url_open">Abrir URL</string>
+    <string name="url_hint">Cole um link direto de vídeo (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Reproduzir</string>
+    <string name="url_download">Baixar</string>
+    <string name="url_recent">Links recentes</string>
+    <string name="url_invalid">Digite um link que comece com http ou https</string>
+    <string name="url_unsupported_site">Links de páginas deste site não são compatíveis. Use um link direto de vídeo.</string>
+    <string name="url_stream_no_download">Ainda não é possível baixar transmissões (m3u8, DASH)</string>
+    <string name="url_download_started">Baixando: %1$s</string>
+    <string name="url_download_failed">Não foi possível baixar: %1$s</string>
+    <string name="url_clear">Limpar</string>
+    <string name="url_paste">Colar</string>
+    <string name="url_network_note">Vídeos on-line usam dados móveis ou Wi-Fi</string>
 </resources>

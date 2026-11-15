@@ -44,7 +44,12 @@ import com.weinet.newvideoplayer.vault.VaultSession
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = viewModel()) {
+fun LibraryScreen(
+    onOpen: (List<Video>, Int) -> Unit,
+    incomingUrl: String? = null,
+    onUrlConsumed: () -> Unit = {},
+    vm: LibraryViewModel = viewModel(),
+) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val permissions = when {
@@ -87,6 +92,11 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
     var audioFor by remember { mutableStateOf<Video?>(null) }
     var folderSheet by remember { mutableStateOf<String?>(null) }
     var folderVault by remember { mutableStateOf<String?>(null) }
+    var showUrl by remember { mutableStateOf(false) }
+    var urlSeed by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(incomingUrl) {
+        if (incomingUrl != null) { urlSeed = incomingUrl; showUrl = true; onUrlConsumed() }
+    }
 
     val title = settingsPage?.title ?: state.selectedFolder ?: state.selectedPlaylist ?: state.tab.label
     val inside = state.selectedFolder != null || state.selectedPlaylist != null || settingsPage != null
@@ -100,6 +110,8 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
                     if (inside) IconButton(onClick = { if (settingsPage != null) settingsPage = null else vm.back() }) { Icon(Icons.Default.ArrowBack, tr(R.string.s030)) }
                 },
                 actions = {
+                    if (state.tab == LibraryTab.Videos && !inside)
+                        IconButton(onClick = { urlSeed = null; showUrl = true }) { Icon(Icons.Default.Link, tr(R.string.url_open)) }
                     if (state.tab == LibraryTab.Videos && state.videoSub == VideoSub.Recent && state.recent.isNotEmpty())
                         TextButton(onClick = { LibraryStore.clearRecent() }) { Text(tr(R.string.s031)) }
                     if (state.tab == LibraryTab.Playlists && state.selectedPlaylist == null)
@@ -202,6 +214,7 @@ fun LibraryScreen(onOpen: (List<Video>, Int) -> Unit, vm: LibraryViewModel = vie
         }
     }
 
+    if (showUrl) OpenUrlDialog(urlSeed, onDismiss = { showUrl = false; urlSeed = null }, onPlay = { onOpen(listOf(it), 0) })
     if (showNowPlaying) NowPlayingSheet(onDismiss = { showNowPlaying = false })
 
     addTarget?.let { v ->

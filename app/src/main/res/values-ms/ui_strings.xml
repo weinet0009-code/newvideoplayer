@@ -442,4 +442,17 @@
     <string name="ab_on">Ulang A-B %1$s – %2$s</string>
     <string name="ab_off">Ulang A-B dimatikan</string>
     <string name="ab_too_short">B mesti selepas A</string>
+    <string name="url_open">Buka URL</string>
+    <string name="url_hint">Tampal pautan video terus (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Main</string>
+    <string name="url_download">Muat turun</string>
+    <string name="url_recent">Pautan terkini</string>
+    <string name="url_invalid">Masukkan pautan yang bermula dengan http atau https</string>
+    <string name="url_unsupported_site">Pautan halaman laman ini tidak disokong. Gunakan pautan video terus.</string>
+    <string name="url_stream_no_download">Strim (m3u8, DASH) belum boleh dimuat turun</string>
+    <string name="url_download_started">Memuat turun: %1$s</string>
+    <string name="url_download_failed">Tidak dapat memuat turun: %1$s</string>
+    <string name="url_clear">Kosongkan</string>
+    <string name="url_paste">Tampal</string>
+    <string name="url_network_note">Video dalam talian menggunakan data mudah alih atau Wi-Fi</string>
 </resources>

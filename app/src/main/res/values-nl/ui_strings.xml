@@ -442,4 +442,17 @@
     <string name="ab_on">A-B-lus %1$s – %2$s</string>
     <string name="ab_off">A-B-lus uit</string>
     <string name="ab_too_short">B moet na A liggen</string>
+    <string name="url_open">URL openen</string>
+    <string name="url_hint">Plak een directe videolink (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Afspelen</string>
+    <string name="url_download">Downloaden</string>
+    <string name="url_recent">Recente links</string>
+    <string name="url_invalid">Voer een link in die begint met http of https</string>
+    <string name="url_unsupported_site">Links naar pagina\'s van deze site worden niet ondersteund. Gebruik een directe videolink.</string>
+    <string name="url_stream_no_download">Streams (m3u8, DASH) kunnen nog niet worden gedownload</string>
+    <string name="url_download_started">Downloaden: %1$s</string>
+    <string name="url_download_failed">Kan niet downloaden: %1$s</string>
+    <string name="url_clear">Wissen</string>
+    <string name="url_paste">Plakken</string>
+    <string name="url_network_note">Online video\'s gebruiken mobiele data of Wi-Fi</string>
 </resources>

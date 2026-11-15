@@ -60,6 +60,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
     implementation(libs.media3.cast)
+    implementation(libs.media3.hls)
+    implementation(libs.media3.dash)
     implementation(libs.media3.effect)
     implementation(libs.androidx.mediarouter)
     implementation(libs.androidx.biometric)

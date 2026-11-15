@@ -442,4 +442,17 @@
     <string name="ab_on">วนซ้ำ A-B %1$s – %2$s</string>
     <string name="ab_off">ปิดการวนซ้ำ A-B แล้ว</string>
     <string name="ab_too_short">จุด B ต้องอยู่หลังจุด A</string>
+    <string name="url_open">เปิด URL</string>
+    <string name="url_hint">วางลิงก์วิดีโอโดยตรง (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">เล่น</string>
+    <string name="url_download">ดาวน์โหลด</string>
+    <string name="url_recent">ลิงก์ล่าสุด</string>
+    <string name="url_invalid">ป้อนลิงก์ที่ขึ้นต้นด้วย http หรือ https</string>
+    <string name="url_unsupported_site">ไม่รองรับลิงก์หน้าเว็บของเว็บไซต์นี้ โปรดใช้ลิงก์วิดีโอโดยตรง</string>
+    <string name="url_stream_no_download">ยังดาวน์โหลดสตรีม (m3u8, DASH) ไม่ได้</string>
+    <string name="url_download_started">กำลังดาวน์โหลด: %1$s</string>
+    <string name="url_download_failed">ดาวน์โหลดไม่ได้: %1$s</string>
+    <string name="url_clear">ล้าง</string>
+    <string name="url_paste">วาง</string>
+    <string name="url_network_note">วิดีโอออนไลน์จะใช้อินเทอร์เน็ตมือถือหรือ Wi-Fi</string>
 </resources>

@@ -442,4 +442,17 @@
     <string name="ab_on">A-B döngüsü %1$s – %2$s</string>
     <string name="ab_off">A-B döngüsü kapalı</string>
     <string name="ab_too_short">B, A\'dan sonra olmalı</string>
+    <string name="url_open">URL aç</string>
+    <string name="url_hint">Doğrudan video bağlantısını yapıştırın (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Oynat</string>
+    <string name="url_download">İndir</string>
+    <string name="url_recent">Son bağlantılar</string>
+    <string name="url_invalid">http veya https ile başlayan bir bağlantı girin</string>
+    <string name="url_unsupported_site">Bu sitenin sayfa bağlantıları desteklenmiyor. Doğrudan video bağlantısı kullanın.</string>
+    <string name="url_stream_no_download">Akışlar (m3u8, DASH) henüz indirilemiyor</string>
+    <string name="url_download_started">İndiriliyor: %1$s</string>
+    <string name="url_download_failed">İndirilemedi: %1$s</string>
+    <string name="url_clear">Temizle</string>
+    <string name="url_paste">Yapıştır</string>
+    <string name="url_network_note">Çevrimiçi videolar mobil veri veya Wi-Fi kullanır</string>
 </resources>

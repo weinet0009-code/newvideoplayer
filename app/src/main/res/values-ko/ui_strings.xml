@@ -442,4 +442,17 @@
     <string name="ab_on">A-B 반복 %1$s – %2$s</string>
     <string name="ab_off">A-B 반복 해제됨</string>
     <string name="ab_too_short">B 지점은 A 지점 뒤여야 합니다</string>
+    <string name="url_open">URL 열기</string>
+    <string name="url_hint">동영상 직접 링크 붙여넣기(MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">재생</string>
+    <string name="url_download">다운로드</string>
+    <string name="url_recent">최근 링크</string>
+    <string name="url_invalid">http 또는 https로 시작하는 링크를 입력하세요</string>
+    <string name="url_unsupported_site">이 사이트의 페이지 링크는 지원되지 않습니다. 동영상 직접 링크를 사용하세요.</string>
+    <string name="url_stream_no_download">스트림(m3u8, DASH)은 아직 다운로드할 수 없습니다</string>
+    <string name="url_download_started">다운로드 중: %1$s</string>
+    <string name="url_download_failed">다운로드할 수 없음: %1$s</string>
+    <string name="url_clear">지우기</string>
+    <string name="url_paste">붙여넣기</string>
+    <string name="url_network_note">온라인 동영상은 모바일 데이터 또는 Wi-Fi를 사용합니다</string>
 </resources>

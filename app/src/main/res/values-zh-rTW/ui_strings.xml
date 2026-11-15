@@ -442,4 +442,17 @@
     <string name="ab_on">A-B 循環 %1$s – %2$s</string>
     <string name="ab_off">已取消 A-B 循環</string>
     <string name="ab_too_short">B 點要在 A 點之後</string>
+    <string name="url_open">開啟網址</string>
+    <string name="url_hint">貼上影片直連網址（MP4、MKV、WebM、m3u8、DASH）</string>
+    <string name="url_play">播放</string>
+    <string name="url_download">下載</string>
+    <string name="url_recent">最近開啟的網址</string>
+    <string name="url_invalid">請輸入 http 或 https 開頭的網址</string>
+    <string name="url_unsupported_site">不支援此網站的頁面連結，請使用影片直連網址</string>
+    <string name="url_stream_no_download">串流格式（m3u8、DASH）暫不支援下載</string>
+    <string name="url_download_started">開始下載：%1$s</string>
+    <string name="url_download_failed">無法下載：%1$s</string>
+    <string name="url_clear">清除</string>
+    <string name="url_paste">貼上</string>
+    <string name="url_network_note">線上影片會使用網路流量</string>
 </resources>

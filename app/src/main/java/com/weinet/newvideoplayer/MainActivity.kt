@@ -26,6 +26,12 @@ class MainActivity : FragmentActivity() {
     /** Set when the floating window or the notification asks to reopen the player. */
     private val openPlayerRequest = mutableStateOf(0)
 
+    /** A link shared into the app, shown in the Open URL dialog. */
+    private val sharedUrl = mutableStateOf<String?>(null)
+
+    /** A video another app asked us to open (link or file), played right away. */
+    private val viewRequest = mutableStateOf<com.weinet.newvideoplayer.data.Video?>(null)
+
     private val pipListener = Consumer<PictureInPictureModeChangedInfo> {
         PipState.inPip.value = it.isInPictureInPictureMode
     }
@@ -49,13 +55,19 @@ class MainActivity : FragmentActivity() {
                         PlayerHolder.player.value?.currentMediaItem?.mediaMetadata?.mediaType != MediaMetadata.MEDIA_TYPE_MUSIC
                     ) nav.navigate("player")
                 }
+                LaunchedEffect(viewRequest.value) {
+                    val v = viewRequest.value ?: return@LaunchedEffect
+                    viewRequest.value = null
+                    PlayerHolder.start(this@MainActivity, listOf(v), 0)
+                    if (nav.currentDestination?.route != "player") nav.navigate("player")
+                }
                 NavHost(navController = nav, startDestination = "library") {
                     composable("library") {
                         LibraryScreen(onOpen = { videos, index ->
                             PlayerHolder.start(this@MainActivity, videos, index)
                             // Songs keep playing under the library's mini player; videos open the player.
                             if (!videos[index].isAudio) nav.navigate("player")
-                        })
+                        }, incomingUrl = sharedUrl.value, onUrlConsumed = { sharedUrl.value = null })
                     }
                     composable("player") {
                         PlayerScreen(onBack = { nav.popBackStack() })
@@ -71,12 +83,43 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
+        when (intent?.action) {
+            Intent.ACTION_SEND -> {
+                com.weinet.newvideoplayer.data.OnlineVideo.extractUrl(intent.getStringExtra(Intent.EXTRA_TEXT))
+                    ?.let { sharedUrl.value = it }
+                intent.action = null
+                return
+            }
+            Intent.ACTION_VIEW -> {
+                val uri = intent.data
+                intent.action = null
+                if (uri != null) {
+                    val s = uri.toString()
+                    viewRequest.value = if (uri.scheme == "http" || uri.scheme == "https") {
+                        if (com.weinet.newvideoplayer.data.OnlineVideo.isUnsupportedSite(s)) { sharedUrl.value = s; return }
+                        com.weinet.newvideoplayer.data.OnlineVideo.remember(s, com.weinet.newvideoplayer.data.OnlineVideo.titleOf(s))
+                        com.weinet.newvideoplayer.data.OnlineVideo.toVideo(s)
+                    } else {
+                        // A file from a file manager or another app; no MediaStore id, so no resume.
+                        com.weinet.newvideoplayer.data.OnlineVideo.toVideo(s, fileName(uri) ?: com.weinet.newvideoplayer.data.OnlineVideo.titleOf(s))
+                            .copy(mimeType = intent.type ?: contentResolver.getType(uri) ?: "video/*")
+                    }
+                }
+                return
+            }
+        }
         if (intent?.getBooleanExtra(EXTRA_OPEN_PLAYER, false) == true) {
             intent.removeExtra(EXTRA_OPEN_PLAYER)
             if (PlayerHolder.floating) PlaybackService.hideFloat(this)
             openPlayerRequest.value++
         }
     }
+
+    private fun fileName(uri: android.net.Uri): String? = runCatching {
+        contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
+            if (it.moveToFirst()) it.getString(0) else null
+        }
+    }.getOrNull()
 
     override fun onStop() {
         super.onStop()

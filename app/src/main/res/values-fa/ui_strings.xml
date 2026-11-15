@@ -442,4 +442,17 @@
     <string name="ab_on">تکرار A-B ‏%1$s – %2$s</string>
     <string name="ab_off">تکرار A-B خاموش شد</string>
     <string name="ab_too_short">B باید بعد از A باشد</string>
+    <string name="url_open">باز کردن URL</string>
+    <string name="url_hint">پیوند مستقیم ویدیو را جای‌گذاری کنید (MP4، MKV، WebM، m3u8، DASH)</string>
+    <string name="url_play">پخش</string>
+    <string name="url_download">بارگیری</string>
+    <string name="url_recent">پیوندهای اخیر</string>
+    <string name="url_invalid">پیوندی وارد کنید که با http یا https شروع شود</string>
+    <string name="url_unsupported_site">پیوند صفحه‌های این سایت پشتیبانی نمی‌شود. از پیوند مستقیم ویدیو استفاده کنید.</string>
+    <string name="url_stream_no_download">جریان‌ها (m3u8، DASH) هنوز قابل بارگیری نیستند</string>
+    <string name="url_download_started">در حال بارگیری: %1$s</string>
+    <string name="url_download_failed">بارگیری نشد: %1$s</string>
+    <string name="url_clear">پاک کردن</string>
+    <string name="url_paste">جای‌گذاری</string>
+    <string name="url_network_note">ویدیوهای آنلاین از داده تلفن همراه یا Wi-Fi استفاده می‌کنند</string>
 </resources>

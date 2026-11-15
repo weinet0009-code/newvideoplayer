@@ -442,4 +442,17 @@
     <string name="ab_on">Lặp A-B %1$s – %2$s</string>
     <string name="ab_off">Đã tắt lặp A-B</string>
     <string name="ab_too_short">B phải sau A</string>
+    <string name="url_open">Mở URL</string>
+    <string name="url_hint">Dán liên kết video trực tiếp (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Phát</string>
+    <string name="url_download">Tải xuống</string>
+    <string name="url_recent">Liên kết gần đây</string>
+    <string name="url_invalid">Nhập liên kết bắt đầu bằng http hoặc https</string>
+    <string name="url_unsupported_site">Không hỗ trợ liên kết trang của trang web này. Hãy dùng liên kết video trực tiếp.</string>
+    <string name="url_stream_no_download">Chưa thể tải xuống luồng (m3u8, DASH)</string>
+    <string name="url_download_started">Đang tải xuống: %1$s</string>
+    <string name="url_download_failed">Không thể tải xuống: %1$s</string>
+    <string name="url_clear">Xóa</string>
+    <string name="url_paste">Dán</string>
+    <string name="url_network_note">Video trực tuyến sẽ dùng dữ liệu di động hoặc Wi-Fi</string>
 </resources>

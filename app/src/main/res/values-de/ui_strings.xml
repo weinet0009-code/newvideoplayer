@@ -442,4 +442,17 @@
     <string name="ab_on">A-B-Schleife %1$s – %2$s</string>
     <string name="ab_off">A-B-Schleife aus</string>
     <string name="ab_too_short">B muss nach A liegen</string>
+    <string name="url_open">URL öffnen</string>
+    <string name="url_hint">Direkten Videolink einfügen (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Abspielen</string>
+    <string name="url_download">Herunterladen</string>
+    <string name="url_recent">Letzte Links</string>
+    <string name="url_invalid">Gib einen Link ein, der mit http oder https beginnt</string>
+    <string name="url_unsupported_site">Links zu Seiten dieser Website werden nicht unterstützt. Verwende einen direkten Videolink.</string>
+    <string name="url_stream_no_download">Streams (m3u8, DASH) können noch nicht heruntergeladen werden</string>
+    <string name="url_download_started">Wird heruntergeladen: %1$s</string>
+    <string name="url_download_failed">Download nicht möglich: %1$s</string>
+    <string name="url_clear">Löschen</string>
+    <string name="url_paste">Einfügen</string>
+    <string name="url_network_note">Online-Videos verbrauchen mobile Daten oder Wi-Fi</string>
 </resources>

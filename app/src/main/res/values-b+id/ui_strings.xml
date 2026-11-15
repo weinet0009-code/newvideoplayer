@@ -442,4 +442,17 @@
     <string name="ab_on">Ulang A-B %1$s – %2$s</string>
     <string name="ab_off">Ulang A-B dimatikan</string>
     <string name="ab_too_short">B harus setelah A</string>
+    <string name="url_open">Buka URL</string>
+    <string name="url_hint">Tempel link video langsung (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Putar</string>
+    <string name="url_download">Unduh</string>
+    <string name="url_recent">Link terbaru</string>
+    <string name="url_invalid">Masukkan link yang diawali http atau https</string>
+    <string name="url_unsupported_site">Link halaman situs ini tidak didukung. Gunakan link video langsung.</string>
+    <string name="url_stream_no_download">Stream (m3u8, DASH) belum bisa diunduh</string>
+    <string name="url_download_started">Mengunduh: %1$s</string>
+    <string name="url_download_failed">Tidak dapat mengunduh: %1$s</string>
+    <string name="url_clear">Hapus</string>
+    <string name="url_paste">Tempel</string>
+    <string name="url_network_note">Video online menggunakan data seluler atau Wi-Fi</string>
 </resources>

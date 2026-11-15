@@ -442,4 +442,17 @@
     <string name="ab_on">Smyčka A-B %1$s – %2$s</string>
     <string name="ab_off">Smyčka A-B vypnuta</string>
     <string name="ab_too_short">B musí být za A</string>
+    <string name="url_open">Otevřít URL</string>
+    <string name="url_hint">Vložte přímý odkaz na video (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Přehrát</string>
+    <string name="url_download">Stáhnout</string>
+    <string name="url_recent">Nedávné odkazy</string>
+    <string name="url_invalid">Zadejte odkaz začínající http nebo https</string>
+    <string name="url_unsupported_site">Odkazy na stránky tohoto webu nejsou podporovány. Použijte přímý odkaz na video.</string>
+    <string name="url_stream_no_download">Streamy (m3u8, DASH) zatím nelze stáhnout</string>
+    <string name="url_download_started">Stahování: %1$s</string>
+    <string name="url_download_failed">Nelze stáhnout: %1$s</string>
+    <string name="url_clear">Vymazat</string>
+    <string name="url_paste">Vložit</string>
+    <string name="url_network_note">Online videa využívají mobilní data nebo Wi-Fi</string>
 </resources>

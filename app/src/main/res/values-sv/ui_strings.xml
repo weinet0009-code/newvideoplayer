@@ -442,4 +442,17 @@
     <string name="ab_on">A-B-slinga %1$s – %2$s</string>
     <string name="ab_off">A-B-slinga av</string>
     <string name="ab_too_short">B måste komma efter A</string>
+    <string name="url_open">Öppna URL</string>
+    <string name="url_hint">Klistra in en direktlänk till video (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Spela</string>
+    <string name="url_download">Ladda ned</string>
+    <string name="url_recent">Senaste länkar</string>
+    <string name="url_invalid">Ange en länk som börjar med http eller https</string>
+    <string name="url_unsupported_site">Länkar till sidor på den här webbplatsen stöds inte. Använd en direktlänk till video.</string>
+    <string name="url_stream_no_download">Strömmar (m3u8, DASH) kan inte laddas ned än</string>
+    <string name="url_download_started">Laddar ned: %1$s</string>
+    <string name="url_download_failed">Kunde inte ladda ned: %1$s</string>
+    <string name="url_clear">Rensa</string>
+    <string name="url_paste">Klistra in</string>
+    <string name="url_network_note">Onlinevideor använder mobildata eller Wi-Fi</string>
 </resources>

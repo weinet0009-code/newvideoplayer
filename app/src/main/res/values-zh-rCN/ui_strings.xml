@@ -442,4 +442,17 @@
     <string name="ab_on">A-B 循环 %1$s – %2$s</string>
     <string name="ab_off">已取消 A-B 循环</string>
     <string name="ab_too_short">B 点必须在 A 点之后</string>
+    <string name="url_open">打开网址</string>
+    <string name="url_hint">粘贴视频直链（MP4、MKV、WebM、m3u8、DASH）</string>
+    <string name="url_play">播放</string>
+    <string name="url_download">下载</string>
+    <string name="url_recent">最近打开的网址</string>
+    <string name="url_invalid">请输入以 http 或 https 开头的网址</string>
+    <string name="url_unsupported_site">不支持此网站的页面链接，请使用视频直链</string>
+    <string name="url_stream_no_download">流媒体格式（m3u8、DASH）暂不支持下载</string>
+    <string name="url_download_started">开始下载：%1$s</string>
+    <string name="url_download_failed">无法下载：%1$s</string>
+    <string name="url_clear">清除</string>
+    <string name="url_paste">粘贴</string>
+    <string name="url_network_note">在线视频会消耗移动数据或 Wi-Fi 流量</string>
 </resources>

@@ -442,4 +442,17 @@
     <string name="ab_on">Buclă A-B %1$s – %2$s</string>
     <string name="ab_off">Buclă A-B dezactivată</string>
     <string name="ab_too_short">B trebuie să fie după A</string>
+    <string name="url_open">Deschide URL</string>
+    <string name="url_hint">Lipește un link direct către video (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Redă</string>
+    <string name="url_download">Descarcă</string>
+    <string name="url_recent">Linkuri recente</string>
+    <string name="url_invalid">Introdu un link care începe cu http sau https</string>
+    <string name="url_unsupported_site">Linkurile către paginile acestui site nu sunt acceptate. Folosește un link direct către video.</string>
+    <string name="url_stream_no_download">Streamurile (m3u8, DASH) nu pot fi descărcate încă</string>
+    <string name="url_download_started">Se descarcă: %1$s</string>
+    <string name="url_download_failed">Nu s-a putut descărca: %1$s</string>
+    <string name="url_clear">Șterge</string>
+    <string name="url_paste">Lipește</string>
+    <string name="url_network_note">Videoclipurile online folosesc date mobile sau Wi-Fi</string>
 </resources>

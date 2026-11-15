@@ -442,4 +442,17 @@
     <string name="ab_on">Bucle A-B %1$s – %2$s</string>
     <string name="ab_off">Bucle A-B desactivado</string>
     <string name="ab_too_short">B debe ir después de A</string>
+    <string name="url_open">Abrir URL</string>
+    <string name="url_hint">Pega un enlace directo de vídeo (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Reproducir</string>
+    <string name="url_download">Descargar</string>
+    <string name="url_recent">Enlaces recientes</string>
+    <string name="url_invalid">Introduce un enlace que empiece por http o https</string>
+    <string name="url_unsupported_site">No se admiten enlaces a páginas de este sitio. Usa un enlace directo de vídeo.</string>
+    <string name="url_stream_no_download">Las transmisiones (m3u8, DASH) aún no se pueden descargar</string>
+    <string name="url_download_started">Descargando: %1$s</string>
+    <string name="url_download_failed">No se pudo descargar: %1$s</string>
+    <string name="url_clear">Borrar</string>
+    <string name="url_paste">Pegar</string>
+    <string name="url_network_note">Los vídeos en línea usan datos móviles o Wi-Fi</string>
 </resources>

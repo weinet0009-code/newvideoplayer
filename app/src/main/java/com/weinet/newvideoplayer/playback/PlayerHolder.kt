@@ -75,7 +75,7 @@ object PlayerHolder {
                             return
                         }
                         val id = item?.mediaId?.toLongOrNull() ?: return
-                        LibraryStore.addRecent(id)
+                        if (id >= 0) LibraryStore.addRecent(id)
                         // Songs always start from the top.
                         if (item?.mediaMetadata?.mediaType == MediaMetadata.MEDIA_TYPE_MUSIC) return
                         if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO ||
@@ -143,7 +143,7 @@ object PlayerHolder {
             .build()
         p.prepare()
         p.playWhenReady = true
-        LibraryStore.addRecent(videos[index].id)
+        if (videos[index].id >= 0) LibraryStore.addRecent(videos[index].id)
         connectSession(app)
     }
 

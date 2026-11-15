@@ -442,4 +442,17 @@
     <string name="ab_on">A-B loop %1$s – %2$s</string>
     <string name="ab_off">Naka-off ang A-B loop</string>
     <string name="ab_too_short">Dapat nasa kasunod ng A ang B</string>
+    <string name="url_open">Buksan ang URL</string>
+    <string name="url_hint">I-paste ang direktang link ng video (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">I-play</string>
+    <string name="url_download">I-download</string>
+    <string name="url_recent">Mga kamakailang link</string>
+    <string name="url_invalid">Maglagay ng link na nagsisimula sa http o https</string>
+    <string name="url_unsupported_site">Hindi suportado ang mga link sa mga page ng site na ito. Gumamit ng direktang link ng video.</string>
+    <string name="url_stream_no_download">Hindi pa mada-download ang mga stream (m3u8, DASH)</string>
+    <string name="url_download_started">Dina-download: %1$s</string>
+    <string name="url_download_failed">Hindi ma-download: %1$s</string>
+    <string name="url_clear">I-clear</string>
+    <string name="url_paste">I-paste</string>
+    <string name="url_network_note">Gumagamit ng mobile data o Wi-Fi ang mga online na video</string>
 </resources>

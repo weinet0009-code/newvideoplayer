@@ -442,4 +442,17 @@
     <string name="ab_on">A-B リピート %1$s – %2$s</string>
     <string name="ab_off">A-B リピートを解除しました</string>
     <string name="ab_too_short">B 点は A 点より後にしてください</string>
+    <string name="url_open">URL を開く</string>
+    <string name="url_hint">動画の直接リンクを貼り付け（MP4、MKV、WebM、m3u8、DASH）</string>
+    <string name="url_play">再生</string>
+    <string name="url_download">ダウンロード</string>
+    <string name="url_recent">最近のリンク</string>
+    <string name="url_invalid">http または https で始まるリンクを入力してください</string>
+    <string name="url_unsupported_site">このサイトのページリンクには対応していません。動画の直接リンクを使用してください</string>
+    <string name="url_stream_no_download">ストリーム（m3u8、DASH）はまだダウンロードできません</string>
+    <string name="url_download_started">ダウンロード中：%1$s</string>
+    <string name="url_download_failed">ダウンロードできません：%1$s</string>
+    <string name="url_clear">クリア</string>
+    <string name="url_paste">貼り付け</string>
+    <string name="url_network_note">オンライン動画はモバイルデータまたは Wi-Fi を使用します</string>
 </resources>

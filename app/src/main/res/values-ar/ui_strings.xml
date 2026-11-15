@@ -442,4 +442,17 @@
     <string name="ab_on">تكرار A-B ‏%1$s – %2$s</string>
     <string name="ab_off">تم إيقاف تكرار A-B</string>
     <string name="ab_too_short">يجب أن تكون B بعد A</string>
+    <string name="url_open">فتح عنوان URL</string>
+    <string name="url_hint">الصق رابط فيديو مباشرًا (MP4، MKV، WebM، m3u8، DASH)</string>
+    <string name="url_play">تشغيل</string>
+    <string name="url_download">تنزيل</string>
+    <string name="url_recent">الروابط الأخيرة</string>
+    <string name="url_invalid">أدخل رابطًا يبدأ بـ http أو https</string>
+    <string name="url_unsupported_site">روابط صفحات هذا الموقع غير مدعومة. استخدم رابط فيديو مباشرًا.</string>
+    <string name="url_stream_no_download">لا يمكن تنزيل البث (m3u8، DASH) حاليًا</string>
+    <string name="url_download_started">جارٍ التنزيل: %1$s</string>
+    <string name="url_download_failed">تعذّر التنزيل: %1$s</string>
+    <string name="url_clear">مسح</string>
+    <string name="url_paste">لصق</string>
+    <string name="url_network_note">تستخدم مقاطع الفيديو عبر الإنترنت بيانات الجوال أو Wi-Fi</string>
 </resources>

@@ -442,4 +442,17 @@
     <string name="ab_on">A-B লুপ %1$s – %2$s</string>
     <string name="ab_off">A-B লুপ বন্ধ</string>
     <string name="ab_too_short">B অবশ্যই A-এর পরে হতে হবে</string>
+    <string name="url_open">URL খুলুন</string>
+    <string name="url_hint">সরাসরি ভিডিও লিংক পেস্ট করুন (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">চালান</string>
+    <string name="url_download">ডাউনলোড</string>
+    <string name="url_recent">সাম্প্রতিক লিংক</string>
+    <string name="url_invalid">http বা https দিয়ে শুরু হওয়া একটি লিংক দিন</string>
+    <string name="url_unsupported_site">এই সাইটের পেজ লিংক সমর্থিত নয়। সরাসরি ভিডিও লিংক ব্যবহার করুন।</string>
+    <string name="url_stream_no_download">স্ট্রিম (m3u8, DASH) এখনও ডাউনলোড করা যায় না</string>
+    <string name="url_download_started">ডাউনলোড হচ্ছে: %1$s</string>
+    <string name="url_download_failed">ডাউনলোড করা যায়নি: %1$s</string>
+    <string name="url_clear">মুছুন</string>
+    <string name="url_paste">পেস্ট</string>
+    <string name="url_network_note">অনলাইন ভিডিও মোবাইল ডেটা বা Wi-Fi ব্যবহার করে</string>
 </resources>

@@ -442,4 +442,17 @@
     <string name="ab_on">A-B लूप %1$s – %2$s</string>
     <string name="ab_off">A-B लूप बंद</string>
     <string name="ab_too_short">B, A के बाद होना चाहिए</string>
+    <string name="url_open">URL खोलें</string>
+    <string name="url_hint">सीधा वीडियो लिंक पेस्ट करें (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">चलाएं</string>
+    <string name="url_download">डाउनलोड करें</string>
+    <string name="url_recent">हाल के लिंक</string>
+    <string name="url_invalid">http या https से शुरू होने वाला लिंक डालें</string>
+    <string name="url_unsupported_site">इस साइट के पेज लिंक समर्थित नहीं हैं। सीधा वीडियो लिंक इस्तेमाल करें।</string>
+    <string name="url_stream_no_download">स्ट्रीम (m3u8, DASH) अभी डाउनलोड नहीं की जा सकतीं</string>
+    <string name="url_download_started">डाउनलोड हो रहा है: %1$s</string>
+    <string name="url_download_failed">डाउनलोड नहीं हो सका: %1$s</string>
+    <string name="url_clear">साफ़ करें</string>
+    <string name="url_paste">पेस्ट करें</string>
+    <string name="url_network_note">ऑनलाइन वीडियो मोबाइल डेटा या Wi-Fi का इस्तेमाल करते हैं</string>
 </resources>

@@ -442,4 +442,17 @@
     <string name="ab_on">Pętla A-B %1$s – %2$s</string>
     <string name="ab_off">Pętla A-B wyłączona</string>
     <string name="ab_too_short">B musi być po A</string>
+    <string name="url_open">Otwórz URL</string>
+    <string name="url_hint">Wklej bezpośredni link do filmu (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Odtwórz</string>
+    <string name="url_download">Pobierz</string>
+    <string name="url_recent">Ostatnie linki</string>
+    <string name="url_invalid">Wpisz link zaczynający się od http lub https</string>
+    <string name="url_unsupported_site">Linki do stron tej witryny nie są obsługiwane. Użyj bezpośredniego linku do filmu.</string>
+    <string name="url_stream_no_download">Strumieni (m3u8, DASH) nie można jeszcze pobrać</string>
+    <string name="url_download_started">Pobieranie: %1$s</string>
+    <string name="url_download_failed">Nie można pobrać: %1$s</string>
+    <string name="url_clear">Wyczyść</string>
+    <string name="url_paste">Wklej</string>
+    <string name="url_network_note">Filmy online zużywają dane komórkowe lub Wi-Fi</string>
 </resources>

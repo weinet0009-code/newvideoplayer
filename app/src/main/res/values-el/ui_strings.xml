@@ -442,4 +442,17 @@
     <string name="ab_on">Επανάληψη A-B %1$s – %2$s</string>
     <string name="ab_off">Η επανάληψη A-B απενεργοποιήθηκε</string>
     <string name="ab_too_short">Το B πρέπει να είναι μετά το A</string>
+    <string name="url_open">Άνοιγμα URL</string>
+    <string name="url_hint">Επικολλήστε έναν άμεσο σύνδεσμο βίντεο (MP4, MKV, WebM, m3u8, DASH)</string>
+    <string name="url_play">Αναπαραγωγή</string>
+    <string name="url_download">Λήψη</string>
+    <string name="url_recent">Πρόσφατοι σύνδεσμοι</string>
+    <string name="url_invalid">Εισαγάγετε έναν σύνδεσμο που ξεκινά με http ή https</string>
+    <string name="url_unsupported_site">Οι σύνδεσμοι σε σελίδες αυτού του ιστότοπου δεν υποστηρίζονται. Χρησιμοποιήστε άμεσο σύνδεσμο βίντεο.</string>
+    <string name="url_stream_no_download">Οι ροές (m3u8, DASH) δεν μπορούν ακόμη να ληφθούν</string>
+    <string name="url_download_started">Λήψη: %1$s</string>
+    <string name="url_download_failed">Δεν ήταν δυνατή η λήψη: %1$s</string>
+    <string name="url_clear">Εκκαθάριση</string>
+    <string name="url_paste">Επικόλληση</string>
+    <string name="url_network_note">Τα διαδικτυακά βίντεο χρησιμοποιούν δεδομένα κινητής ή Wi-Fi</string>
 </resources>

@@ -442,4 +442,17 @@
     <string name="ab_on">A-B لوپ %1$s – %2$s</string>
     <string name="ab_off">A-B لوپ بند</string>
     <string name="ab_too_short">B کو A کے بعد ہونا چاہیے</string>
+    <string name="url_open">URL کھولیں</string>
+    <string name="url_hint">براہ راست ویڈیو لنک پیسٹ کریں (MP4، MKV، WebM، m3u8، DASH)</string>
+    <string name="url_play">چلائیں</string>
+    <string name="url_download">ڈاؤن لوڈ کریں</string>
+    <string name="url_recent">حالیہ لنکس</string>
+    <string name="url_invalid">http یا https سے شروع ہونے والا لنک درج کریں</string>
+    <string name="url_unsupported_site">اس سائٹ کے صفحات کے لنکس معاون نہیں ہیں۔ براہ راست ویڈیو لنک استعمال کریں۔</string>
+    <string name="url_stream_no_download">اسٹریمز (m3u8، DASH) ابھی ڈاؤن لوڈ نہیں ہو سکتیں</string>
+    <string name="url_download_started">ڈاؤن لوڈ ہو رہا ہے: %1$s</string>
+    <string name="url_download_failed">ڈاؤن لوڈ نہیں ہو سکا: %1$s</string>
+    <string name="url_clear">صاف کریں</string>
+    <string name="url_paste">پیسٹ کریں</string>
+    <string name="url_network_note">آن لائن ویڈیوز موبائل ڈیٹا یا Wi-Fi استعمال کرتی ہیں</string>
 </resources>
